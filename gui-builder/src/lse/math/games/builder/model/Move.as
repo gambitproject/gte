@@ -11,7 +11,7 @@ package lse.math.games.builder.model
 		public function Move() {}
 		
 		public function set label(value:String):void {
-			if (_iset.player == Player.CHANCE) {
+			if (_iset != null && _iset.player == Player.CHANCE) {
 				assignProb(Number(value));
 			} else if (value == defaultLabel) {
 				_label = null;
