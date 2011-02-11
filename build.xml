@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<!--
+	Build file for Game Theory Explorer
+	@author Mark Egesdal
+--> 
+<project name="GameTheoryExplorer" basedir="." default="main"> 
+	
+	<!-- setup a prefix for all environment variables -->
+	<property file="build.properties" />
+	
+	<property name="gui.proj.dir" value="gui-builder"/>
+	<property name="gui.test.proj.dir" value="gui-builder/test"/>
+	<property name="lib.proj.dir" value="lib-algo"/>
+	<property name="lib.test.proj.dir" value="lib-algo/test"/>
+	<property name="web.proj.dir" value="web-service"/>
+	
+	<property name="build.dir" value="build"/>
+	<property name="lib.build.dir" value="build/core"/>
+	<property name="lib.test.build.dir" value="build/core-test"/>	
+	<property name="gui.build.dir" value="build/gui"/>
+	<property name="gui.test.build.dir" value="build/gui-test"/>
+	<property name="war.dir" value="build/${WAR_NAME}"/>
+		
+	<!-- This is what you have to include to be able to use "mxml" ant task --> 
+    <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />	 	
+	
+	<taskdef resource="flexUnitTasks.tasks">
+	   <classpath>
+	      <fileset dir="${gui.test.proj.dir}/lib">
+	         <include name="flexUnitTasks*.jar" />
+	      </fileset>
+	   </classpath>
+	</taskdef>
+	
+	
+	<target name="main" depends="clean, test-core, test-gui, package" />	
+	
+	<target name="setup">
+		<mkdir dir="${build.dir}"/>
+	</target>
+	
+	<target name="clean">		
+		<delete dir="build"/> 
+	</target>
+	
+	<target name="compile-core" depends="setup">
+		<echo>Compiling core library...</echo>
+		<mkdir dir="${lib.build.dir}"/>
+		<javac 
+			srcdir="${lib.proj.dir}/src" 
+			destdir="${lib.build.dir}"
+			includeAntRuntime="false"
+		/>
+	</target>
+	
+	<target name="compile-gui" depends="setup">
+		<echo>Compiling Flash GUI...</echo>		 
+		<mxmlc 
+            file="${gui.proj.dir}/src/lse/math/games/builder/view/Main.mxml" 
+			debug="false"
+            output="${gui.build.dir}/GuiBuilder.swf"
+            actionscript-file-encoding="UTF-8"
+            keep-generated-actionscript="false"
+			link-report="${gui.build.dir}/MxmlcReport.xml"
+            incremental="true"> 
+						
+            <load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/> 
+  
+            <source-path path-element="${FLEX_HOME}/frameworks"/> 
+			<compiler.source-path path-element="${gui.proj.dir}/src"/> 			
+ 
+            <compiler.library-path dir="${FLEX_HOME}/frameworks" append="true"> 
+                <include name="libs" /> 
+                <include name="../bundles/{locale}" /> 
+            </compiler.library-path> 
+			
+			<!--<library-path dir="${SWC_LIB_DIR}" append="true"> 
+				<include name="*.swc" /> 
+			</library-path>	-->
+ 
+        </mxmlc>		
+	</target>
+	
+	<target name="test-gui" depends="compile-gui">
+		<mkdir dir="${gui.test.build.dir}"/>
+		<!-- Execute FlexUnit tests and publish reports -->
+		<flexunit 
+		    workingDir="${gui.test.build.dir}"
+		    toDir="${gui.test.build.dir}" 
+			haltonfailure="true" 
+			verbose="false" 
+			localTrusted="true">
+	      <source dir="${gui.proj.dir}/src" />
+	      <testSource dir="${gui.test.proj.dir}/src">
+	         <include name="**/*Test.as" />
+	      </testSource>
+	      <library dir="${gui.test.proj.dir}/lib" />
+	   </flexunit>
+
+		<!-- Generate readable JUnit-style reports -->
+		<!--<junitreport todir="${gui.test.build.dir}">
+			<fileset dir="${gui.test.build.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${gui.test.build.dir}/html" />
+		</junitreport>-->
+	</target>
+	
+	<target name="test-core" depends="compile-core">
+		<mkdir dir="${lib.test.build.dir}"/>
+		<echo>Compiling Java library tests...</echo>		
+		<javac 
+			srcdir="${lib.test.proj.dir}/src" 
+			destdir="${lib.test.build.dir}"
+			includeAntRuntime="false">
+
+			<classpath>
+				<pathelement location="${lib.build.dir}" />
+				<fileset dir="${lib.test.proj.dir}/lib">
+					<include name="junit*.jar" />
+				</fileset>
+			</classpath>
+
+		</javac>		
+		<echo>Running Java library tests...</echo>		
+		<junit printsummary="on" haltonfailure="yes">
+			<formatter type="brief" usefile="true"/>
+			<classpath>
+				<pathelement location="${lib.test.build.dir}" />
+				<pathelement location="${lib.build.dir}" />
+				<fileset dir="${lib.test.proj.dir}/lib">
+					<include name="junit*.jar" />
+				</fileset>
+			</classpath>
+			<batchtest todir="${lib.test.build.dir}">
+				<fileset dir="${lib.test.proj.dir}/src"/>
+			</batchtest>
+		</junit>
+	</target>
+	
+	<target name="package" depends="compile-core, compile-gui">
+		<echo>Building WAR directory...</echo>		
+		<mkdir dir="${war.dir}"/>
+		<copy todir="${war.dir}">
+			<fileset dir="${web.proj.dir}/war"></fileset>
+		</copy>
+		<tstamp>
+			<format property="last.mod" pattern="yyyy-MM-dd hh:mm" timezone="GMT"/>
+		</tstamp>
+		<replace file="${war.dir}/builder/index.jsp" token="yyyy-MM-dd hh:mm" value="${last.mod}"/>
+		<mkdir dir="${war.dir}/WEB-INF/lib"/>		
+		<echo>Creating core library JAR file...</echo>
+		<jar
+			destfile="${war.dir}/WEB-INF/lib/${CORE_JAR_NAME}.jar"
+			basedir="${lib.build.dir}"
+			update="true"
+		/>		
+		<echo>Copying GUI flash program to WAR...</echo>
+		<html-wrapper swf="GuiBuilder" express-install="true" output="${gui.build.dir}" height="100%" width="100%" />
+		<copy file="${gui.build.dir}/GuiBuilder.swf" todir="${war.dir}/builder" overwrite="true"/>
+		<copy file="${gui.build.dir}/playerProductInstall.swf" todir="${war.dir}/builder" overwrite="true"/>
+		<copy file="${gui.build.dir}/swfobject.js" todir="${war.dir}/builder" overwrite="true"/>
+		<echo>Compiling WAR class files...</echo>
+		<mkdir dir="${war.dir}/WEB-INF/classes"/>
+		<javac 
+			srcdir="${web.proj.dir}/src" 
+			destdir="${war.dir}/WEB-INF/classes"
+			includeAntRuntime="false">
+			
+			<classpath>
+				<fileset dir="${war.dir}/WEB-INF/lib">
+					<include name="*.jar"/>
+				</fileset>
+				<fileset dir="${GAE_HOME}/lib">
+					<include name="shared/**/*.jar"/>
+					<include name="user/**/*.jar"/>
+				</fileset>
+			</classpath>
+			
+		</javac>
+		<echo>Packaging WAR...</echo>
+		<war destfile="${build.dir}/${WAR_NAME}.war"
+			webxml="${war.dir}/WEB-INF/web.xml"
+			basedir="${war.dir}">		
+		</war>		
+	</target>	
+    
+</project>

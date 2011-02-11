@@ -1,0 +1,102 @@
+Build
+=====
+* Add deployment documentation
+* Add coverage analysis (cobetura and flex cover)
+* Add PMD and FlexPMD source code static analysis
+* Add FindBugs bytecode static analysis (Java only)
+* Add a report directory and have better reporting on testing, etc. (using junitreport and failure properties)
+
+
+High Priority
+=============
+* Breadth-first autoname
+* Normal form strategy labels using your approach
+* Adding commas to payoffs depending on orientation
+* Fig depths fixed for each shape (this one might be really easy)
+* Tree orientation mode instead of rotate buttons
+* Warning before "Clear" and "Load" that the current tree will be lost
+* Error feedback for user (e.g. merging invalid isets)
+* Better logo for zero-sum toggle
+* Possibly removing dissolve as a redundant cut feature
+
+
+Nice-to-Haves
+=============
+BETTER ERROR HANDLING ON BOTH ENDS
+
+REST Interface
+* Output name and duration of algorithm used (perhaps tableau size and and num pivots, etc.)
+
+Conceptual
+* Make sure nothing is dependent on move ORDER for a given node... 
+	I think XMLReader violates this atm when it hooks up and verifies the moves
+* Complete Lrs port
+* Implement LrsNash!!!
+* Cut Action mouse click handling for multi-row Isets (needs improvement)
+* sort Isets in the linked list by minDepth and then ltr of left most minDepth node
+
+Display
+* fig page settings (auto determine)
+* BigMatrixPainter (using monospaced font and larger text block for really large matrices)
+     Alos, see if I can find a quick way to drop all the labels... or is it the gc that is slowing things up
+* Auto-Label should correct casing (UPPER first pl, lower second pl) for already assigned nodes
+* mouse over effects (perhaps that means making iset depth groups their own child components? same with matrix squares?)
+* fix drawing so labels don't run into eachother... hard to get right all the time
+* try to draw all labels from a given node at the same place, taking the minimum of the children and splitting that in half
+* clicking and selecting a label/outcome/strategy square (highlighting the corresponding leaf in the datagrid)
+* more sophisticated leaf drawing
+* align columns of payoffs in LR display
+* player labels not updating on open (need to invalidate data grid display to get an update, since properties are read only?)
+
+
+Refactoring
+* Merge the Tableau and Dictionary classes (along with TableuVariables and LexicographicMethod classes)... they do the same thing!
+* Extension to above:  Merge lrs and lcp packages into a lp (linear programming) package
+* rename Presenter to Controller
+* remove TreeGrid as subclass add a tree property?
+
+
+Need to put some limits on dimensions of normal form or it gets out of hand with all the labels (sometimes reduced is fine, but expanded is not)
+
+	
+Better image export
+* canvas dimensions setter for precise image export (separating canvas from open space somehow?)
+     this needs to set the actual canvas height and width if I want the image export to work
+* sizes in general need a bit of tweaking (level distance, line width, font size, etc.)?
+
+
+Clique Improvement
+==================
+V = A U B
+Get cliques of all A and all B, enumerate
+Blow up the whole thing by 4
+  A  B
+A 1  G
+B G' 1
+adjacency matrices
+discard the all A and all B at the end
+currently it runs through the original alg twice
+generating the connected components slow since it runs through all the edges (very primative, but it is not the bottleneck)
+
+	
+Some Day...
+===========
+3 players
+
+Delete animation
+
+pseudo-tree view for editing outcomes
+    *short summary (num nodes, leaves, isets at top)
+	*one row per leaf
+	*only have moves editable once (first time the sequence prefix appears)
+	*indent children rows up to new move
+	*first click select, second click to edit
+	*editable player ids
+
+	complex data grid and normal form
+	=================================
+	Could they just be different painters on the same viewmodel?
+	Or different viewmodels around the same model
+	-> One viewmodel per view (and one painter per view model)
+	A second complex component will really help me get the MVVM pattern in place
+		They will both be modifying the underlying model and everything needs to update... should be cool :)

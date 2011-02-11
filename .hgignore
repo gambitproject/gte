@@ -1,0 +1,20 @@
+syntax: glob
+
+build/*
+
+gui-builder/bin/*
+gui-builder/obj/*
+gui-builder/test/bin/*
+gui-builder/test/obj/*
+*.as3proj
+
+web-service/war/WEB-INF/classes/*
+lib-algo/bin/*
+*.swf
+*.class
+
+*/.classpath
+*/.project
+*/.settings/*
+
+
