@@ -141,7 +141,7 @@ package lse.math.games.builder.viewmodel
 				var node:Node = queue.shift();
 				
 				// nothing to do for nodes with no isets or singleton isets
-				if (node.iset == null || node.iset.numNodes == 0) {
+				if (node.iset == null || node.iset.numNodes == 1) {
 					continue;
 				}
 				
@@ -190,10 +190,18 @@ package lse.math.games.builder.viewmodel
 					var toPull:TreeGridNode = potentialPulls.pop() as TreeGridNode;
 					if (!recHasDecendantsInNodeSet(toPull, below, nodeSet)) {
 						toPull.assignDepth(below);						
-						queue.remove(toPull);
+						
+						// any depth change of a node requires removal from the queue to keep sort order consistent
+						queue.remove(toPull);						
+						
+						// we need to add children back to queue if they were already processed
+						for (var pulledChild:Node = toPull.firstchild; pulledChild != null; pulledChild = pulledChild.sibling) {
+							if (!queue.contains(pulledChild)) {
+								queue.push(pulledChild);
+							}
+						}
 					}
-				}	
-				// note that any depth change of a node will result in removal from the queue to keep sort order consistent
+				}				
 			}
 		}		
 		

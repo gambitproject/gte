@@ -40,7 +40,7 @@
 	
 	
 	<target name="main" depends="clean, test-core, test-gui, package">
-		<echo>Build Finished</echo>
+		<echo>Finished</echo>
 	</target>
 	
 	<target name="setup">
@@ -149,25 +149,32 @@
 	<target name="package" depends="compile-core, compile-gui">
 		<echo>Building WAR directory...</echo>		
 		<mkdir dir="${war.dir}"/>
-		<copy todir="${war.dir}">
+		<copy todir="${war.dir}" overwrite="true">
 			<fileset dir="${web.proj.dir}/war"></fileset>
 		</copy>
 		<tstamp>
 			<format property="last.mod" pattern="yyyy-MM-dd hh:mm" timezone="GMT"/>
 		</tstamp>
-		<replace file="${war.dir}/builder/index.jsp" token="yyyy-MM-dd hh:mm" value="${last.mod}"/>
-		<mkdir dir="${war.dir}/WEB-INF/lib"/>		
+		<replace file="${war.dir}/builder/index.jsp" token="yyyy-MM-dd hh:mm" value="${last.mod}"/>				
+		
 		<echo>Creating core library JAR file...</echo>
+		<mkdir dir="${war.dir}/WEB-INF/lib"/>		
 		<jar
 			destfile="${war.dir}/WEB-INF/lib/${lib.jar.name}.jar"
 			basedir="${lib.build.dir}"
 			update="true"
 		/>		
+		
 		<echo>Copying GUI flash program to WAR...</echo>
 		<html-wrapper swf="GuiBuilder" express-install="true" output="${gui.build.dir}" height="100%" width="100%" />
 		<copy file="${gui.build.dir}/GuiBuilder.swf" todir="${war.dir}/builder" overwrite="true"/>
 		<copy file="${gui.build.dir}/playerProductInstall.swf" todir="${war.dir}/builder" overwrite="true"/>
 		<copy file="${gui.build.dir}/swfobject.js" todir="${war.dir}/builder" overwrite="true"/>
+		
+		<!-- Timestamp the swf to prevent browser caching of the old one -->
+		<replace file="${war.dir}/builder/index.jsp" token="GuiBuilder.swf" value="GuiBuilder-${DSTAMP}${TSTAMP}.swf"/>
+		<move file="${war.dir}/builder/GuiBuilder.swf" tofile="${war.dir}/builder/GuiBuilder-${DSTAMP}${TSTAMP}.swf" />
+		
 		<echo>Compiling WAR class files...</echo>
 		<mkdir dir="${war.dir}/WEB-INF/classes"/>
 		<javac 
@@ -186,6 +193,7 @@
 			</classpath>
 			
 		</javac>
+		
 		<echo>Packaging WAR...</echo>
 		<war destfile="${build.dir}/${war.name}.war"
 			webxml="${war.dir}/WEB-INF/web.xml"

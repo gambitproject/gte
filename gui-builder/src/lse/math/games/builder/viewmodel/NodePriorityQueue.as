@@ -113,6 +113,20 @@ package lse.math.games.builder.viewmodel
 			}
 			return rv;
 		}
+		
+		public function contains(toCheck:Node):Boolean
+		{
+			var found:Boolean = false;
+			if (!isEmpty) {
+				for (var enqueued:NodeWrapper = _front; enqueued != null; enqueued = enqueued.next) {					
+					if (enqueued.node == toCheck) {
+						found = true;
+						break;
+					}
+				}
+			}
+			return found;
+		}
 				
 		private function insertBefore(enqueued:NodeWrapper, toAdd:NodeWrapper):void
 		{			
