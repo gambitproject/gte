@@ -6,21 +6,27 @@
 <project name="GameTheoryExplorer" basedir="." default="main"> 
 	
 	<!-- setup a prefix for all environment variables -->
-	<property file="build.properties" />
+	<property file="build.properties" />	
 	
 	<property name="gui.proj.dir" value="gui-builder"/>
 	<property name="gui.test.proj.dir" value="gui-builder/test"/>
 	<property name="lib.proj.dir" value="lib-algo"/>
 	<property name="lib.test.proj.dir" value="lib-algo/test"/>
-	<property name="web.proj.dir" value="web-service"/>
+	<property name="web.proj.dir" value="web-service"/>	
+	
+	<property name="war.name" value="gte"/>
+	<property name="lib.jar.name" value="${lib.proj.dir}"/>
 	
 	<property name="build.dir" value="build"/>
-	<property name="lib.build.dir" value="build/core"/>
-	<property name="lib.test.build.dir" value="build/core-test"/>	
-	<property name="gui.build.dir" value="build/gui"/>
-	<property name="gui.test.build.dir" value="build/gui-test"/>
-	<property name="war.dir" value="build/${WAR_NAME}"/>
-		
+	<property name="lib.build.dir" value="${build.dir}/${lib.proj.dir}"/>
+	<property name="lib.test.build.dir" value="${build.dir}/${lib.proj.dir}-test"/>	
+	<property name="gui.build.dir" value="${build.dir}/${gui.proj.dir}"/>
+	<property name="gui.test.build.dir" value="${build.dir}/${gui.proj.dir}-test"/>	
+	<property name="war.dir" value="${build.dir}/${war.name}"/>
+	
+	
+	
+	
 	<!-- This is what you have to include to be able to use "mxml" ant task --> 
     <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar" />	 	
 	
@@ -151,7 +157,7 @@
 		<mkdir dir="${war.dir}/WEB-INF/lib"/>		
 		<echo>Creating core library JAR file...</echo>
 		<jar
-			destfile="${war.dir}/WEB-INF/lib/${CORE_JAR_NAME}.jar"
+			destfile="${war.dir}/WEB-INF/lib/${lib.jar.name}.jar"
 			basedir="${lib.build.dir}"
 			update="true"
 		/>		
@@ -179,7 +185,7 @@
 			
 		</javac>
 		<echo>Packaging WAR...</echo>
-		<war destfile="${build.dir}/${WAR_NAME}.war"
+		<war destfile="${build.dir}/${war.name}.war"
 			webxml="${war.dir}/WEB-INF/web.xml"
 			basedir="${war.dir}">		
 		</war>		

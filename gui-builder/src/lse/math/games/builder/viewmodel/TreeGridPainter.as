@@ -403,12 +403,19 @@ package lse.math.games.builder.viewmodel
 					drawnumber = recPositionTree(child as TreeGridNode, drawnumber, grid, width, height, leafdistance);										
 				}
 				
-				var first:TreeGridNode = /*n.firstLeaf*/ n.firstchild as TreeGridNode;
-				var last:TreeGridNode = /*n.lastLeaf*/ n.lastchild as TreeGridNode;
-				if (grid.rotate == 0 || grid.rotate == 2) {
-					n.xpos = (first.xpos + last.xpos) / 2;
-				} else {
-					n.ypos = (first.ypos + last.ypos) / 2;
+				//equal slopes of extreme nodes parent positioning
+				var first:TreeGridNode = n.firstchild as TreeGridNode;
+				var last:TreeGridNode = n.lastchild as TreeGridNode;				
+				if (grid.rotate == 0 || grid.rotate == 2) 
+				{		
+					var deltaHeight1:Number = first.ypos - n.ypos;
+					var deltaHeight2:Number = last.ypos - n.ypos;				
+					n.xpos = (first.xpos*deltaHeight2 + last.xpos*deltaHeight1) / (deltaHeight1 + deltaHeight2);
+				} else 
+				{
+					var deltaWidth1:Number = first.xpos - n.xpos;
+					var deltaWidth2:Number = last.xpos - n.xpos;					
+					n.ypos = (first.ypos*deltaWidth2 + last.ypos*deltaWidth1) / (deltaWidth1 + deltaWidth2);					
 				}
 				return drawnumber;				
 			}	
