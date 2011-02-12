@@ -39,7 +39,9 @@
 	</taskdef>
 	
 	
-	<target name="main" depends="clean, test-core, test-gui, package" />	
+	<target name="main" depends="clean, test-core, test-gui, package">
+		<echo>Build Finished</echo>
+	</target>
 	
 	<target name="setup">
 		<mkdir dir="${build.dir}"/>
