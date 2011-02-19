@@ -106,7 +106,7 @@ package lse.math.games.builder.viewmodel
 		{		
 			var didAdjustments:Boolean = false;
 
-			for (var child:Node = node.firstchild; child != null; child = child.sibling) {
+			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
 				if (pushDownAllIsetDependents(child, depth + 1)) {
 					didAdjustments = true;
 				}
@@ -195,7 +195,7 @@ package lse.math.games.builder.viewmodel
 						queue.remove(toPull);						
 						
 						// we need to add children back to queue if they were already processed
-						for (var pulledChild:Node = toPull.firstchild; pulledChild != null; pulledChild = pulledChild.sibling) {
+						for (var pulledChild:Node = toPull.firstChild; pulledChild != null; pulledChild = pulledChild.sibling) {
 							if (!queue.contains(pulledChild)) {
 								queue.push(pulledChild);
 							}
@@ -210,7 +210,7 @@ package lse.math.games.builder.viewmodel
 			var hasDecendants:Boolean = (nodeSet.indexOf(node) != -1);
 			if (!hasDecendants) {
 				if (node.depth < maxDepth) {
-					for (var child:Node = node.firstchild; child != null; child = child.sibling) {
+					for (var child:Node = node.firstChild; child != null; child = child.sibling) {
 						hasDecendants = recHasDecendantsInNodeSet(child, maxDepth, nodeSet);
 						if (hasDecendants) {
 							break;
@@ -243,7 +243,7 @@ package lse.math.games.builder.viewmodel
 		// TODO: add children from right to left to optimize queueing time... need a new pointer to prevSibling
 		private function recAddToQueue(node:Node, queue:NodePriorityQueue):void
 		{			
-			for (var child:Node = node.firstchild; child != null; child = child.sibling) {
+			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
 				recAddToQueue(child, queue);				
 			}
 			(node as TreeGridNode).resetDepth();

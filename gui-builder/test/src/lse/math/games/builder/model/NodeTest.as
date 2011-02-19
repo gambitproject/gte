@@ -1,10 +1,10 @@
-/**	 
- * @author Mark Egesdal
- */
 package lse.math.games.builder.model 
 {
 	import org.flexunit.Assert;
 	
+	/**	 
+	 * @author Mark Egesdal
+	 */
 	public class NodeTest
 	{
 		[Test]
@@ -26,7 +26,7 @@ package lse.math.games.builder.model
 			child1.remove();
 			
 			Assert.assertEquals(1, parent.numChildren);
-			Assert.assertEquals(parent.firstchild, child2);
+			Assert.assertEquals(parent.firstChild, child2);
 		}	
 	}
 }

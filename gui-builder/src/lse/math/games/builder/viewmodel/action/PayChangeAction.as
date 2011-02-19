@@ -2,6 +2,7 @@ package lse.math.games.builder.viewmodel.action
 {
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Outcome;
+	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	import lse.math.games.builder.presenter.IAction;
 	
@@ -11,10 +12,10 @@ package lse.math.games.builder.viewmodel.action
 	public class PayChangeAction implements IAction
 	{
 		private var _nodeId:int;
-		private var _pay1:Number;
-		private var _pay2:Number;
+		private var _pay1:Rational;
+		private var _pay2:Rational;
 		
-		public function PayChangeAction(nodeId:int, pay1:Number, pay2:Number)
+		public function PayChangeAction(nodeId:int, pay1:Rational, pay2:Rational)
 		{
 			_nodeId = nodeId;
 			_pay1 = pay1;

@@ -5,6 +5,7 @@ package lse.math.games.builder.viewmodel
 	import flash.text.engine.FontWeight;
 	import flash.text.engine.FontPosture;
 	import lse.math.games.builder.model.Move;
+	import lse.math.games.builder.model.Rational;
 	
 	import flash.utils.Dictionary;
 	
@@ -148,9 +149,9 @@ package lse.math.games.builder.viewmodel
 			var text:String = "?";			
 			if (map[key] != undefined) 
 			{
-				var number:Number = map[key];
-				if (!isNaN(number)) {
-					text = (Math.round(number * 100) / 100).toString();
+				var number:Rational = map[key];
+				if (!number.isNaN) {
+					text = number.toString();
 				}
 			}
 			return text;

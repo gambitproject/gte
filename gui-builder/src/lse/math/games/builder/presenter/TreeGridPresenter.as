@@ -13,6 +13,7 @@ package lse.math.games.builder.presenter
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	import lse.math.games.builder.model.Rational;
 	
 	import lse.math.games.builder.fig.FigFontManager;
 	import lse.math.games.builder.fig.TreeGridFigWriter;
@@ -190,15 +191,15 @@ package lse.math.games.builder.presenter
 				changes = true;
 			}
 			if (modelObj.outcome != null) {
-				var pay1:Number = modelObj.outcome.pay(_grid.firstPlayer);
-				var pay2:Number = modelObj.outcome.pay(_grid.firstPlayer.nextPlayer);					
-				if ((isNaN(pay1) && viewObj.pay1 != "?") || 
-					(!isNaN(pay1) && viewObj.pay1 != pay1.toString()))
+				var pay1:Rational = modelObj.outcome.pay(_grid.firstPlayer);
+				var pay2:Rational = modelObj.outcome.pay(_grid.firstPlayer.nextPlayer);					
+				if ((pay1.isNaN && viewObj.pay1 != "?") || 
+					(!pay1.isNaN && viewObj.pay1 != pay1.toString()))
 				{
 					changes = true;
 				}
-				if ((isNaN(pay2) && viewObj.pay2 != "?") || 
-					(!isNaN(pay2) && viewObj.pay2 != pay2.toString()))
+				if ((pay2.isNaN && viewObj.pay2 != "?") || 
+					(!pay2.isNaN && viewObj.pay2 != pay2.toString()))
 				{
 					changes = true;
 				}
@@ -250,10 +251,10 @@ package lse.math.games.builder.presenter
 					
 					leafObj.leaf = pathInString(leaf);				
 					if (leaf.outcome != null) {
-						var pay1:Number = leaf.outcome.pay(_grid.firstPlayer);
-						var pay2:Number = leaf.outcome.pay(_grid.firstPlayer.nextPlayer);					
-						leafObj.pay1 = isNaN(pay1) ? "?" : pay1.toString();
-						leafObj.pay2 = isNaN(pay2) ? "?" : pay2.toString();
+						var pay1:Rational = leaf.outcome.pay(_grid.firstPlayer);
+						var pay2:Rational = leaf.outcome.pay(_grid.firstPlayer.nextPlayer);					
+						leafObj.pay1 = pay1.isNaN ? "?" : pay1.toString();
+						leafObj.pay2 = pay2.isNaN ? "?" : pay2.toString();
 					} else {
 						leafObj.pay1 = "?";
 						leafObj.pay2 = "?";

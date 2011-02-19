@@ -78,8 +78,8 @@ package lse.math.games.builder.model
 			//make the moves of other the same as those of this
 			for (var p:Node = other.firstNode; p != null; p = p.nextInIset)
 			{				
-				var s:Node = _firstNode.firstchild; //we can just use the first node, since all moves in iset are the same
-				for (var r:Node = p.firstchild; r != null; r = r.sibling) {
+				var s:Node = _firstNode.firstChild; //we can just use the first node, since all moves in iset are the same
+				for (var r:Node = p.firstChild; r != null; r = r.sibling) {
 					r.reachedby = s.reachedby;					
 					s = s.sibling;
 				}
@@ -190,15 +190,20 @@ package lse.math.games.builder.model
 		}
 		
 		private function newMove():Move
-		{
+		{			
 			var move:Move = new Move();			
 			if (_player == Player.CHANCE) 
 			{				
-				var n:int = _firstNode.numChildren + 1;				
-				for (var child:Node = _firstNode.firstchild; child != null; child = child.sibling) {					
-					child.reachedby.prob = (1.0 / n);
-				}	
-				move.prob = (1.0 / n);
+				var n:int = _firstNode.numChildren + 1;
+				
+				if (n > 1) {
+					// don't assign the last node yet, let it keep the residual... it will even out when the new node is added
+					// otherwise it will push the residual back to the node before
+					for (var child:Node = _firstNode.firstChild; child.sibling != null; child = child.sibling) {					
+						child.reachedby.prob = new Rational(1, n);
+					}
+				}
+				move.prob = new Rational(1, n);
 			}
 			assignMove(move);			
 			return move;
@@ -297,22 +302,23 @@ package lse.math.games.builder.model
 			var numChildren:int = _firstNode.numChildren;
 			var newMoves:Vector.<Move> = new Vector.<Move>(numChildren);
 			for (var mate:Node = _firstNode; mate != null; mate = mate.nextInIset) {
-				for (var child:Node = mate.firstchild, i:int = 0; child != null; child = child.sibling, ++i)
-				{					
+				for (var child:Node = mate.firstChild, i:int = 0; child != null; child = child.sibling, ++i)
+				{
 					var m:Move = newMoves[i];
 					if (m == null) {
+						trace("creating new moves for new iset " + _idx);
 						m = createMove(numChildren);						
 						newMoves[i] = m;
 					}
 					child.reachedby = m;
-				}				
+				}
 			}
 		}
 		
 		private function createNewMovesForSingleton():void
 		{
 			//create new moves for chopped off first node of the new set				
-			var child:Node = _firstNode.firstchild;
+			var child:Node = _firstNode.firstChild;
 			for (var i:int = 0, n:int = _firstNode.numChildren; i < n; ++i)
 			{
 				//create new move for that child
@@ -326,7 +332,7 @@ package lse.math.games.builder.model
 		{
 			var m:Move = new Move();
 			if (_player == Player.CHANCE) {
-				m.prob = (1.0 / numSiblings);
+				m.prob = new Rational(1, numSiblings);
 			}
 			m.setIset(this);
 			return m;
@@ -339,11 +345,17 @@ package lse.math.games.builder.model
 			else _player = _player.nextPlayer; 
 		}
 		
-		public function makechance():void
+		public function makeChance():void
 		{			
 			_player = Player.CHANCE;
-			dissolve();				
-			createNewMovesForSingleton();
+			dissolve();
+			
+			// new isets are fine, but we need to adjust probs for original iset
+			var n:int = _firstNode.numChildren;
+			for (var child:Node = _firstNode.firstChild; child != null; child = child.sibling)
+			{
+				child.reachedby.prob = new Rational(1, n);				
+			}			
 		}
 		
 		public function toString():String

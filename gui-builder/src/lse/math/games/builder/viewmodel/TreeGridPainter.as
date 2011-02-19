@@ -3,6 +3,7 @@ package lse.math.games.builder.viewmodel
 	import flash.text.engine.TextLine;
 	import flash.text.engine.FontWeight;
 	import flash.text.engine.FontPosture;
+	import lse.math.games.builder.model.Rational;
 	
 	import lse.math.games.builder.view.AbstractPainter;	
 	import lse.math.games.builder.view.IGraphics;
@@ -133,7 +134,7 @@ package lse.math.games.builder.viewmodel
 		private function recPaintTree(g:IGraphics, grid:TreeGrid, n:TreeGridNode):Boolean
 		{			
 			var selectionFound:Boolean = false;
-			var child:TreeGridNode = n.firstchild as TreeGridNode;
+			var child:TreeGridNode = n.firstChild as TreeGridNode;
 			
 			if (n.isLeaf) {
 				selectionFound = (n.number == grid.selectedNodeId);
@@ -181,7 +182,7 @@ package lse.math.games.builder.viewmodel
 		private function recAssignNodeLabels(n:Node, grid:TreeGrid):Boolean
 		{
 			var selected:Boolean = n.number == grid.selectedNodeId;
-			for (var child:Node = n.firstchild; child != null; child = child.sibling) {
+			for (var child:Node = n.firstChild; child != null; child = child.sibling) {
 				if (recAssignNodeLabels(child, grid)) {
 					selected = true;
 				}
@@ -205,10 +206,10 @@ package lse.math.games.builder.viewmodel
 			if (node.outcome != null) {
 				var p1:Player = grid.firstPlayer;
 				var p2:Player = grid.firstPlayer.nextPlayer;
-				var pay1:Number = node.outcome.pay(p1);
-				var pay2:Number = node.outcome.pay(p2);
-				var pay1Str:String = isNaN(pay1) ? "?" : pay1.toString();
-				var pay2Str:String = isNaN(pay2) ? "?" : pay2.toString();
+				var pay1:Rational = node.outcome.pay(p1);
+				var pay2:Rational = node.outcome.pay(p2);
+				var pay1Str:String = pay1.isNaN ? "?" : pay1.toString();
+				var pay2Str:String = pay2.isNaN ? "?" : pay2.toString();
 				registerLabel(getOutcomeLabelKey(node, p1), pay1Str, grid.player1Color, grid.fontFamily, styleOutcome);
 				registerLabel(getOutcomeLabelKey(node, p2), pay2Str, grid.player2Color, grid.fontFamily, styleOutcome);
 			}
@@ -245,7 +246,7 @@ package lse.math.games.builder.viewmodel
 				positionOutcomeLabels(n, grid, payoffLabel1, payoffLabel2);
 			}			
 			
-			var child:TreeGridNode = n.firstchild as TreeGridNode;
+			var child:TreeGridNode = n.firstChild as TreeGridNode;
 			while (child != null) {
 				recPositionNodeLabels(child, grid);
 				child = child.sibling as TreeGridNode;
@@ -399,13 +400,13 @@ package lse.math.games.builder.viewmodel
 				}
 				return drawnumber + 1;				
 			} else {
-				for (var child:Node = n.firstchild; child != null; child = child.sibling) {
+				for (var child:Node = n.firstChild; child != null; child = child.sibling) {
 					drawnumber = recPositionTree(child as TreeGridNode, drawnumber, grid, width, height, leafdistance);										
 				}
 				
 				//equal slopes of extreme nodes parent positioning
-				var first:TreeGridNode = n.firstchild as TreeGridNode;
-				var last:TreeGridNode = n.lastchild as TreeGridNode;				
+				var first:TreeGridNode = n.firstChild as TreeGridNode;
+				var last:TreeGridNode = n.lastChild as TreeGridNode;				
 				if (grid.rotate == 0 || grid.rotate == 2) 
 				{		
 					var deltaHeight1:Number = first.ypos - n.ypos;

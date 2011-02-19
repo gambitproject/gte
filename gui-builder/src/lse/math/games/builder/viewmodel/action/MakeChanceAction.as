@@ -33,15 +33,15 @@ package lse.math.games.builder.viewmodel.action
 				var node:Node = grid.getNodeById(_nodeId);
 				if (node != null) {
 					iset = node.makeNonTerminal();
-					iset.makechance();
+					iset.makeChance();
 				}
 			} else {
 				var dissolve:Boolean = iset.numNodes > 1;
-				iset.makechance();
+				iset.makeChance();
 				if (dissolve) {
 					_onDissolve.doAction(grid);
 				}
-			}				
+			}			
 		}
 		
 		public function get changesData():Boolean {

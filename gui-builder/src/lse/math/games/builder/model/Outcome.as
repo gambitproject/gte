@@ -14,14 +14,14 @@ package lse.math.games.builder.model
 		
 		public function Outcome(whichnode:Node) { _whichnode = whichnode; }
 		
-		public function setPay(player:Player, payoff:Number):void
+		public function setPay(player:Player, payoff:Rational):void
 		{			
 			_payoffs[player] = payoff;
 		}
 		
-		public function pay(player:Player):Number
+		public function pay(player:Player):Rational
 		{			
-			return _payoffs[player] as Number;
+			return _payoffs[player] as Rational;
 		}
 		
 		public function toString():String

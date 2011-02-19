@@ -103,8 +103,8 @@ package lse.math.games.builder.viewmodel.action
 					}
 					
 					if (!labGen) {
-						n1 = x.parent.firstchild;
-						n2 = x.parent.iset.firstNode.firstchild;
+						n1 = x.parent.firstChild;
+						n2 = x.parent.iset.firstNode.firstChild;
 						
 						var n:int = 0;
 						while (n1 != x) {
@@ -127,7 +127,7 @@ package lse.math.games.builder.viewmodel.action
 				}
 			}
 
-			var y:Node = x.firstchild;
+			var y:Node = x.firstChild;
 			while (y != null) {
 				recLabel(y, tree);
 				y = y.sibling;
@@ -166,7 +166,7 @@ package lse.math.games.builder.viewmodel.action
 			var i:Iset = tree.root.iset;			
 			while (i!=null) {
 				if (i.player != Player.CHANCE) {
-					for (var child:Node = i.firstNode.firstchild; child != null; child = child.sibling) {
+					for (var child:Node = i.firstNode.firstChild; child != null; child = child.sibling) {
 						if (child.reachedby.hasLabel) { //not checking if child.reachedby is null, since that is an error we want to know about				
 							inUse.push(child.reachedby.label.toLowerCase());
 						} else {

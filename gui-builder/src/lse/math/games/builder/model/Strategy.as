@@ -35,8 +35,7 @@ package lse.math.games.builder.model
 				if (a.sequence.length > i && b.sequence.length > i) {
 					var moveA:Move = a.sequence[i];
 					var moveB:Move = b.sequence[i];					
-					cmp = compareMoves(moveA, moveB);
-					trace("mv " + moveA.toString() + " " + moveB.toString() + " " + cmp);
+					cmp = compareMoves(moveA, moveB);					
 				} else if (a.sequence.length > i) {
 					cmp = 1;
 				} else if (b.sequence.length > i) {

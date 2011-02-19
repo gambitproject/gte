@@ -38,8 +38,8 @@ package lse.math.games.builder.model
 
 		public function get number():int { return _number; }          	// for specification of tree
 		
-		public function get firstchild():Node { return _firstchild; }
-		public function get lastchild():Node { return _lastchild; }
+		public function get firstChild():Node { return _firstchild; }
+		public function get lastChild():Node { return _lastchild; }
 		public function get parent():Node { return _father; }
 		public function get sibling():Node { return _brother; }		
 		
@@ -286,7 +286,7 @@ package lse.math.games.builder.model
 			var parent:Node = a.parent;
 			if (parent != b.parent) throw new Error("Problem in Node.compare() method... parents are not the same");			
 			if (parent != null) {
-				for (var child:Node = parent.firstchild; child != null; child = child.sibling) {
+				for (var child:Node = parent.firstChild; child != null; child = child.sibling) {
 					if (child == a) {
 						if (child == b) {
 							break;
@@ -324,9 +324,7 @@ package lse.math.games.builder.model
 		}
 		
 		public function makeLastInIset():Iset
-		{
-			//trace("Node:  making node " + _number + " last in iset " + _iset.idx);
-						
+		{			
 			var h:Iset = null;
 			if (_nextInIset != null) {
 				h = _iset.newIset(_iset.player);

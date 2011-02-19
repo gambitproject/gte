@@ -39,7 +39,7 @@ package lse.math.games.builder.io
 					isets.push(n.iset);
 				}
 				
-				for (var child:Node = n.firstchild; child != null; child = child.sibling) {
+				for (var child:Node = n.firstChild; child != null; child = child.sibling) {
 					nodeElem.appendChild(getNodeElem(child, isets, tree));
 				}
 			} else {
@@ -93,7 +93,7 @@ package lse.math.games.builder.io
 				nodeElem.@move = node.reachedby.label; // TODO: add a unique constraint in the program to prevent errors here?
 			}
 			
-			for (var child:Node = node.firstchild; child != null; child = child.sibling) {
+			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
 				if (child.outcome != null) {
 					var outcomeElem:XML = <outcome/>;
 					if (child.reachedby != null && child.reachedby.isChance) {

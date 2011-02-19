@@ -3,6 +3,7 @@ package lse.math.games.builder.viewmodel
 	import flashx.textLayout.operations.ModifyInlineGraphicOperation;
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;	
+	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.presenter.ActionChain;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.action.*;
@@ -27,17 +28,20 @@ package lse.math.games.builder.viewmodel
 			return action;
 		}
 		
-		public function outcomeDataUpdate(grid:TreeGrid, nodeId:int, pathIn:String, pay1:Number, pay2:Number):IAction
+		public function outcomeDataUpdate(grid:TreeGrid, nodeId:int, pathIn:String, pay1Str:String, pay2Str:String):IAction
 		{
 			var chain:ActionChain = null;
 			var n:Node = grid.getNodeById(nodeId);
 			if (n != null) {
 				chain = new ActionChain();				
 				
+				var pay1:Rational = Rational.parse(pay1Str);
+				var pay2:Rational = Rational.parse(pay2Str);
+				
 				if (grid.isZeroSum) {
-					pay2 = -pay1;				
+					pay2 = pay1.negate();				
 				}
-				if (!isNaN(pay1) || !isNaN(pay2)) { //if neither is a number don't bother...
+				if (!pay1.isNaN || !pay2.isNaN) { //if neither is a number don't bother...
 					var action:IAction = new PayChangeAction(nodeId, pay1, pay2);
 					chain.push(action);
 				}
@@ -67,8 +71,8 @@ package lse.math.games.builder.viewmodel
 			var chain:ActionChain = new ActionChain();			
 			for (var leaf:Node = grid.root.firstLeaf; leaf != null; leaf = leaf.nextLeaf) 
 			{
-				var pay1:Number = randomInt(grid.maxPayoff);
-				var pay2:Number = grid.isZeroSum ? -pay1 : randomInt(grid.maxPayoff);								
+				var pay1:Rational = new Rational(randomInt(grid.maxPayoff), 1);
+				var pay2:Rational = grid.isZeroSum ? pay1.negate() : new Rational(randomInt(grid.maxPayoff), 1);
 				var action:IAction = new PayChangeAction(leaf.number, pay1, pay2);
 				chain.push(action);
 			}
@@ -105,8 +109,8 @@ package lse.math.games.builder.viewmodel
 			for (var leaf:Node = grid.root.firstLeaf; leaf != null; leaf = leaf.nextLeaf) 
 			{
 				if (leaf.outcome != null) {	
-					var pay:Number = leaf.outcome.pay(grid.firstPlayer)
-					var action:IAction = new PayChangeAction(leaf.number, pay, -pay);
+					var pay:Rational = leaf.outcome.pay(grid.firstPlayer)
+					var action:IAction = new PayChangeAction(leaf.number, pay, pay.negate());
 					chain.push(action);
 				}
 			}
@@ -193,7 +197,7 @@ package lse.math.games.builder.viewmodel
 			var action:MakeChanceAction = new MakeChanceAction(h, n);
 			action.onDissolve = _depthAdjuster;
 			return action;
-		}		
+		}
 		
 		// protected so it can be overridden for endo testing
 		protected function randomInt(max:Number):int

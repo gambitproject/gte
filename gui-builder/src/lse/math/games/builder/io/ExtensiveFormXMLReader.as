@@ -8,6 +8,7 @@ package lse.math.games.builder.io
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Outcome;
 	import lse.math.games.builder.model.Player;
+	import lse.math.games.builder.model.Rational;
 	
 	/**	 
 	 * @author Mark Egesdal
@@ -78,7 +79,7 @@ package lse.math.games.builder.io
 				
 				//for each child of the first node, hook up move
 				var baseline:Node = iset.firstNode;
-				for (var baselineChild:Node = baseline.firstchild, childIdx:int = 0; baselineChild != null; baselineChild = baselineChild.sibling, ++childIdx)
+				for (var baselineChild:Node = baseline.firstChild, childIdx:int = 0; baselineChild != null; baselineChild = baselineChild.sibling, ++childIdx)
 				{					
 					iset.assignMove(baselineChild.reachedby);
 					
@@ -86,7 +87,7 @@ package lse.math.games.builder.io
 					// TODO: it does not necessarily need to be at the same index
 					for (var baselineMate:Node = baseline.nextInIset; baselineMate != null; baselineMate = baselineMate.nextInIset)
 					{
-						var mateChild:Node = baselineMate.firstchild;
+						var mateChild:Node = baselineMate.firstChild;
 						for (var i:int = 0; i < childIdx; ++i) {
 							mateChild = mateChild.sibling;
 						}
@@ -212,7 +213,7 @@ package lse.math.games.builder.io
 			// set up the moves
 			if (elem.@prob != undefined) {				
 				node.reachedby = new Move();
-				node.reachedby.prob = new Number(elem.@prob);
+				node.reachedby.prob = Rational.parse(elem.@prob);
 				if (elem.@move != undefined) {
 					trace("Warning: @move attribute is given to a node reached by probability.  Ignored.");
 				}
@@ -265,7 +266,7 @@ package lse.math.games.builder.io
 			for each (var child:XML in elem.children()) {
 				if (child.name() == "payoff") {
 					var playerId:String = child.@player;
-					var payoff:Number = Number(child.@value);
+					var payoff:Rational = Rational.parse(child.@value);
 					
 					var player:Player = players[playerId];
 					if (player == null) {

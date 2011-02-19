@@ -138,7 +138,7 @@ package lse.math.games.builder.model
 			else
 			{
 				var max:int = 0;				
-				for (var child:Node = node.firstchild; child != null; child = child.sibling)
+				for (var child:Node = node.firstChild; child != null; child = child.sibling)
 				{
 					var submax:int = recMaxDepth(child);
 					if (submax > max) {
@@ -168,7 +168,7 @@ package lse.math.games.builder.model
 			else
 			{
 				var leafcurrnum:int = count;
-				var y:Node = node.firstchild;
+				var y:Node = node.firstChild;
 				while (y != null)
 				{
 					leafcurrnum = recNumberLeaves(y, leafcurrnum);
@@ -191,7 +191,7 @@ package lse.math.games.builder.model
 				indent += "    ";
 			}
 						
-			var y:Node = x.firstchild;
+			var y:Node = x.firstChild;
 			trace(indent + x.toString() + ((y == null) ? " (leaf)" : ""));
 			
 			while (y != null)
@@ -207,7 +207,7 @@ package lse.math.games.builder.model
 				return node;
 			} 
 
-			var child:Node = node.firstchild;
+			var child:Node = node.firstChild;
 			while (child != null) {
 				var rv:Node = recGetNodeById(child, number);
 				if (rv != null) {

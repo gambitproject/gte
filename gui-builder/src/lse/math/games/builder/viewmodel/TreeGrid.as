@@ -241,7 +241,7 @@ package lse.math.games.builder.viewmodel
 			}
 						
 			var rv:Node = null;
-			for (var child:Node = node.firstchild; child != null; child = child.sibling)
+			for (var child:Node = node.firstChild; child != null; child = child.sibling)
 			{
 				rv = recFindNode(child, x, y);
 				if (rv != null) {

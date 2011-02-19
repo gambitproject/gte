@@ -219,9 +219,9 @@ public class Rational
             return (greater(other.num, this.num)) ? -1 : 1;
 
         //check signs...
-        if (negative(num) && positive(other.num)) 
+        if ((zero(num) || negative(num)) && positive(other.num)) 
         	return -1;
-        else if (positive(num) && negative(other.num)) 
+        else if (positive(num) && (zero(other.num) || negative(other.num))) 
         	return 1;
 
         Rational c = other.negate();            

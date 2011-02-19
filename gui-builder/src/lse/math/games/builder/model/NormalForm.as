@@ -27,7 +27,7 @@ package lse.math.games.builder.model
 					map[pl] = processStrategiesForLeaf(pl, leaf, reduce);					
 				}
 				
-				var prob:Number = realprob(leaf);								
+				var prob:Rational = realprob(leaf);								
 				recAddPayoffs(tree.firstPlayer, null, z, prob, map);				
 			}
 		}
@@ -36,7 +36,7 @@ package lse.math.games.builder.model
 			return _firstPlayer;
 		}
 		
-		private function recAddPayoffs(player:Player, sofar:Array, z:Outcome, prob:Number, map:Dictionary):void 
+		private function recAddPayoffs(player:Player, sofar:Array, z:Outcome, prob:Rational, map:Dictionary):void 
 		{			
 			var strategies:Vector.<Strategy> = map[player];
 			for each (var strategy:Strategy in strategies) {
@@ -55,7 +55,7 @@ package lse.math.games.builder.model
 			}		
 		}
 		
-		private function addPayoff(combo:Array, z:Outcome, prob:Number):void
+		private function addPayoff(combo:Array, z:Outcome, prob:Rational):void
 		{
 			var pairKey:String = Strategy.key(combo);
 			for (var pl:Player = _firstPlayer; pl != null; pl = pl.nextPlayer) {					
@@ -65,10 +65,10 @@ package lse.math.games.builder.model
 					_payMatrixMap[pl] = payMatrix;					
 				}
 				if (payMatrix[pairKey] == undefined) {					
-					payMatrix[pairKey] = 0.0; //Number
+					payMatrix[pairKey] = Rational.ZERO;
 				}
-				var pay:Number = (z != null) ? prob * z.pay(pl) : NaN;				
-				payMatrix[pairKey] += pay;
+				var pay:Rational = (z != null) ? prob.multiply(z.pay(pl)) : Rational.NaN;				
+				payMatrix[pairKey] = payMatrix[pairKey].add(pay);
 			}			
 		}
 		
@@ -265,7 +265,7 @@ package lse.math.games.builder.model
 		{		
 			var expansion:Vector.<Strategy> = new Vector.<Strategy>();
 			if (!iset.isChildless) {
-				for (var child:Node = iset.firstNode.firstchild; child != null; child = child.sibling) {
+				for (var child:Node = iset.firstNode.firstChild; child != null; child = child.sibling) {
 					var expansionSequence:Vector.<Move> = new Vector.<Move>();
 					for each (var move:Move in baseStrategy.sequence) {
 						expansionSequence.push(move);
@@ -312,12 +312,12 @@ package lse.math.games.builder.model
 			return lines.join("\n");
 		}
 		
-		private function realprob(n:Node):Number
+		private function realprob(n:Node):Rational
 		{
-			var prob:Number = 1;
+			var prob:Rational = Rational.ONE;
 			while (n != null) {
 				if (n.parent != null && n.parent.iset.player == Player.CHANCE) {
-					prob *= n.reachedby.prob;
+					prob = prob.multiply(n.reachedby.prob);
 				}
 				n = n.parent;
 			}

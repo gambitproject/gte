@@ -71,7 +71,7 @@ package lse.math.games.builder.viewmodel.action
 				// if all children in one Iset and without children
 				// add new child to each node in Iset and place these
 				// children in same Iset as existing children
-				parent.addMoveTo(parent.firstNode.firstchild.iset);
+				parent.addMoveTo(parent.firstNode.firstChild.iset);
 				
 				// make nextInIset of new Node the nextInIset
 				// of previous lastchild and
@@ -119,16 +119,16 @@ package lse.math.games.builder.viewmodel.action
 			if (y.isLeaf) {
 				ok = false;
 			} else {
-				var h:Iset = y.firstchild.iset;
+				var h:Iset = y.firstChild.iset;
 				if (h == null) {
 					ok = false;
 				}
 
 				while (ok && y != null) { //go through nodes in Iset
-					var z:Node = y.firstchild;
+					var z:Node = y.firstChild;
 					
 					while (ok && z != null) {
-						ok = ((z.iset == h)&&(z.firstchild == null));
+						ok = ((z.iset == h)&&(z.firstChild == null));
 						z = z.sibling;
 					}
 					y = y.nextInIset;
