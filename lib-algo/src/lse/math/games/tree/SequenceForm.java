@@ -314,20 +314,20 @@ public class SequenceForm
 			colpp.writeCol(pl.toString());
 			for (int j = 0; j < nseqs(firstPlayer.next); ++j) {
 				Move colMove = seqsMap.get(firstPlayer.next).get(j);
-				colpp.writeCol(colMove == null ? "Ø" : colMove.toString());
+				colpp.writeCol(colMove == null ? "\u00D8" : colMove.toString());
 			}
 			if (pl == firstPlayer) {			
 				for (int j = 0; j < nisets(firstPlayer); ++j) 
 				{
 					Iset h = isetsMap.get(firstPlayer).get(j);
 					Move hseqin = seqin.get(h);
-					colpp.writeCol(hseqin == null ? "Ø" : hseqin.toString());					
+					colpp.writeCol(hseqin == null ? "\u00D8" : hseqin.toString());					
 				}
 			}
 			colpp.endRow();
 			for (int i = 0; i < mat.length; ++i) {
 				Move rowMove = seqsMap.get(firstPlayer).get(i);
-				colpp.writeCol(rowMove == null ? "Ø" : rowMove.toString());
+				colpp.writeCol(rowMove == null ? "\u00D8" : rowMove.toString());
 				for (int j = 0; j < mat[i].length; ++j) {
 					Rational pay = mat[i][j];
 					colpp.writeCol(pay.isZero() ? "." : pay.toString());
@@ -344,7 +344,7 @@ public class SequenceForm
 				for (int i = 0; i < nisets(firstPlayer.next); ++i) {
 					Iset h = isetsMap.get(firstPlayer.next).get(i);
 					Move hseqin = seqin.get(h);
-					colpp.writeCol(hseqin == null ? "Ø" : hseqin.toString());
+					colpp.writeCol(hseqin == null ? "\u00D8" : hseqin.toString());
 					
 					for (int j = 0; j < nseqs(firstPlayer.next); ++j) {
 						Integer cstr = constraintsMap.get(firstPlayer.next)[i + 1][j];

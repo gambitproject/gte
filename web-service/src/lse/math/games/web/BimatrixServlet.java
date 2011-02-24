@@ -286,7 +286,7 @@ public class BimatrixServlet extends AbstractRESTServlet
 				colpp.writeCol("");
 			}
 		}
-		colpp.writeCol("£" + game.firstPlayer());
+		colpp.writeCol("\u00A3" + game.firstPlayer());
 		colpp.writeCol("  ");
 
 		if (eqs.count() > 1) {
@@ -307,7 +307,7 @@ public class BimatrixServlet extends AbstractRESTServlet
 				colpp.writeCol("");
 			}
 		}
-		colpp.writeCol("£" + game.secondPlayer());		
+		colpp.writeCol("\u00A3" + game.secondPlayer());		
 		colpp.endRow();
 	}*/
 
@@ -331,7 +331,7 @@ public class BimatrixServlet extends AbstractRESTServlet
 					colpp.writeCol("");
 				}
 			}
-			colpp.writeCol("  £" + String.format("%.2f", eq.payoff1.doubleValue()));
+			colpp.writeCol("  \u00A3" + String.format("%.2f", eq.payoff1.doubleValue()));
 			colpp.writeCol("  y" + eq.getVertex2());
 			for (int j = 0; j < eq.probVec2.length; ++j) {
 				Rational prob = eq.probVec2[j];
@@ -344,7 +344,7 @@ public class BimatrixServlet extends AbstractRESTServlet
 					colpp.writeCol("");
 				}
 			}
-			colpp.writeCol("  £" + String.format("%.2f", eq.payoff2.doubleValue()));
+			colpp.writeCol("  \u00A3" + String.format("%.2f", eq.payoff2.doubleValue()));
 			colpp.endRow();
 			
 			colpp.writeCol("");
@@ -465,8 +465,8 @@ public class BimatrixServlet extends AbstractRESTServlet
 				colpp.endRow();
 			}
 			
-			printRow("£" + game.firstPlayer(), payX, colpp, false);
-			printRow("£" + game.secondPlayer(), payY, colpp, false);
+			printRow("\u00A3" + game.firstPlayer(), payX, colpp, false);
+			printRow("\u00A3" + game.secondPlayer(), payY, colpp, false);
 			colpp.endRow();
 		}
 		colpp.alignLeft(0);

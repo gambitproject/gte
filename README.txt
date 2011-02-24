@@ -6,7 +6,7 @@ I. PREREQUISITES
 	1.2 Add bin directory to path
 	1.3 Add JAVA_HOME environment variable (makes sure it points to the SDK, not JRE)
 	===LINUX===
-	$ sudo apt-get sun-java6-jdk
+	$ sudo apt-get install sun-java6-jdk
 	
 2. Install Apache Ant
 	===WINDOWS===
@@ -14,15 +14,21 @@ I. PREREQUISITES
 	2.2 Add bin directory to path	
 	2.3 Add ANT_HOME environment variable (might not be necessary)
 	===LINUX===
-	$ sudo apt-get ant
+	$ sudo apt-get install ant
 	
 3. Install Flex SDK
 	3.1 Download archive - http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4	
-	3.2 Add bin directory to path	
+	3.2 Add bin directory to PATH (.bashrc in Linux, System->Advanced->Environment Variables in Windows)	
+
+3b. Install "gflashplayer" (Linux only)
+	3b.1 cd {FLEX_HOME}/runtimes/player/10.1/lnx
+	3b.2 tar -zxvf flashplayerdebugger.tar.gz
+	3b.3 ln -s ./flashplayerdebugger ./gflashplayer
+	3b.4 Add directory from [3b.1] to PATH
 
 4. Install the Google AppEngine SDK 
 	4.1 Download archive - http://code.google.com/appengine/downloads.html
-	4.2 Add bin directory to path	
+	4.2 Add bin directory to PATH (see [3])	
 
 5. Update build.properties file for your environment
 	5.1 Update FLEX_HOME with root directory of Flex SDK (not bin)

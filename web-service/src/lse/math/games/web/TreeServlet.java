@@ -137,7 +137,7 @@ public class TreeServlet extends AbstractRESTServlet
 							}
 							colpp.endRow();
 							for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
-								colpp.writeCol("£" + pl.toString());						
+								colpp.writeCol("\u00A3" + pl.toString());						
 								colpp.writeCol(epayoffs.get(pl).toString());
 								colpp.endRow();						
 							}
