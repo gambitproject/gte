@@ -318,6 +318,7 @@ public class Tableau
                 String value = valToString(i, j);
                 colpp.writeCol(value);
             }
+	    colpp.endRow();
         }
         colpp.endRow();
         sb.append(colpp.toString());

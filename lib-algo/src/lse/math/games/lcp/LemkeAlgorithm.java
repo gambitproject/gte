@@ -20,7 +20,7 @@ public class LemkeAlgorithm
     public int getRecordDigits() { return record_size; }          
     public Tableau A;
     public LexicographicMethod lex; // Performs MinRatio Test
-
+    private LCP origLCP;
 
     //region Event Callbacks
     public LeavingVariableDelegate leavingVarHandler;       //interactivevar OR lexminvar
@@ -36,11 +36,12 @@ public class LemkeAlgorithm
     	throws InvalidLCPException, TrivialSolutionException
     {
         checkInputs(lcp.q(), lcp.d());
+	origLCP = lcp;
         A = new Tableau(lcp.d().length);
         A.fill(lcp.M(), lcp.q(), lcp.d());
         if (onInit != null)
         	onInit.onInit("After filltableau", A);
-        lex = new LexicographicMethod(A.vars().size());
+        lex = new LexicographicMethod(A.vars().size(), lcp);
 
         this.leavingVarHandler = new LeavingVariableDelegate() {
 			public int getLeavingVar(int enter) throws RayTerminationException {
@@ -166,8 +167,9 @@ public class LemkeAlgorithm
             z0leave = leavingVarHandler.canZ0Leave();
             return rv;
         } catch (RayTerminationException ex) {
-            if (onLexRayTermination != null)
-                onLexRayTermination.onLexRayTermination(enter, A);
+            if (onLexRayTermination != null) {
+                onLexRayTermination.onLexRayTermination(enter, A, origLCP);
+	    }
             throw ex;
         }
     }
@@ -182,7 +184,9 @@ public class LemkeAlgorithm
     public interface OnPivotDelegate { public void onPivot(int leave, int enter, TableauVariables vars); }
     public interface OnTableauChangeDelegate { public void onTableauChange(String message, Tableau A); }
     public interface OnLexCompleteDelegate { public void onLexComplete(LexicographicMethod lex); }
-    public interface OnLexRayTerminationDelegate { public void onLexRayTermination(int enter, Tableau A); }
+    public interface OnLexRayTerminationDelegate { 
+        public void onLexRayTermination(int enter, Tableau end, LCP start); 
+    }
     
     @SuppressWarnings("serial")
     public static class LemkeException extends Exception {    	
@@ -209,11 +213,13 @@ public class LemkeAlgorithm
     @SuppressWarnings("serial")
     public static class RayTerminationException extends LemkeException {
 		public Tableau A;
+		public LCP start;
 
-		public RayTerminationException(String error, Tableau A) 
+		public RayTerminationException(String error, Tableau A, LCP start) 
 		{ 
 			super(error);
 			this.A = A;
+			this.start = start;
 		}
 		
 		@Override
@@ -221,6 +227,8 @@ public class LemkeAlgorithm
 		{
 			StringBuilder sb = new StringBuilder()
 				.append(super.getMessage())
+				.append(System.getProperty("line.separator"))
+				.append(start != null ? start.toString() : "LCP is null")
 				.append(System.getProperty("line.separator"))
 				.append(A.toString());
 			return sb.toString();

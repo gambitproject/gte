@@ -15,9 +15,11 @@ public class LexicographicMethod
     public int[] tested;        //TODO: make private
     public int[] comparisons;   //TODO: make private  
     private int[] leavecand;    /* leavecand [0..numcand-1] = candidates (rows) for leaving var */ 
-    
-    public LexicographicMethod(int basisSize)
+    private LCP start;
+
+    public LexicographicMethod(int basisSize, LCP start)
     {
+	this.start = start;
         leavecand = new int[basisSize];
         InitStatistics(basisSize + 1);
     }
@@ -191,6 +193,6 @@ public class LexicographicMethod
     	throws RayTerminationException
     {
         String error = String.format("Ray termination when trying to enter %s", A.vars().toString(enter));
-        throw new RayTerminationException(error, A);
+        throw new RayTerminationException(error, A, start);
     }
 }

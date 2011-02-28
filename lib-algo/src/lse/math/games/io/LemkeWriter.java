@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import lse.math.games.lcp.LexicographicMethod;
 import lse.math.games.lcp.Tableau;
 import lse.math.games.lcp.TableauVariables;
+import lse.math.games.lcp.LCP;
 
 public class LemkeWriter {
 	private ColumnTextWriter colpp = new ColumnTextWriter();
@@ -14,9 +15,12 @@ public class LemkeWriter {
 		this.output = output;
 	}    
 
-    public void RayTerminationDump(int enter, Tableau A)
+    public void RayTerminationDump(int enter, Tableau A, LCP start)
     {
         output.println(String.format("Ray termination when trying to enter %s", A.vars().toString(enter)));        
+	output.println("Starting LCP:");
+	output.println(start.toString());
+	output.println("Final Tableau:");
         output.println(A.toString());
         output.println("Current basis, not an LCP solution:");        
         WriteSolution(A);

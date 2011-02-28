@@ -19,7 +19,7 @@ public class LexicographicMethodTest {
          A.set(1, 2, 3);
          A.set(1, 3, -1);
 
-         LexicographicMethod lex = new LexicographicMethod(A.vars().size());
+         LexicographicMethod lex = new LexicographicMethod(A.vars().size(), null);
          
          try
          {
@@ -92,7 +92,7 @@ public class LexicographicMethodTest {
                  else A.set(i, j, (i - (j-1)) * ((j * 17) - (i * 63)));
              }
 
-         LexicographicMethod lex = new LexicographicMethod(A.vars().size());
+         LexicographicMethod lex = new LexicographicMethod(A.vars().size(), null);
 
          long before = System.currentTimeMillis();
          for (int i = 0; i < 1000; ++i)
@@ -125,7 +125,7 @@ public class LexicographicMethodTest {
          A.set(1, 2, 3);
          A.set(1, 3, -1);
 
-         LexicographicMethod lex = new LexicographicMethod(A.vars().size());
+         LexicographicMethod lex = new LexicographicMethod(A.vars().size(), null);
          int[] candidates = new int[] { 0, 1 };
          int numcand = candidates.length;
 
