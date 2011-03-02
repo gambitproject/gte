@@ -247,13 +247,15 @@ public class ExtensiveFormXMLReader
 		tree.addToIset(node, iset);
 		
 		// set up the moves
-		
+		processMove(elem, node, parentNode);
+/*		
 		String moveId = getAttribute(elem, "move");
 		if (moveId != null) {			
-			Move move = moves.get(moveId);
+			String moveIsetId = parentNode.iset() != null ? parentNode.iset().name() : ""; 
+			Move move = moves.get(moveIsetId + "::" + moveId);
 			if (move == null) {
 				move = tree.createMove(moveId); 				
-				moves.put(moveId, move);
+				moves.put(moveIsetId + "::" + moveId, move);
 			}
 			node.reachedby = move;
 		} else if (parentNode != null) {
@@ -262,14 +264,16 @@ public class ExtensiveFormXMLReader
 			log.fine("Node " + id + " has a parent, but no incoming probability or move is specified");
 		}
 		
-		String probStr = getAttribute(elem, "prob");		
-		if (probStr != null) {		
-			node.reachedby.prob = Rational.valueOf(probStr);			 				
-		} else {
+		String probStr = getAttribute(elem, "prob");
+		if (probStr != null && node.reachedby != null) {
+			node.reachedby.prob = Rational.valueOf(probStr);
+		} else if (node.reachedby != null) {
 			log.fine("Warning: @move is missing probability.  Prior belief OR chance will be random.");			
 		}
-		
-		log.fine("node: " + id + ", iset: " + isetId + ", pl: " + (getAttribute(elem, "player") == null ? getAttribute(elem.getParentNode(), "player") : getAttribute(elem, "player")) + ", mv: " + moveId);		
+*/		
+		log.fine("node: " + id + ", iset: " + isetId + ", pl: " + 
+			(getAttribute(elem, "player") == null ? getAttribute(elem.getParentNode(), "player") : getAttribute(elem, "player")) + 
+			(node.reachedby != null ? ", mv: " + node.uid() : ""));
 		
 		for (org.w3c.dom.Node child = elem.getFirstChild(); child != null; child = child.getNextSibling()) {
 			if ("node".equals(child.getNodeName())) {
@@ -284,20 +288,34 @@ public class ExtensiveFormXMLReader
 	
 	private void processOutcome(org.w3c.dom.Node elem, Node parent)
 	{		
+		// Create wrapping node
+		// get parent from dictionary... if it doesn't exist then the outcome must be the root
 		Node wrapNode = parent != null ? tree.createNode() : tree.root();
 		if (parent != null) parent.addChild(wrapNode);		
 					
-		// TODO: what about chance outcomes...
+		processMove(elem, wrapNode, parent);
+		/*
 		String moveId = getAttribute(elem, "move");
-		Move move = moveId != null ? moves.get(moveId) : null;
-		if (move == null && moveId != null) {
-			move = tree.createMove(moveId);			
-			moves.put(moveId, move);
+		if (moveId != null) {
+			String moveIsetId = (parent != null && parent.iset() != null) ? parent.iset().name() : ""; 
+			Move move = moveId != null ? moves.get(moveIsetId + "::" + moveId) : null;
+			if (move == null && moveId != null) {
+				move = tree.createMove(moveId);			
+				moves.put(moveIsetId + "::" + moveId, move);
+			}
+			wrapNode.reachedby = move;
+		} else if (parent != null) {
+			wrapNode.reachedby = tree.createMove();
+			log.fine("Node " + wrapNode.uid() + " has a parent, but no incoming probability or move is specified");
 		}
-		wrapNode.reachedby = move;
 
-		// Create wrapping node
-		// get parent from dictionary... if it doesn't exist then the outcome must be the root
+		String probStr = getAttribute(elem, "prob");
+		if (probStr != null && wrapNode.reachedby != null) {
+			wrapNode.reachedby.prob = Rational.valueOf(probStr);
+		} else if (wrapNode.reachedby != null) {
+			log.fine("Warning: @move is missing probability.  Prior belief OR chance will be random.");
+		}
+*/
 		Outcome outcome = tree.createOutcome(wrapNode);
 		for (org.w3c.dom.Node child = elem.getFirstChild(); child != null; child = child.getNextSibling()) {
 			if ("payoff".equals(child.getNodeName())) {
@@ -314,9 +332,34 @@ public class ExtensiveFormXMLReader
 				log.warning("Ignoring unknown element:\r\n" + child);
 			}
 		}
-		log.fine("outcome: " + wrapNode + ", by move: " + moveId);					
+		log.fine("outcome: " + wrapNode + ", by move: " + (wrapNode.reachedby != null ? wrapNode.reachedby.uid() : "null"));
 	}
 	
+	private void processMove(org.w3c.dom.Node elem, Node node, Node parentNode)
+	{
+		String moveId = getAttribute(elem, "move");
+		if (moveId != null) {			
+			String moveIsetId = parentNode.iset() != null ? parentNode.iset().name() : ""; 
+			Move move = moves.get(moveIsetId + "::" + moveId);
+			if (move == null) {
+				move = tree.createMove(moveId);
+				moves.put(moveIsetId + "::" + moveId, move);
+			}
+			node.reachedby = move;
+		} else if (parentNode != null) {
+			// assume this comes from a chance node
+			node.reachedby = tree.createMove();
+			log.fine("Node has a parent, but no incoming probability or move is specified");
+		}
+		
+		String probStr = getAttribute(elem, "prob");
+		if (probStr != null && node.reachedby != null) {
+			node.reachedby.prob = Rational.valueOf(probStr);
+		} else if (node.reachedby != null) {
+			log.fine("Warning: @move is missing probability.  Prior belief OR chance will be random.");
+		}
+	}
+
 	private String getAttribute(org.w3c.dom.Node elem, String key)
 	{
 		String value = null;

@@ -17,6 +17,7 @@ package lse.math.games.builder.io
 	{		
 		private var nodes:Dictionary;
 		private var isets:Dictionary;
+		private var isetObjToId:Dictionary;
 		private var singletons:Vector.<Iset>;
 		private var moves:Dictionary;
 		private var players:Dictionary;
@@ -36,6 +37,7 @@ package lse.math.games.builder.io
 			
 			nodes = new Dictionary();
 			isets = new Dictionary();
+			isetObjToId = new Dictionary();
 			singletons = new Vector.<Iset>();
 			moves = new Dictionary();
 			players = new Dictionary();			
@@ -126,6 +128,7 @@ package lse.math.games.builder.io
 				var player:Player = (elem.@player != undefined) ? getPlayer(elem.@player) : Player.CHANCE;
 				iset = new Iset(player, tree);
 				isets[id] = iset;
+				isetObjToId[iset] = id;
 			}
 			
 			for each (var child:XML in elem.children())
@@ -194,9 +197,9 @@ package lse.math.games.builder.io
 				//look it up in the map, if it doesn't exist create it and add it
 				iset = isets[isetId];
 				if (iset == null) {
-					
 					iset = new Iset(player, tree);
 					isets[isetId] = iset;
+					isetObjToId[iset] = isetId;
 				} else {
 					if (player != Player.CHANCE) {
 						if (iset.player != Player.CHANCE && player != iset.player) {
@@ -211,26 +214,27 @@ package lse.math.games.builder.io
 			iset.insertNode(node);
 			
 			// set up the moves
-			if (elem.@prob != undefined) {				
-				node.reachedby = new Move();
-				node.reachedby.prob = Rational.parse(elem.@prob);
-				if (elem.@move != undefined) {
-					trace("Warning: @move attribute is given to a node reached by probability.  Ignored.");
-				}
-			} else if (elem.@move != undefined) {
+			processMove(elem, node, parentNode);
+/*		 	if (elem.@move != undefined) {
 				var moveId:String = elem.@move;
-				var move:Move = moves[moveId];
+				var moveIsetId:String = (parentNode != null && parentNode.iset != null) ? String(parentNode.iset.idx) : "";
+				var move:Move = moves[moveIsetId + "::" + moveId];
+
 				if (move == null) {
 					move = new Move(); 
 					move.label = moveId;
-					moves[moveId] = move;
+					moves[moveIsetId + "::" + moveId] = move;
 				}
 				node.reachedby = move;
 			} else if (parentNode != null) {
 				// assume this comes from a chance node with a probability of zero
 				node.reachedby = new Move();
 			}
-						
+			
+			if (elem.@prob != undefined && node.reachedby != null) {				
+				node.reachedby.prob = Rational.parse(elem.@prob);
+			}
+*/	
 			for each (var child:XML in elem.children()) {
 				if (child.name() == "node") {
 					processNode(child, node);
@@ -244,24 +248,31 @@ package lse.math.games.builder.io
 		
 		private function processOutcome(elem:XML, parent:Node):void
 		{
+			// Create wrapping node
+			// get parent from dictionary... if it doesn't exist then the outcome must be the root
 			var wrapNode:Node = parent != null ? parent.newChild() : tree.createNode();
 			if (parent == null) {
 				tree.root = wrapNode;
 			}
 			
-			if (elem.@move != undefined) {
+			// set up the moves
+			processMove(elem, wrapNode, parent);
+		/*	if (elem.@move != undefined) {
 				var moveId:String = elem.@move;
-				var move:Move = moves[moveId];
+				var moveIsetId:String = (parent != null && parent.iset != null) ? String(parent.iset.idx) : "";
+				var move:Move = moves[moveIsetId + "::" + moveId];
 				if (move == null) {
 					move = new Move();
 					move.label = moveId;
-					moves[moveId] = move;
+					moves[moveIsetId + "::" + moveId] = move;
 				}
 				wrapNode.reachedby = move;
 			}
-			
-			// Create wrapping node
-			// get parent from dictionary... if it doesn't exist then the outcome must be the root
+
+			if (elem.@prob != undefined && wrapNode.reachedby != null) {				
+				wrapNode.reachedby.prob = Rational.parse(elem.@prob);
+			}*/
+
 			var outcome:Outcome = wrapNode.makeTerminal();
 			for each (var child:XML in elem.children()) {
 				if (child.name() == "payoff") {
@@ -278,6 +289,28 @@ package lse.math.games.builder.io
 					trace("Ignoring unknown element:\r\n" + child);
 				}*/
 			}				
+		}
+
+		private function processMove(elem:XML, node:Node, parent:Node):void
+		{
+			if (elem.@move != undefined) {
+				var moveId:String = elem.@move;
+				var moveIsetId:String = (parent != null && parent.iset != null) ? String(isetObjToId[parent.iset]) : "";
+				var move:Move = moves[moveIsetId + "::" + moveId];
+				if (move == null) {
+					move = new Move();
+					move.label = moveId;
+					moves[moveIsetId + "::" + moveId] = move;
+				}
+				node.reachedby = move;
+			} else if (parent != null) {
+				// assume this comes from a chance node with a probability of zero
+				node.reachedby = new Move();
+			}
+
+			if (elem.@prob != undefined && node.reachedby != null) {				
+				node.reachedby.prob = Rational.parse(elem.@prob);
+			}
 		}
 	}
 }
