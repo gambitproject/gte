@@ -16,7 +16,7 @@ I. PREREQUISITES
 	===LINUX===
 	$ sudo apt-get install ant
 	
-3. Install Flex SDK
+3. Install Adobe Flex SDK (NOT Open Source Flex SDK) 
 	3.1 Download archive - http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4	
 	3.2 Add bin directory to PATH (.bashrc in Linux, System->Advanced->Environment Variables in Windows)	
 
@@ -26,7 +26,7 @@ I. PREREQUISITES
 	3b.3 ln -s ./flashplayerdebugger ./gflashplayer
 	3b.4 Add directory from [3b.1] to PATH
 
-4. Install the Google AppEngine SDK 
+4. Install the Google AppEngine SDK (for Java)
 	4.1 Download archive - http://code.google.com/appengine/downloads.html
 	4.2 Add bin directory to PATH (see [3])	
 
