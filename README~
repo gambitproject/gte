@@ -32,8 +32,8 @@ I. PREREQUISITES
 
 5. Update build.properties file for your environment
 	5.1 Update FLEX_HOME with root directory of Flex SDK (not bin)
-	5.2 Update GAE_HOME with root directory of Google AppEngine SDK (not bin)
-    5.3 (Windows only) Make sure to switch all path separators from "\" to "/"
+	5.1 Update GAE_HOME with root directory of Google AppEngine SDK (not bin)
+    NB: Make sure to switch all path separators the "/" character 
 
 II. BUILD
 
