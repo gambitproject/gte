@@ -2,9 +2,10 @@ package lse.math.games.builder.model
 {
 	/**	 
 	 * @author Mark Egesdal
+	 * Class representing an information set
 	 */
 	public class Iset
-	{
+	{		
 		private var _firstNode:Node;
 		private var _lastNode:Node;				
 		private var _player:Player;
@@ -53,6 +54,7 @@ package lse.math.games.builder.model
 		}
 		
 		// a measure of the breadth of an iset
+		// Returns numNodes-1
 		// TODO: spanAt(depth)
 		public function get span():int
 		{

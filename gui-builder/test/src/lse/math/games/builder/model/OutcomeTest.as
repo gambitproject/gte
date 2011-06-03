@@ -1,16 +1,12 @@
 package lse.math.games.builder.model 
 {
 	import org.flexunit.Assert;
-
-	import flash.utils.Dictionary;
 	
 	/**
 	 * @author alfongj
 	 */
 	public class OutcomeTest
 	{
-		//TODO: Remove all commented code from Extensvie Form (by now it's there until teh testing is finished
-
 		[Test]
 		public function testAddPays()
 		{
@@ -31,32 +27,5 @@ package lse.math.games.builder.model
 			Assert.assertEquals(1, outcome.pay(player2).den);
 
 		}
-		/*
-		private var _whichnode:Node;
-		public function get whichnode():Node { return _whichnode; }
-		
-		private var _payoffs:Dictionary = new Dictionary(); 		
-		
-		public function Outcome(whichnode:Node) { _whichnode = whichnode; }
-		
-		public function setPay(player:Player, payoff:Rational):void
-		{			
-			_payoffs[player] = payoff;
-		}
-		
-		public function pay(player:Player):Rational
-		{			
-			return _payoffs[player] as Rational;
-		}
-		
-		public function toString():String
-		{
-			var sb:Vector.<String> = new Vector.<String>();
-			for (var pl:Object in _payoffs) {				
-				sb.push(pl + "=" + _payoffs[pl]);
-			}
-			return sb.join(" ");
-		}
-		*/
 	}
 }

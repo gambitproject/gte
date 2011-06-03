@@ -1,0 +1,27 @@
+Testsuite: lse.math.games.tree.SequenceFormTest
+Tests run: 3, Failures: 0, Errors: 0, Time elapsed: 0,02 sec
+
+------------- Standard Error -----------------
+03-jun-2011 23:57:09 lse.math.games.tree.SequenceForm getPayAdjust
+INFO: Player I's maximum payoff is 24, normalize to -1.
+03-jun-2011 23:57:09 lse.math.games.tree.SequenceForm getPayAdjust
+INFO: Player II's maximum payoff is 10, normalize to -1.
+03-jun-2011 23:57:09 lse.math.games.io.ExtensiveFormXMLReader load
+INFO: node leaf iset player parent reachedby outcome pay1 pay2
+   0    0    0      1                                   
+   1    1                  0         L       0   13   14
+   2    1                  0         R       1   21    0
+
+03-jun-2011 23:57:09 lse.math.games.tree.SequenceForm getPayAdjust
+INFO: Player 1's maximum payoff is 21, normalize to -1.
+03-jun-2011 23:57:09 lse.math.games.tree.SequenceForm getPayAdjust
+INFO: Player 2's maximum payoff is 14, normalize to -1.
+03-jun-2011 23:57:09 lse.math.games.io.ExtensiveFormXMLReader load
+INFO: node leaf iset player parent reachedby outcome pay1 pay2
+   0    1                                    0   13   14
+
+03-jun-2011 23:57:09 lse.math.games.tree.SequenceForm getPayAdjust
+INFO: Player 1's maximum payoff is 13, normalize to -1.
+03-jun-2011 23:57:09 lse.math.games.tree.SequenceForm getPayAdjust
+INFO: Player 2's maximum payoff is 14, normalize to -1.
+------------- ---------------- ---------------

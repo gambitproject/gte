@@ -35,8 +35,14 @@ package lse.math.games.builder.model
 						
 			iset1.merge(iset2);
 			
-			Assert.assertEquals(4, iset1.numNodes);
-		}		
+			Assert.assertEquals(4, iset1.numNodes);				
+		}	
+		
+		[Test]
+		public function testHasPerfectRecall():void
+		{
+			//TODO: When I understand it exactly, complete this test
+		}
 	}
 
 }

@@ -1,0 +1,3 @@
+Testsuite: lse.math.games.RationalTest
+Tests run: 22, Failures: 0, Errors: 0, Time elapsed: 0,05 sec
+

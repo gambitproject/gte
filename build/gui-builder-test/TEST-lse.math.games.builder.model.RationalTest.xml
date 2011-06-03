@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<testsuite name="lse.math.games.builder.model.RationalTest" tests="6" failures="0" errors="0" skipped="0" time="0,004" hostname="ALFONGJ-PORT" timestamp="2011-06-03T21:57:48">
+  <testcase classname="lse.math.games.builder.model::RationalTest" name="testIntegerStringParse" time="0,000"/>
+  <testcase classname="lse.math.games.builder.model::RationalTest" name="testDecimalStringParse" time="0,001"/>
+  <testcase classname="lse.math.games.builder.model::RationalTest" name="testComparison" time="0,000"/>
+  <testcase classname="lse.math.games.builder.model::RationalTest" name="testMultiplication" time="0,001"/>
+  <testcase classname="lse.math.games.builder.model::RationalTest" name="testSubtraction" time="0,001"/>
+  <testcase classname="lse.math.games.builder.model::RationalTest" name="testFractionStringParse" time="0,001"/>
+</testsuite>
