@@ -27,6 +27,8 @@ package lse.math.games.builder.model
 			
 			Assert.assertEquals(1, parent.numChildren);
 			Assert.assertEquals(parent.firstChild, child2);
-		}	
+		}
+		
+		//TODO: Many many more tests!
 	}
 }

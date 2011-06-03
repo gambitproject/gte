@@ -11,6 +11,7 @@ package lse.math.games.builder.model
 		[Test]
 		public function testSimpleMerge():void
 		{			
+			
 			var tree:ExtensiveForm = new ExtensiveForm();
 			var root:Node = new Node(tree, 0);
 			var player:Player = new Player("test player", tree);		
@@ -31,7 +32,7 @@ package lse.math.games.builder.model
 			
 			Assert.assertEquals(2, iset1.numNodes);
 			Assert.assertEquals(2, iset2.numNodes);
-			
+						
 			iset1.merge(iset2);
 			
 			Assert.assertEquals(4, iset1.numNodes);

@@ -1,5 +1,6 @@
 package
 {
+	import lse.math.games.builder.model.ExtensiveFormTest;
 	import lse.math.games.builder.model.NodeTest;
 	import lse.math.games.builder.model.IsetTest;
 	
@@ -14,5 +15,6 @@ package
 		public var moveTest:lse.math.games.builder.model.MoveTest;
 		public var nodeTest:lse.math.games.builder.model.NodeTest;		
 		public var rationalTest:lse.math.games.builder.model.RationalTest;
+		public var extensiveFormTest:lse.math.games.builder.model.ExtensiveFormTest;
 	}
 }
