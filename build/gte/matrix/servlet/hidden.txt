@@ -1,1 +1,0 @@
-Files in this folder are accessible to the server but not to a browser

@@ -1,3 +1,0 @@
-Testsuite: lse.math.games.lcp.LexicographicMethodTest
-Tests run: 3, Failures: 0, Errors: 0, Time elapsed: 0,983 sec
-

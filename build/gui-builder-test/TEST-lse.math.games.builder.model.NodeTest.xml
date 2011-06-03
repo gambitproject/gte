@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<testsuite name="lse.math.games.builder.model.NodeTest" tests="1" failures="0" errors="0" skipped="0" time="0,020" hostname="ALFONGJ-PORT" timestamp="2011-06-03T21:57:48">
-  <testcase classname="lse.math.games.builder.model::NodeTest" name="testSimpleNodeRemoval" time="0,020"/>
-</testsuite>

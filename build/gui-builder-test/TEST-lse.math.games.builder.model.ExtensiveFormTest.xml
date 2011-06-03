@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<testsuite name="lse.math.games.builder.model.ExtensiveFormTest" tests="4" failures="0" errors="0" skipped="0" time="0,022" hostname="ALFONGJ-PORT" timestamp="2011-06-03T21:57:48">
-  <testcase classname="lse.math.games.builder.model::ExtensiveFormTest" name="testNumberLeaves" time="0,000"/>
-  <testcase classname="lse.math.games.builder.model::ExtensiveFormTest" name="testAddIset" time="0,004"/>
-  <testcase classname="lse.math.games.builder.model::ExtensiveFormTest" name="testMaxDepth" time="0,017"/>
-  <testcase classname="lse.math.games.builder.model::ExtensiveFormTest" name="testMakePerfectRecall" time="0,001"/>
-</testsuite>
