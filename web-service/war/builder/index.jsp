@@ -31,6 +31,9 @@
 		var attributes = {
 			id:"GuiBuilder"
 		};
+		
+		var fullwindow = false;
+
 		swfobject.embedSWF(
 			"GuiBuilder.swf", 
 			"flashContent", 
@@ -58,6 +61,22 @@
 			body.style.display = "block";
 			body.innerHTML = "<pre>" + data + "</pre>";
 		}
+		
+		function expand()
+		{
+			if(fullwindow)
+			{
+				document.getElementById("GTEContainer").style.width = "85%";
+				document.getElementById("expandButton").innerHTML = "Expand";
+				fullwindow = 0;
+			}
+			else
+			{
+				document.getElementById("GTEContainer").style.width = "99%";
+				document.getElementById("expandButton").innerHTML = "Contract";
+				fullwindow = 1;
+			}
+		}
 	</script>
 	<style type="text/css">
 		html, body { height:100%; background-color: #303030;}		
@@ -73,7 +92,7 @@
 			<em style="font-size: 13px; font-family: Helvetica; color: #a0a0a0;">Build, explore and solve extensive form games.</em>
 		</div>
 	</div>
-	<div style="text-align: left; width: 85%; margin: auto; background-color: #B7BABC; padding: 2px 5px 5px 5px; border: 1px solid #808080;">
+	<div id="GTEContainer" style="text-align: left; width: 85%; margin: auto; background-color: #B7BABC; padding: 2px 5px 5px 5px; border: 1px solid #808080;">
 		<!-- <div style="background-color: #e0e0e0; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;">Build</div> -->
 		<div style="height: 575px">
 			<div id="flashContent">				
@@ -121,7 +140,9 @@
 		</div>
 	</div>
 	<div style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
-		<div><div style="display: inline-block; margin-bottom: 5px;">Last modified: yyyy-MM-dd hh:mm GMT</div><br/>
+		<div>
+		<button id="expandButton" type="button" onclick="expand()">Expand</button>
+		<div style="display: inline-block; margin-bottom: 5px;">Last modified: yyyy-MM-dd hh:mm GMT</div><br/>
 		<!--  Copyright 2010 <span style="color: #ffffff;">Mark Egesdal</span><br/> -->
 		Developed by <span style="color: #ffffff;">Mark Egesdal</span> et al.<br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.
 		</div>

@@ -38,6 +38,7 @@ package lse.math.games.builder.model
 			Assert.assertEquals(4, iset1.numNodes);				
 		}	
 		
+		[Ignore("To be done")]
 		[Test]
 		public function testHasPerfectRecall():void
 		{

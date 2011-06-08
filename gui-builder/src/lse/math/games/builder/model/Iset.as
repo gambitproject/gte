@@ -54,7 +54,6 @@ package lse.math.games.builder.model
 		}
 		
 		// a measure of the breadth of an iset
-		// Returns numNodes-1
 		// TODO: spanAt(depth)
 		public function get span():int
 		{
@@ -140,7 +139,8 @@ package lse.math.games.builder.model
 			}			
 			return true;
 		}
-
+		
+		//adds a node at the end of the Iset
 		private function appendNode(toAdd:Node):void
 		{
 			if (_firstNode == null) {				

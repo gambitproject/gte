@@ -125,6 +125,7 @@ package lse.math.games.builder.model
 
 		*/
 		
+		[Ignore("Not ready")]
 		[Test]
 		public function testMakePerfectRecall():void
 		{
@@ -176,24 +177,23 @@ package lse.math.games.builder.model
 		[Test]
 		public function testMaxDepth():void
 		{
-			//TODO: This test fails in every assertion, it needs real AS debugging
-			/*var tree:ExtensiveForm = new ExtensiveForm();
+			var tree:ExtensiveForm = new ExtensiveForm();
 			var root:Node = tree.createNode();
 			tree.root = root;
 			var player:Player = new Player("test player", tree);
 			root.makeNonTerminal();
 						
-			Assert.assertEquals(tree.maxDepth, 0);
+			Assert.assertEquals(tree.maxDepth(), 0);
 			
 			var child1:Node = root.newChild();
 			var child2:Node = root.newChild();
 			
-			Assert.assertEquals(tree.maxDepth, 1);
+			Assert.assertEquals(tree.maxDepth(), 1);
 			
 			var child11:Node = child1.newChild();
 			var child111:Node = child11.newChild();
 			
-			Assert.assertEquals(tree.maxDepth, 3);	*/		
+			Assert.assertEquals(tree.maxDepth(), 3);			
 		}
 		
 		/*
@@ -229,29 +229,27 @@ package lse.math.games.builder.model
 	
 		[Test]
 		public function testNumberLeaves():void
-		{
-			//TODO: This test fails in every assertion, it needs real AS debugging
-			
-			/*var tree:ExtensiveForm = new ExtensiveForm();
+		{		
+			var tree:ExtensiveForm = new ExtensiveForm();
 			tree.clearTree();
 			var root:Node = tree.createNode();
 			tree.root = root;
 			var player:Player = new Player("test player", tree);
 			
-			Assert.assertEquals(tree.numberLeaves, 1);
+			Assert.assertEquals(tree.numberLeaves(), 1);
 			
 			var child1:Node = root.newChild();
 			var child2:Node = root.newChild();
 			
 			tree.printTree();
 			
-			Assert.assertEquals(tree.numberLeaves, 3);
+			Assert.assertEquals(tree.numberLeaves(), 2);
 
 			
 			var child11:Node = child1.newChild();
 			var child111:Node = child11.newChild();
 			
-			Assert.assertEquals(tree.numberLeaves, 3);*/
+			Assert.assertEquals(tree.numberLeaves(), 2);
 		}
 		
 		/**

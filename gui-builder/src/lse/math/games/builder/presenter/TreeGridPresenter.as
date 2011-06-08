@@ -45,11 +45,22 @@ package lse.math.games.builder.presenter
 		private var _getClickAction:Function = null;
 		private var _getDataUpdateAction:Function = null;
 		
+		private var _fileName:String = "Untitled";
+		
 		//private var _modelDirty:Boolean = true;		
 		
 		public function TreeGridPresenter() 
 		{									
 			_gridData.addEventListener("collectionChange", onOutcomeEdit);		
+		}
+		
+		[Bindable] //?
+		public function get fileName():String {
+			return _fileName;
+		}
+		
+		public function set fileName(value:String):void {
+			_fileName = value;
 		}
 		
 		public function set grid(value:TreeGrid):void {
@@ -379,34 +390,87 @@ package lse.math.games.builder.presenter
 		public function clear():void
 		{
 			_actionHandler.reset(_grid);
+			fileName = "Untitled";
 			invalidate(true, true, true);
 		}
 		
 		//TODO: IOHandler from here down...
-		private static const FILE_TYPES:Array = [new FileFilter("*.xml", "*.xml")];
+		private static const FILE_OPEN_TYPES:Array = [new FileFilter("*.xml", "*.xml")];
+		private static const FILE_SAVE_TYPES:Array = [".xml", ".fig", ".png"];
 		private var fr:FileReference = null;
 		
+		/**
+		 * Updates the name of the current tree taking it from the file associated to it
+		 * Should be called after saving or loading a file
+		 */
+		public function updateName():void { //?
+			if(fr!=null && fr.name!=null)
+			{
+				var newFileName:String = fr.name;
+				
+				//Removes file extension (There might be a better way)
+				for(var i:int = 0; i<FILE_SAVE_TYPES.length; i++)
+				{
+					var ext:String = FILE_SAVE_TYPES[i];
+					if(newFileName.substr(newFileName.length-ext.length, ext.length).toLowerCase() == ext)
+					{
+						newFileName = newFileName.substr(0, newFileName.length-ext.length);
+						break;
+					}
+				}
+				
+				fileName = newFileName;			
+			}
+		}
+		
+		/**
+		 * Opens a dialog for saving the tree in .fig format
+		 */
 		public function fig():void
 		{
 			var out:TreeGridFigWriter = new TreeGridFigWriter();
-			var figStr:String = out.paintFig(_canvas.painter, _canvas.width, _canvas.height, _grid);	
-			(new FileReference()).save(figStr, "extensiveForm.fig");
+			var figStr:String = out.paintFig(_canvas.painter, _canvas.width, _canvas.height, _grid);
+
+			fr = new FileReference();
+			
+			fr.addEventListener(Event.COMPLETE, onSaveComplete);
+			fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+
+			fr.save(figStr, fileName+".fig"); //?
 		}
 		
+		/**
+		 * Opens a dialog for saving an image of the tree in .png format
+		 */
 		public function image():void
 		{
 		  var bd:BitmapData = new BitmapData(_canvas.width, _canvas.height);
 		  bd.draw(_canvas);
 		  
 		  var ba:ByteArray = (new PNGEncoder()).encode(bd);
-		  (new FileReference()).save(ba, "extensiveForm.png");    
+		  
+		  fr = new FileReference();
+		  
+		  fr.addEventListener(Event.COMPLETE, onSaveComplete);
+		  fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+
+		  fr.save(ba, fileName+".png");
 		}
 		
-		public function save():void
+		/**
+		 * Opens a dialog for saving the tree in xml format
+		 */
+		public function save():void 
 		{
 			var xmlWriter:ExtensiveFormXMLWriter = new ExtensiveFormXMLWriter();
-			var treeXML:XML = xmlWriter.write(_grid);			
-			(new FileReference()).save(treeXML.toXMLString(), "extensiveForm.out.xml");
+			var treeXML:XML = xmlWriter.write(_grid);		
+			
+			fr = new FileReference();
+			
+			fr.addEventListener(Event.COMPLETE, onSaveComplete);
+			fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+
+			fr.save(treeXML.toXMLString(), fileName+".xml");
 		}
 		
 		public function loadXML(xml:XML):void
@@ -416,6 +480,9 @@ package lse.math.games.builder.presenter
 			invalidate(true, true, true);
 		}
 		
+		/**
+		 * Opens a dialog for selecting and opening a tree in xml format
+		 */
 		public function open():void
 		{
 			//create the FileReference instance
@@ -428,7 +495,7 @@ package lse.math.games.builder.presenter
 			fr.addEventListener(Event.CANCEL, onCancel);
 						
 			//open a native browse dialog that filters for text files
-			fr.browse(FILE_TYPES);
+			fr.browse(FILE_OPEN_TYPES);
 		}
 
 		/************ Browse Event Handlers **************/
@@ -472,6 +539,8 @@ package lse.math.games.builder.presenter
 			var xml:XML = new XML(text);						
 			loadXML(xml);
 			
+			updateName();
+			
 			fr = null;
 		}
 		
@@ -480,6 +549,22 @@ package lse.math.games.builder.presenter
 		{
 			trace("Error loading file : " + e.text);
 		}
+		
+		//called when the file has completed saving, independently of the file saving command chosen
+		private function onSaveComplete(evt:Event):void{
+			//trace("File saved correctly");
+			updateName();
+			
+			fr = null;
+		}
+		
+		//called if an error occurs while saving the file contents
+		private function onSaveError(e:IOErrorEvent):void
+		{
+			trace("Error saving file : " + e.text);
+		}
+		
+		
 		
 		// URL Request Handler below here...
 		public function runAlgorithm(algo:Object, seed:String):void

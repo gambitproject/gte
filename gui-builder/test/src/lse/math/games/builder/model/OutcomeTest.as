@@ -25,7 +25,6 @@ package lse.math.games.builder.model
 
 			Assert.assertEquals(-1, outcome.pay(player2).num);
 			Assert.assertEquals(1, outcome.pay(player2).den);
-
 		}
 	}
 }

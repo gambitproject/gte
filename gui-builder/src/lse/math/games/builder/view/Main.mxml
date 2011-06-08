@@ -124,6 +124,7 @@
 					</s:Scroller>
 					
 					<s:Label id="info" top="5" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvas.width)} x {int(canvas.height)} ({int(treePainter.scale * 100)}%)" />
+					<s:Label id="filename" top="25" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{controller.fileName}" />
 					
 					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
@@ -155,6 +156,7 @@
 					</s:Scroller>
 					
 					<s:Label id="infoNF" top="5" right="{scrollbarNF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
+					<s:Label id="filenameNF" top="25" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{controller.fileName}" />					
 					
 					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isNormalReduced = (event.target.selectedIndex == 0);">
