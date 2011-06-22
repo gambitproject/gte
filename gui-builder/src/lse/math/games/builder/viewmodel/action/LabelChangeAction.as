@@ -6,7 +6,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**	
-	 * @author Mark
+	 * Changes a selected node's label to a new one
+	 * <li>Changes Data</li>
+	 * <li>NOT <strike>Changes Size</strike></li>
+	 * <li>Changes Display</li>
+	 * @author Mark Egesdal
 	 */
 	public class LabelChangeAction implements IAction
 	{

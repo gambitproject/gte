@@ -5,7 +5,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
-	/**	 
+	/**	
+	 * Changes the player of all nodes inside selected Iset/selected node's Iset
+	 * <li>Changes Data</li>
+	 * <li>NOT <strike>Changes Size</strike></li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class ChangePlayerAction implements IAction

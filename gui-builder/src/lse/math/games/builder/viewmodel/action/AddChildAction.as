@@ -9,6 +9,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**	
+	 * Adds children to all the nodes in a selected iset/ in a selected node's iset.
+	 * If the nodes are leaves, then two children per node are added, else just one
+	 * <li>Changes Data</li>
+	 * <li>Changes Size</li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class AddChildAction implements IAction
@@ -23,7 +28,6 @@ package lse.math.games.builder.viewmodel.action
 			if (iset != null) _isetId = iset.idx;
 			if (node != null) _nodeId = node.number;
 		}
-		
 		
 		public function doAction(grid:TreeGrid):void
 		{			

@@ -1,8 +1,13 @@
 package lse.math.games.builder.model
 {
+	import mx.controls.Alert;
+	import util.Log;
+	
 	/**	 
 	 * @author Mark Egesdal
 	 * Class representing an information set
+	 * It contains a linked-list of its nodes, a player to which they correspond, and a reference
+	 * to the tree it's in and to the next Iset in the tree's linked-list of Isets.
 	 */
 	public class Iset
 	{		
@@ -29,11 +34,13 @@ package lse.math.games.builder.model
 		public function get numNodes():int {
 			return indexOf(_lastNode) + 1;
 		}
-				
+		
+		/** Returns the number of moves that can be taken from each node of the Iset (its the same number for all of them) */
 		public function get numMoves():int {
 			return _firstNode.numChildren;
 		}
-				
+		
+		/** Returns a node in a certain position inside the Iset */
 		public function nodeAt(idx:int):Node
 		{
 			var node:Node = null;
@@ -73,7 +80,7 @@ package lse.math.games.builder.model
 		}
 		
 		
-		// this absorbs nodes in other
+		/** Absorbs nodes from 'other' Iset into this one, taking this one's moves. */
 		public function merge(other:Iset):void
 		{
 			//make the moves of other the same as those of this
@@ -128,7 +135,10 @@ package lse.math.games.builder.model
 			}			
 		}
 		
-		//false if all Nodes do not define same sequence of own moves
+		/** 
+		 * Checks if all the nodes in the Iset have the same own move sequence,
+		 * if one hasn't, returns false, if all have, returns true
+		 */
 		public function hasPerfectRecall():Boolean		
 		{
 			var baseline:Node = _firstNode;						
@@ -140,7 +150,7 @@ package lse.math.games.builder.model
 			return true;
 		}
 		
-		//adds a node at the end of the Iset
+		//Adds a node at the end of the linked list of this Iset 
 		private function appendNode(toAdd:Node):void
 		{
 			if (_firstNode == null) {				
@@ -154,11 +164,13 @@ package lse.math.games.builder.model
 			toAdd.makeLastInIset();			
 		}
 				
+		/** Inserts a node in its place in the linked list of nodes */
 		public function insertNode(toAdd:Node):Boolean
 		{
 			return insertNodeRightOf(_firstNode, toAdd);
 		}
 		
+		//Inserts a node in the iset at its corresponding position, lookinf for it starting from the 'left' node
 		private function insertNodeRightOf(left:Node, toAdd:Node):Boolean
 		{			
 			if (left != null && left.isRightOf(toAdd)) {
@@ -186,11 +198,13 @@ package lse.math.games.builder.model
 			return true;
 		}
 		
+		
 		public function assignMove(move:Move):void
 		{
 			move.setIset(this);	
 		}
 		
+		//Creates new move and assigns it this iset. Updates probs if player is CHANCE
 		private function newMove():Move
 		{			
 			var move:Move = new Move();			
@@ -228,6 +242,11 @@ package lse.math.games.builder.model
 			return move;
 		}
 		
+		/**
+		 * Adds a move (and a new child following that move) to each node on the ISet
+		 * @param destPlayer The player to which the new children created will belong to
+		 * @return the move
+		 */
 		public function addMove(destPlayer:Player):Move		
 		{
 			var move:Move = newMove();
@@ -242,6 +261,11 @@ package lse.math.games.builder.model
 			return move;
 		}
 
+		/**
+		 * Checks if the 'b' Iset has at least one node that is descendant 
+		 * of at least one node of this Iset
+		 * @return True if it does
+		 */
 		public function has_descendant(b:Iset):Boolean
 		{
 			if (b == this) {
@@ -259,6 +283,10 @@ package lse.math.games.builder.model
 			return false;
 		}
 		
+		/**
+		 * Separates all of the nodes from the Iset, making each of them
+		 * belong to a new Iset
+		 */
 		public function dissolve():void
 		{			
 			var h:Iset = this;		  
@@ -267,6 +295,7 @@ package lse.math.games.builder.model
 			}
 		} 
 		
+		/** Returns the index of 'node' in the Iset */
 		public function indexOf(node:Node):int
 		{
 			var idx:int = 0;			
@@ -279,21 +308,26 @@ package lse.math.games.builder.model
 			throw new Error("node not found in iset");			
 		}
 		
+		/** Checks if this Iset can be merged with another */
 		public function canMergeWith(h:Iset):Boolean
 		{
 			if (this == h)
 			{
 				//trace("Same Iset");
+				//Alert.show("Please select two different Isets", "Couldn't merge the Isets");
+				Log.add(Log.ERROR, "Couldn't merge the Isets: please select two different ones");
 				return false;				
 			}
 			if (this.player != h.player)
 			{
 				//trace("Different players");
+				Alert.show("Please select two Isets of the same player", "Couldn't merge the Isets");
 				return false;
 			}			
 			if (numMoves != h.numMoves)
 			{
 				//trace("Different number of choices");
+				Alert.show("Please select two Isets with the same number of moves", "Couldn't merge the Isets");
 				return false;
 			}
 			return true;
@@ -446,6 +480,10 @@ package lse.math.games.builder.model
 			return newIset;
 		}
 		
+		/**
+		 * Inserts an Iset after this one int he linked list of Isets,
+		 * updating the idx's accordingly
+		 */
 		public function insertAfter(toAdd:Iset):void
 		{
 			toAdd._nextIset = _nextIset;

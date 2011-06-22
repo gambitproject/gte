@@ -4,76 +4,146 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns="lse.math.games.builder.view.*"
 			   backgroundColor="0xB7BABC" minWidth="692">
-
+	
 	<fx:Script>
-        <![CDATA[		
-		import mx.controls.Alert;
-		import mx.core.FlexGlobals;
-		import mx.utils.StringUtil;
-		
-		private function getClickCallback(idx:int):Function 
-		{
-			switch (idx) {
-				case 0: return actions.addChild;
-				case 1: return actions.deleteNode;
-				case 2: return actions.cutIset;
-				case 3: return actions.dissolveIset;
-				case 4: return actions.mergeIsets;	
-				case 5: return actions.changePlayer;							
-				case 6: return actions.makeChance;				
+		<![CDATA[		
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.utils.StringUtil;
+			
+			private function getClickCallback(idx:int):Function 
+			{
+				//First disable pan tool if it is running
+				if(scrollbar.mouseScrollingEnabled)
+					scrollbar.disableMouseScrolling();
+				
+				switch (idx) {
+					case 0: return actions.addChild;
+					case 1: return actions.deleteNode;
+					case 2: return actions.cutIset;
+					case 3: return actions.dissolveIset;
+					case 4: return actions.mergeIsets;	
+					case 5: return actions.changePlayer;							
+					case 6: return actions.makeChance;	
+					case 7: scrollbar.enableMouseScrolling();
+						return null;
+				}
+				throw new Error("callback for index " + idx + " not found");
 			}
-			throw new Error("callback for index " + idx + " not found");
-		}
-		
-		[Bindable]
-		public var seed:String;
-		
-		[Bindable]
-		public var nfalgos:Array = new Array();
-		
-		[Bindable]
-		public var xfalgos:Array = new Array();
-
-		private function initVars():void 
-		{			
-			// FOR TESTING ONLY... comment this and uncomment one below before building for prod
-			//var flashvars:Object = {
-			//	menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=http://localhost:8888/matrix/",
-			//	msolve: "label=Lemke Find Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=http://localhost:8888/matrix/",   
-			//	xsolve: "label=Lemke Find Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=http://localhost:8888/tree/"
-			//};
-			var flashvars:Object = FlexGlobals.topLevelApplication.parameters;
-			for (var param:String in flashvars) {
-				if (param == "seed") {
-					seed = StringUtil.trim(flashvars[param]);
-				} else {
-					//Alert.show("'" + param + "'='" + flashvars[param] + "'");
-					// TODO: use XMLListCollection and pass in XML to load and use instead of this homemade parsing
-					var pvalue:String = StringUtil.trim(flashvars[param]);				
-					var o:Object = new Object();
-					o.uid = param;
-					
-					for each (var pair:String in pvalue.split(";")) {
-						var keyvalue:Array = pair.split("=");
-						var key:String = StringUtil.trim(keyvalue[0]);
-						var value:String = StringUtil.trim(keyvalue[1]);
-						o[key] = value;
-						//Alert.show("'" + key + "'='" + o[key] + "'");
-					}
-					o.service = httpService;
-					
-					if (o["type"] == "nf") {
-						nfalgos.push(o);
-					} else if (o["type"] == "xf") {
-						xfalgos.push(o);
-					} /*else {
-						trace("Unrecognized type");
-					}*/
+			
+			//*** Keyboard shortcut handlers ***
+			private var opModeBar2lastSelectedIdx:int = 0;
+			protected function sc_keyDownHandler(event:KeyboardEvent):void
+			{
+				var ctrl:Boolean = event.ctrlKey;
+				var tab:String = tabNavigator.selectedChild.label;
+				
+				switch(event.keyCode)
+				{
+					case Keyboard.SPACE:
+						if(tab == "Extensive Form")
+						{
+							scrollbar.enableMouseScrolling();
+							opModeBar2lastSelectedIdx = opModeBar2.selectedIndex;
+							opModeBar2.selectedIndex = 7;
+						}
+						else if(tab == "Strategic Form")
+							scrollbarNF.enableMouseScrolling();
+						break;
 				}
 			}
-		}
-        ]]>
-    </fx:Script>
+			
+			protected function sc_keyUpHandler(event:KeyboardEvent):void
+			{
+				var ctrl:Boolean = event.ctrlKey;
+				var tab:String = tabNavigator.selectedChild.label;
+
+				
+				switch(event.keyCode)
+				{
+					case Keyboard.SPACE:
+						if(tab == "Extensive Form" && opModeBar2lastSelectedIdx != 7)
+						{
+							scrollbar.disableMouseScrolling();
+							opModeBar2.selectedIndex = opModeBar2lastSelectedIdx;
+						}
+						else if(tab == "Strategic Form")
+							//Although we've released spacebar, we need to check this
+								scrollbarNF.disableMouseScrolling();
+						break;
+					case 67: //'c'
+						if(ctrl) controller.clear();
+						break;
+					case 79: //'o'
+						if(ctrl) controller.open();
+						break;
+					case 83: //'s'
+						if(ctrl) controller.save();
+						break;
+					case 82: //'r'
+						if(ctrl) controller.runAlgorithm(algoComboBox.selectedItem, seed);
+						break;
+					case 90: //'z'
+						if(ctrl) 
+						{
+							if(event.shiftKey)
+								controller.redo();
+							else
+								controller.undo();
+						}
+						break;
+				}
+			}
+			
+			[Bindable]
+			public var seed:String;
+			
+			[Bindable]
+			public var nfalgos:Array = new Array();
+			
+			[Bindable]
+			public var xfalgos:Array = new Array();
+			
+			private function initVars():void 
+			{			
+				// FOR TESTING ONLY... comment this and uncomment one below before building for prod
+				//var flashvars:Object = {
+				//	menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=http://localhost:8888/matrix/",
+				//	msolve: "label=Lemke Find Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=http://localhost:8888/matrix/",   
+				//	xsolve: "label=Lemke Find Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=http://localhost:8888/tree/"
+				//};
+				var flashvars:Object = FlexGlobals.topLevelApplication.parameters;
+				for (var param:String in flashvars) {
+					if (param == "seed") {
+						seed = StringUtil.trim(flashvars[param]);
+					} else {
+						//Alert.show("'" + param + "'='" + flashvars[param] + "'");
+						// TODO: use XMLListCollection and pass in XML to load and use instead of this homemade parsing
+						var pvalue:String = StringUtil.trim(flashvars[param]);				
+						var o:Object = new Object();
+						o.uid = param;
+						
+						for each (var pair:String in pvalue.split(";")) {
+							var keyvalue:Array = pair.split("=");
+							var key:String = StringUtil.trim(keyvalue[0]);
+							var value:String = StringUtil.trim(keyvalue[1]);
+							o[key] = value;
+							//Alert.show("'" + key + "'='" + o[key] + "'");
+						}
+						o.service = httpService;
+						
+						if (o["type"] == "nf") {
+							nfalgos.push(o);
+						} else if (o["type"] == "xf") {
+							xfalgos.push(o);
+						} /*else {
+						trace("Unrecognized type");
+						}*/
+					}
+				}
+			}
+		]]>
+	</fx:Script>
 	
 	<!-- TODO: only cornerRadius seems to be working? -->
 	<fx:Style>
@@ -91,13 +161,13 @@
 	
 	<fx:Declarations>
 		<mx:HTTPService id="httpService"
-		 concurrency="single"		 
-		 method="POST"		 
-		 resultFormat="text"
-		 showBusyCursor="true"
-		 fault="Alert.show(event.fault.faultCode + ':' + event.fault.faultString + ':' + event.fault.faultDetail)"
-		 result="if (ExternalInterface.available) {ExternalInterface.call('writeSolution', event.result);} else { trace(event.result); }"
-		 />
+						concurrency="single"		 
+						method="POST"		 
+						resultFormat="text"
+						showBusyCursor="true"
+						fault="Alert.show(event.fault.faultCode + ':' + event.fault.faultString + ':' + event.fault.faultDetail)"
+						result="if (ExternalInterface.available) {ExternalInterface.call('writeSolution', event.result);} else { trace(event.result); }"
+						/>
 		<TreeGrid id="grid" xmlns="lse.math.games.builder.viewmodel.*" />
 		<PainterChain id="treePainter" xmlns="lse.math.games.builder.view.*">
 			<links>
@@ -110,21 +180,22 @@
 		<TreeGridActionFactory id="actions" xmlns="lse.math.games.builder.viewmodel.*" />		
 		<MatrixPainter id="matrixPainter" xmlns="lse.math.games.builder.viewmodel.*" grid="{grid}" />
 		<TreeGridPresenter id="controller" xmlns="lse.math.games.builder.presenter.*" grid="{grid}" getDataUpdateAction="actions.outcomeDataUpdate" />
+		<Log id="log" xmlns="util.*" />
 	</fx:Declarations>
-		
-	<s:Group left="0" right="0" top="0" bottom="0">
-		<s:BorderContainer top="30" bottom="0" left="0" right="185" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080">
-			<mx:TabNavigator tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2" tabWidth="120" tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" change="controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; algoComboBox.selectedIndex = 0;">
+	
+	<s:Group left="0" right="0" top="0" bottom="0" >
+		<s:BorderContainer top="30" bottom="0" left="0" right="185" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2" tabWidth="120" tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" change="controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; algoComboBox.selectedIndex = 0;">
 				<s:NavigatorContent label="Extensive Form">
 					
-					<s:Scroller id="scrollbar" width="100%" height="100%">
+					<MouseScroller id="scrollbar" width="100%" height="100%">
 						<s:Group id="viewport" width="100%" height="100%">
 							<Canvas id="canvas" width="100%" height="100%" click="controller.doActionAt(canvas.mouseX, canvas.mouseY)" painter="{treePainter}" preinitialize="controller.canvas = canvas;" />
 						</s:Group>
-					</s:Scroller>
+					</MouseScroller>
 					
 					<s:Label id="info" top="5" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvas.width)} x {int(canvas.height)} ({int(treePainter.scale * 100)}%)" />
-					<s:Label id="filename" top="25" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{controller.fileName}" />
+					<s:Label id="logLine" bottom="{scrollbar.horizontalScrollBar.visible ? 20 : 5}" left="20" fontFamily="Helvetica" text="log: {controller.lastLogMessage}" />
 					
 					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
@@ -137,7 +208,8 @@
 										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link_break.png')" toolTip="Dissolve Iset" /> 
 										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link.png')" toolTip="Merge Isets" /> 
 										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_go.png')" toolTip="Change Player" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_delete.png')" toolTip="Make Chance" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_delete.png')" toolTip="Make Chance" />
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool [SpaceBar]" /> 
 									</mx:source>
 								</mx:ArrayCollection>
 							</mx:dataProvider>
@@ -146,17 +218,16 @@
 						<mx:Button cornerRadius="0" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/shape_rotate_clockwise.png')" toolTip="Rotate Clockwise" click="controller.doAction(actions.rotateRight)"/>
 						<mx:Button cornerRadius="0" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/shape_rotate_anticlockwise.png')" toolTip="Rotate Counterclockwise" click="controller.doAction(actions.rotateLeft)"/>
 					</s:HGroup>
-
+					
 				</s:NavigatorContent>
 				<s:NavigatorContent label="Strategic Form">
-					<s:Scroller id="scrollbarNF" width="100%" height="100%">
+					<MouseScroller id="scrollbarNF" width="100%" height="100%">
 						<s:Group id="viewportNF" width="100%" height="100%">
 							<Canvas id="canvasNF" width="100%" height="100%" painter="{matrixPainter}" />
 						</s:Group>
-					</s:Scroller>
+					</MouseScroller>
 					
 					<s:Label id="infoNF" top="5" right="{scrollbarNF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
-					<s:Label id="filenameNF" top="25" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{controller.fileName}" />					
 					
 					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isNormalReduced = (event.target.selectedIndex == 0);">
@@ -169,11 +240,14 @@
 								</mx:ArrayCollection>
 							</mx:dataProvider>
 						</mx:ToggleButtonBar>
+						<mx:Spacer width="23"/>
+						<mx:Button cornerRadius="0" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarNF.mouseScrollingEnabled ? 'ON' : 'OFF'}" toggle="true" selected="{scrollbarNF.mouseScrollingEnabled}" change="if(scrollbarNF.mouseScrollingEnabled) scrollbarNF.disableMouseScrolling(); else scrollbarNF.enableMouseScrolling()" />
+
 					</s:HGroup>
 				</s:NavigatorContent>				
 			</mx:TabNavigator>
 		</s:BorderContainer>
-	
+		
 		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="0" top="30" right="0" width="180" editable="true" borderColor="0x808080" draggableColumns="false" sortableColumns="false" change="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" focusOut="controller.selectedNode = -1" focusIn="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
 			<mx:columns>
 				<mx:DataGridColumn headerText="Sequence" dataField="leaf" width="110" editable="true"/>				
@@ -181,15 +255,20 @@
 				<mx:DataGridColumn headerText="{controller.player2Name}" dataField="pay2" width="33" editable="{!controller.isZeroSum}" />
 			</mx:columns>
 		</mx:DataGrid>
-				
-		<s:HGroup left="0" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true">
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear" click="controller.clear()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open" click="controller.open()" />	
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save" click="controller.save()" />	
+		
+		<s:HGroup left="0" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="controller.clear()" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
 			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
 			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />			
 			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
+			<mx:TextInput id="filename" width="100" height="24" enabled="false" 
+						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) controller.fileName= filename.text; else filename.text = controller.fileName" 
+						  text="{controller.fileName}" keyUp="event.stopPropagation()" keyDown="event.stopPropagation()" change=""
+						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
+			<mx:Spacer width="23"/>
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
 			<mx:Spacer width="4"/>
 			<s:ComboBox id="algoComboBox" width="106" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
@@ -204,8 +283,8 @@
 				</s:itemRenderer>
 			</s:ComboBox>
 			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo" click="controller.undo()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo" click="controller.redo()" />				
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" click="controller.undo()" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" click="controller.redo()" />				
 			<mx:Spacer width="23"/>			
 			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/text_replace.png')" toolTip="Auto Label" click="controller.doAction(actions.label)" />				
 			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" click="controller.doAction(actions.randomPayoffs)" />

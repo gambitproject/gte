@@ -2,6 +2,7 @@ package lse.math.games.builder.model
 {	
 	/**	 
 	 * @author Mark Egesdal
+	 * Represents a full game-tree in its extensive form
 	 */
 	public class ExtensiveForm
 	{										
@@ -40,19 +41,47 @@ package lse.math.games.builder.model
 			return new Player(name, this);
 		}
 		
-		private function getNextNodeNumber():int {			
-			return lastNodeNumber++;
-		}
-		
+		/** Creates a new node assigning it an autoincreasing ID*/
 		public function createNode():Node {						
 			return newNode(getNextNodeNumber());
+		}
+		
+		private function getNextNodeNumber():int {			
+			return lastNodeNumber++;
 		}
 		
 		protected function newNode(number:int):Node {
 			return new Node(this, number);
 		}
 		
-		// currently just adds to the end
+		/** Returns a node with the corresponding id number, or null if it can't find any */
+		public function getNodeById(number:int):Node
+		{
+			return recGetNodeById(root, number);
+		}
+		
+		private function recGetNodeById(node:Node, number:int):Node
+		{
+			if (node.number == number) {
+				return node;
+			} 
+			
+			var child:Node = node.firstChild;
+			while (child != null) {
+				var rv:Node = recGetNodeById(child, number);
+				if (rv != null) {
+					return rv;
+				}
+				child = child.sibling;
+			}
+			return null;
+		}
+		
+		/**
+		 * Adds an Iset at the end of the linked list of isets.
+		 * If the Iset was already in the list, it does nothing
+		 * @return: The added isets' idx after insertion
+		 */
 		public function addIset(toAdd:Iset):int
 		{
 			if (root == null) throw new Error("Cannot add isets until root is set");
@@ -86,6 +115,11 @@ package lse.math.games.builder.model
 			return null;
 		}		
 
+		/**
+		 * It rearranges the tree to make sure that every node follows
+		 * the principles of perfect recall: that every node in its Iset
+		 * comes from the same own move sequence
+		 */
 		public function makePerfectRecall():void
 		{
 			for (var h:Iset = _root.iset; h != null; h = h.nextIset) {
@@ -94,13 +128,16 @@ package lse.math.games.builder.model
 					var nodesInIset:Vector.<Node> = new Vector.<Node>();					
 					for (var node:Node = h.firstNode; node != null; node = node.nextInIset) {
 						nodesInIset.push(node);						
-					}					
+					}		
+					//The Iset is disolved
 					h.dissolve();
+					//New Isets are formed in groups with same own move sequence
 					mergeNodesWithSameOwnMoveSequence(nodesInIset); 
 				}				
 			}			
 		}
 		
+		//Creates isets for each group of nodes in the vector with the same own move sequence
 		private function mergeNodesWithSameOwnMoveSequence(nodesToMerge:Vector.<Node>):void
 		{
 			while (nodesToMerge.length > 1)
@@ -125,11 +162,13 @@ package lse.math.games.builder.model
 			lastNodeNumber = 0;
 		}
 
+		/** @return The maximum depth (distance from root to leaf) of the tree */
 		public function maxDepth():int
 		{
 			return recMaxDepth(root);
 		}
 		
+		//returns the maximum depth out of the children of a certain node, recursively
 		private function recMaxDepth(node:Node):int
 		{
 			if (node.isLeaf) {
@@ -149,12 +188,13 @@ package lse.math.games.builder.model
 			}
 		}
 		
+		/** @return the number of leaves (nodes without children) of the tree */
 		public function numberLeaves():int
 		{
 			return recNumberLeaves(_root, 0);
 		}
 	
-		/**
+		/** //?
 		 * number the leaves of the subtree starting at this node
 		 * where drawcurrnum is the first number to be used,
 		 * and the return value is the next number that can be used
@@ -199,28 +239,6 @@ package lse.math.games.builder.model
 				recPrintTree(y);
 				y = y.sibling;
 			}			
-		}
-
-		private function recGetNodeById(node:Node, number:int):Node
-		{
-			if (node.number == number) {
-				return node;
-			} 
-
-			var child:Node = node.firstChild;
-			while (child != null) {
-				var rv:Node = recGetNodeById(child, number);
-				if (rv != null) {
-					return rv;
-				}
-				child = child.sibling;
-			}
-			return null;
-		}
-
-		public function getNodeById(number:int):Node
-		{
-			return recGetNodeById(root, number);
 		}
 		
 		public function toString():String

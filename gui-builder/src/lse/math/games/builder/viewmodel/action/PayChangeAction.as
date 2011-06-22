@@ -6,7 +6,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	import lse.math.games.builder.presenter.IAction;
 	
-	/**
+	/**	
+	 * Changes the payoffs of a terminal node
+	 * <li>Changes Data</li>
+	 * <li>Changes Size</li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class PayChangeAction implements IAction

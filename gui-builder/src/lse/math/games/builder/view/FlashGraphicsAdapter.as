@@ -6,6 +6,7 @@ package lse.math.games.builder.view
 	
 	/**
 	 * @author Mark
+	 * Graphic adapter with basic painting operations. It renders in a Flash window
 	 */
 	public class FlashGraphicsAdapter implements IGraphics
 	{

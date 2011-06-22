@@ -249,13 +249,15 @@ package lse.math.games.builder.model
 			return compare(this, b) > 0;
 		}
 		
-		// returns <0 if a is to the left of b
-		// returns >0 if a is to the right of b
-		// returns 0 if a and b are the same node
+		/** Compares positions of two nodes in the tree. A node descendant of another is considered to its right
+		 * returns <0 if a is to the left of b
+		 * returns >0 if a is to the right of b
+		 * returns 0 if a and b are the same node
+		 */
 		public static function compare(a:Node, b:Node):int
 		{
 			var aList:Vector.<Node> = new Vector.<Node>();
-			var bList:Vector.<Node> = new Vector.<Node>;
+			var bList:Vector.<Node> = new Vector.<Node>();
 			
 			for (; a != null; a = a.parent) {
 				aList.push(a);
@@ -323,6 +325,10 @@ package lse.math.games.builder.model
 			return true;
 		}
 		
+		/**
+		 * Makes the current node the last of is ISet 
+		 * @return new Iset with the nodes from the current node's Iset that came after it before making it the last
+		 */
 		public function makeLastInIset():Iset
 		{			
 			var h:Iset = null;
@@ -425,6 +431,7 @@ package lse.math.games.builder.model
 			}
 		}
 		
+		/** Inserts 'toAdd' before this node */
 		internal function insertBefore(toAdd:Node):void
 		{
 			if (toAdd != null) {
@@ -437,6 +444,7 @@ package lse.math.games.builder.model
 			_prevInIset = toAdd;
 		}
 		
+		/** Inserts 'toAdd'  after this node */
 		internal function insertAfter(toAdd:Node):void
 		{
 			if (toAdd != null) {

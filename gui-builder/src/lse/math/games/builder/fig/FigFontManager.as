@@ -6,7 +6,8 @@ package lse.math.games.builder.fig
 	import flash.text.FontStyle;
 	import flash.text.FontType;
 	
-	/**	 
+	/**	
+	 * Class that manages the collection of fonts embedded in the fig 
 	 * @author Mark Egesdal
 	 */
 	public class FigFontManager
@@ -148,6 +149,7 @@ package lse.math.games.builder.fig
 			return fontFamilies;
 		}
 		
+		//Returns an array with all the font families (and not each font name!) available and embedded in the fig
 		private static function initFontFamilies():Array
 		{
 			var baseFonts:Array = new Array();
@@ -159,11 +161,13 @@ package lse.math.games.builder.fig
 			return baseFonts;
 		}
 		
+		/** Returns a font's code in the collection of fonts of the fig*/
 		public static function figEnumValue(fontFamily:String, weight:String, posture:String):int
 		{
 			var enum:int = -1;
 			if (_fontFamilyEnums.hasOwnProperty(fontFamily)) {
 				enum = _fontFamilyEnums[fontFamily];
+				//TODO: Check because possibly it should be enum += 1 for BOLD and +=2 for ITALIC
 				if (weight == FontWeight.BOLD) {
 					enum += 2;
 				}

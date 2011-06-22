@@ -14,6 +14,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Player;
 	
 	/**	 
+	 * Painter in charge of the background and the full tree, except from Isets
 	 * @author Mark Egesdal
 	 */
 	public class TreeGridPainter extends AbstractPainter
@@ -130,7 +131,7 @@ package lse.math.games.builder.viewmodel
 			recPaintTree(g, grid, grid.root as TreeGridNode);
 		}
 		
-		// return a boolean is a selected node is in the subtree
+		// return a boolean if a selected node is in the subtree
 		private function recPaintTree(g:IGraphics, grid:TreeGrid, n:TreeGridNode):Boolean
 		{			
 			var selectionFound:Boolean = false;

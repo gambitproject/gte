@@ -32,7 +32,7 @@
 			id:"GuiBuilder"
 		};
 		
-		var fullwindow = false;
+		var fullwindow = true;
 
 		swfobject.embedSWF(
 			"GuiBuilder.swf", 
@@ -62,21 +62,31 @@
 			body.innerHTML = "<pre>" + data + "</pre>";
 		}
 		
+			
 		function expand()
 		{
-			if(fullwindow)
+			if(fullwindow) //Contract
 			{
 				document.getElementById("GTEContainer").style.width = "85%";
 				document.getElementById("expandButton").innerHTML = "Expand";
-				fullwindow = 0;
+				document.getElementById("flashContainer").style.height = "580px";
 			}
-			else
+			else //Expand
 			{
 				document.getElementById("GTEContainer").style.width = "99%";
 				document.getElementById("expandButton").innerHTML = "Contract";
-				fullwindow = 1;
+				document.getElementById("flashContainer").style.height = getFlashContainerExpandedSize(); //?
 			}
+			
+			fullwindow = !fullwindow;
 		}
+		
+ 		function getFlashContainerExpandedSize()
+		{
+			var pixels = document.body.clientHeight - document.getElementById("titleContainer").offsetHeight - 50;
+			return ""+pixels+"px";
+		} 
+		
 	</script>
 	<style type="text/css">
 		html, body { height:100%; background-color: #303030;}		
@@ -84,8 +94,8 @@
 		object:focus { outline:none; }		
 	</style>
 </head>
-<body>
-	<div style="text-align: left; width: 85%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
+<body onload="expand()">
+	<div id="titleContainer" style="text-align: left; width: 85%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
 		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
 			<h3 style="display: inline; font-family: Helvetica;">Game Theory Explorer <span style="color: #ffd700">&#946;</span></h3><br/>
@@ -94,8 +104,8 @@
 	</div>
 	<div id="GTEContainer" style="text-align: left; width: 85%; margin: auto; background-color: #B7BABC; padding: 2px 5px 5px 5px; border: 1px solid #808080;">
 		<!-- <div style="background-color: #e0e0e0; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;">Build</div> -->
-		<div style="height: 575px">
-			<div id="flashContent">				
+		<div id="flashContainer">
+			<div id="flashContent">			
 				<p>
 					To view this page ensure that Adobe Flash Player version 
 					10.0.0 or greater is installed. 
@@ -141,7 +151,7 @@
 	</div>
 	<div style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
 		<div>
-		<button id="expandButton" type="button" onclick="expand()">Expand</button>
+		<button id="expandButton" type="button" onclick="expand()">Expand</button><br/>
 		<div style="display: inline-block; margin-bottom: 5px;">Last modified: yyyy-MM-dd hh:mm GMT</div><br/>
 		<!--  Copyright 2010 <span style="color: #ffffff;">Mark Egesdal</span><br/> -->
 		Developed by <span style="color: #ffffff;">Mark Egesdal</span> et al.<br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.

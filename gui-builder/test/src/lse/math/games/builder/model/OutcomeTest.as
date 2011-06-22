@@ -8,7 +8,7 @@ package lse.math.games.builder.model
 	public class OutcomeTest
 	{
 		[Test]
-		public function testAddPays()
+		public function testAddPays():void
 		{
 			var tree:ExtensiveForm = new ExtensiveForm();
 			var root:Node = new Node(tree, 0);

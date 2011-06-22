@@ -76,6 +76,7 @@ package lse.math.games.builder.view
 			label.y = y ;
 		}		
 		
+		//Registers a label with a TextLine that contains the info necessary for rendering, including format
 		protected function registerLabel(key:String, text:String, color:uint, fontFamily:String, styles:Object):void
 		{
 			if (text.length > 0) {

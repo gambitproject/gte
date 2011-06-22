@@ -8,7 +8,9 @@ package lse.math.games.builder.fig
 	import lse.math.games.builder.view.IGraphics;
 	
 	/**
+	 * Graphic adapter with basic painting operations. It 'paints' in a buffer String with FIG format
 	 * @author Mark Egesdal
+	 * @see IGraphics parent class IGraphics for reference on the implemented methods
 	 */
 	public class FigGraphics implements IGraphics
 	{
@@ -18,7 +20,7 @@ package lse.math.games.builder.fig
 		private var _buffer:Vector.<String>;
 		private var _colors:Dictionary;
 		private var _numColors:int;
-		private var _colorEnum:int;
+		private var _colorEnum:int; //Current color internal FIG code
 		private var _linewidth:Number;
 		
 		private var _fontEnum:int = -1;
@@ -71,6 +73,7 @@ package lse.math.games.builder.fig
 			drawPolyline(x1, y1, x2, y2, 1);
 		}
 		
+		//Draws a line between two points with a determinate style
 		private function drawPolyline(x1:Number, y1:Number, x2:Number, y2:Number, styleEnum:int):void
 		{
 			_buffer.push("2 1 " + styleEnum + " " + int(_linewidth) + " " + _colorEnum + " " + _colorEnum + " " + _curDepth + " 0 -1 " + DASH_LEN + " 0 0 -1 0 0 2");
@@ -90,6 +93,7 @@ package lse.math.games.builder.fig
 		// alignment in fig is to the lower left, but our coords are to upper left, so we adjust y by height
 		// the problem is that their coords are to the baseline not the bottom of the text area...
 		// This is fixed by using the TextLine class instead of Label class as the Canvas children.
+		/** Draws a String starting on coords 'x' 'y' as the upper left corner of the textbox */
 		public function drawString(x:Number, y:Number, width:Number, height:Number, str:String):void
 		{			
 			_buffer.push("4 0 " + _colorEnum + " " + _curDepth + " 0 " + _fontEnum + " " + _fontSize + " 0.000 4 " 
@@ -105,12 +109,12 @@ package lse.math.games.builder.fig
 			}
 		}
 		
+		/** Sets the font, including its format and size for all the following drawing operations, until it is changed again*/
 		public function setFont(name:String, weight:String, posture:String, size:Number):void 
 		{							
 			_fontEnum = FigFontManager.figEnumValue(name, weight, posture);
 			_fontSize = size * (72 / 80); //convert from pixels to points
 		}
-		
 		
 		public function set color(color:uint):void 
 		{		
@@ -121,7 +125,7 @@ package lse.math.games.builder.fig
 				if (COLOR_ENUMS.hasOwnProperty(colorHex)) {
 					_colorEnum = COLOR_ENUMS[colorHex];
 				} else {
-					_colorEnum = -1;
+					_colorEnum = -1; //TODO: Should Log an error also.
 				}
 			}
 			if (_curDepth > 0) {
@@ -129,6 +133,9 @@ package lse.math.games.builder.fig
 			}
 		}
 		
+		/** Adds a new color to the list of existing ones in the fig. 
+		 * If a color wants to be used and is not in the COLOR_ENUM list, it needs to be added first using this function.
+		 */
 		public function addColor(color:uint):void
 		{
 			var colorHex:String = hexStr(color);
@@ -139,6 +146,7 @@ package lse.math.games.builder.fig
 			}			
 		}
 		
+		//Returns a String with the Hex value of a color in the format: #RRGGBB 
 		private function hexStr(color:uint):String
 		{
 			var h:HexEncoder = new HexEncoder(); 

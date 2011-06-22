@@ -4,7 +4,12 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
-	/**
+	/**	
+	 * Removes a node and its children
+	 * <li><b>Is undoable</b></li>
+	 * <li>Changes Data</li>
+	 * <li>Changes Size</li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class DeleteAction implements IAction

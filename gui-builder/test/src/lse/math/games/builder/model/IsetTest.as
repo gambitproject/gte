@@ -3,8 +3,8 @@ package lse.math.games.builder.model
 	import org.flexunit.Assert;
 	
 	/**
-	 * ...
 	 * @author Mark
+	 * @author alfongj
 	 */
 	public class IsetTest
 	{

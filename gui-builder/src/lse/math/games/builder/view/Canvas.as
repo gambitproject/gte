@@ -2,18 +2,21 @@ package lse.math.games.builder.view
 {	
 	import flash.display.DisplayObject;
 	import flash.display.Shape;
-	import flash.text.engine.DigitWidth;	
-	import flash.text.engine.ElementFormat;	
+	import flash.events.MouseEvent;
+	import flash.text.engine.ContentElement;
+	import flash.text.engine.DigitWidth;
+	import flash.text.engine.ElementFormat;
 	import flash.text.engine.FontDescription;
 	import flash.text.engine.GraphicElement;
-	import flash.text.engine.TextElement;
-	import flash.text.engine.ContentElement;
 	import flash.text.engine.GroupElement;
 	import flash.text.engine.TextBlock;
+	import flash.text.engine.TextElement;
 	import flash.text.engine.TextLine;
 	import flash.utils.getTimer;
-			
-	import mx.core.UIComponent;	
+	
+	import mx.controls.Alert;
+	
+	import mx.core.UIComponent;
 	
 	/**	 
 	 * @author Mark Egesdal

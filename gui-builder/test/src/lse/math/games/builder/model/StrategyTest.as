@@ -8,7 +8,7 @@ package lse.math.games.builder.model
 	public class StrategyTest
 	{	
 		//TODO: Understand class and test
-		//TODO: Remove all commented code from Extensvie Form (by now it's there until teh testing is finished
+		//TODO: Remove all commented code (by now it's there until teh testing is finished
 		
 		/*
 		private var _sequence:Vector.<Move> = null;

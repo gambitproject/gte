@@ -4,7 +4,11 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.presenter.IAction;
 	
-	/**
+	/**	
+	 * 
+	 * <li>Changes Data</li>
+	 * <li>Changes Size</li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class DepthAdjuster implements IAction
@@ -130,6 +134,7 @@ package lse.math.games.builder.viewmodel
 			return didAdjustments;
 		}
 		
+		//Aligns the 'adjusted' depths of all nodes to be the equal if they belong to the same Iset, taking the maximum possible
 		private function alignDepths(grid:TreeGrid):void
 		{
 			// sort nodes with (1) lowest BASE depth first and (2) left Of first 
@@ -203,24 +208,22 @@ package lse.math.games.builder.viewmodel
 					}
 				}				
 			}
-		}		
+		}	
 		
-		private static function recHasDecendantsInNodeSet(node:Node, maxDepth:int, nodeSet:Vector.<Node>):Boolean
-		{
-			var hasDecendants:Boolean = (nodeSet.indexOf(node) != -1);
-			if (!hasDecendants) {
-				if (node.depth < maxDepth) {
-					for (var child:Node = node.firstChild; child != null; child = child.sibling) {
-						hasDecendants = recHasDecendantsInNodeSet(child, maxDepth, nodeSet);
-						if (hasDecendants) {
-							break;
-						}
-					}
-				}
+		// Adds node and children to a queue ordered by depth, with their adjusted depth cleared
+		// TODO: add children from right to left to optimize queueing time... need a new pointer to prevSibling or use a DEQueue as NodePriorityQueue
+		private function recAddToQueue(node:Node, queue:NodePriorityQueue):void
+		{			
+			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
+				recAddToQueue(child, queue);				
 			}
-			return hasDecendants;
+			(node as TreeGridNode).resetDepth();
+			queue.push(node);
 		}
-				
+		
+		//Adds to nodeSet all nodes with a depth higher than 'top' but lower or equal than 'bottom', starting from the ones inside 
+		//the 'bottom' level inside the 'iset', and looking at their parents Iset's nodes, recursively (its easier to understand
+		//just by reading the code :) )
 		private static function recAddAncestorIsetNodes(bottom:int, top:int, iset:Iset, nodeSet:Vector.<Node>):void
 		{
 			if (bottom == top) {
@@ -239,15 +242,21 @@ package lse.math.games.builder.viewmodel
 			}
 		}
 		
-		// add to the queue depth first with depth deltacleared
-		// TODO: add children from right to left to optimize queueing time... need a new pointer to prevSibling
-		private function recAddToQueue(node:Node, queue:NodePriorityQueue):void
-		{			
-			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
-				recAddToQueue(child, queue);				
+		//Checks recursively if 'node' has any descendants on 'nodeSet' (and maxDepth is used for avoiding extra operations)
+		private static function recHasDecendantsInNodeSet(node:Node, maxDepth:int, nodeSet:Vector.<Node>):Boolean
+		{
+			var hasDecendants:Boolean = (nodeSet.indexOf(node) != -1);
+			if (!hasDecendants) {
+				if (node.depth < maxDepth) {
+					for (var child:Node = node.firstChild; child != null; child = child.sibling) {
+						hasDecendants = recHasDecendantsInNodeSet(child, maxDepth, nodeSet);
+						if (hasDecendants) {
+							break;
+						}
+					}
+				}
 			}
-			(node as TreeGridNode).resetDepth();
-			queue.push(node);
+			return hasDecendants;
 		}
 	}
 }

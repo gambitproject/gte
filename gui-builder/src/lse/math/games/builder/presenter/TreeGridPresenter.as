@@ -5,6 +5,7 @@ package lse.math.games.builder.presenter
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
+	import flash.events.MouseEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.external.ExternalInterface;
@@ -13,7 +14,6 @@ package lse.math.games.builder.presenter
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	import lse.math.games.builder.model.Rational;
 	
 	import lse.math.games.builder.fig.FigFontManager;
 	import lse.math.games.builder.fig.TreeGridFigWriter;
@@ -21,15 +21,18 @@ package lse.math.games.builder.presenter
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.NormalForm;
 	import lse.math.games.builder.model.Player;
+	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.model.Strategy;
 	import lse.math.games.builder.view.Canvas;
 	import lse.math.games.builder.viewmodel.TreeGrid;
+	
+	import mx.collections.*;
 	import mx.controls.Alert;
+	import mx.events.*;
+	import mx.graphics.codec.PNGEncoder;
 	import mx.rpc.http.HTTPService;
 	
-	import mx.graphics.codec.PNGEncoder;	
-	import mx.collections.*;
-	import mx.events.*;
+	import util.Log;
 	
 	/**	
 	 * @author Mark Egesdal
@@ -47,14 +50,24 @@ package lse.math.games.builder.presenter
 		
 		private var _fileName:String = "Untitled";
 		
+		private var _log:Log = Log.instance;
+		private var _lastLogMessage:String = _log.lastMessage;
+		
 		//private var _modelDirty:Boolean = true;		
 		
 		public function TreeGridPresenter() 
 		{									
-			_gridData.addEventListener("collectionChange", onOutcomeEdit);		
+			_gridData.addEventListener("collectionChange", onOutcomeEdit);	
 		}
 		
-		[Bindable] //?
+		//TODO: This doesn't update the gui
+		public function get lastLogMessage():String
+		{
+			_lastLogMessage = _log.lastMessage;
+			return _lastLogMessage;
+		}
+		
+		[Bindable]
 		public function get fileName():String {
 			return _fileName;
 		}
@@ -72,6 +85,7 @@ package lse.math.games.builder.presenter
 				throw new Error("Cannot assign a null canvas")
 			}
 			_canvas = canvas;
+			_canvas.addEventListener(MouseEvent.MOUSE_WHEEL, mouseZoomHandle);
 			invalidate(true, true, true);
 		}
 
@@ -280,6 +294,18 @@ package lse.math.games.builder.presenter
 			}
 		}
 		
+		//Zooms in or out when a MOUSE_WHEEL event is detected
+		private function mouseZoomHandle(e:MouseEvent):void
+		{
+			if(e.type==MouseEvent.MOUSE_WHEEL)
+			{
+				if(e.delta>0)
+					zoomIn();
+				else if(e.delta<0)
+					zoomOut();
+			}
+		}
+		
 		public function zoomIn():void
 		{
 			var oldScale:Number = _canvas.painter.scale;
@@ -315,11 +341,14 @@ package lse.math.games.builder.presenter
 		
 		public function doActionAt(x:Number, y:Number):void
 		{
-			selectedNode = -1;
-			var action:IAction = getClickAction(_grid, x, y);
-			if (action != null) {
-				_actionHandler.processAction(action, _grid);									
-				invalidate(action.changesData, action.changesSize, action.changesDisplay);
+			if(getClickAction!= null)
+			{
+				selectedNode = -1;
+				var action:IAction = getClickAction(_grid, x, y);
+				if (action != null) {
+					_actionHandler.processAction(action, _grid);									
+					invalidate(action.changesData, action.changesSize, action.changesDisplay);
+				}
 			}
 		}
 		
@@ -424,7 +453,7 @@ package lse.math.games.builder.presenter
 		}
 		
 		/**
-		 * Opens a dialog for saving the tree in .fig format
+		 * Opens a dialog for saving the tree in .fig format using TreeGridFigWriter
 		 */
 		public function fig():void
 		{
@@ -436,7 +465,7 @@ package lse.math.games.builder.presenter
 			fr.addEventListener(Event.COMPLETE, onSaveComplete);
 			fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 
-			fr.save(figStr, fileName+".fig"); //?
+			fr.save(figStr, fileName+".fig"); 
 		}
 		
 		/**

@@ -5,7 +5,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
-	/**
+	/**	
+	 * Makes a node or all nodes in iset to be chances (eliminating player data and replacing move labels with probabilities)
+	 * <li>Changes Data</li>
+	 * <li>Changes Size</li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class MakeChanceAction implements IAction

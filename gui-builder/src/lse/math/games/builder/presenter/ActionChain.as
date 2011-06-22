@@ -3,6 +3,7 @@ package lse.math.games.builder.presenter
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**
+	 * Linked list of Actions, usable as an action itself, applying each operation to the whole list
 	 * @author Mark
 	 */
 	public class ActionChain implements IAction
@@ -10,6 +11,7 @@ package lse.math.games.builder.presenter
 		private var _start:ActionChainLink;
 		private var _end:ActionChainLink;
 		
+		/** Adds new action to the end of the linked list */
 		public function push(action:IAction):void
 		{
 			var link:ActionChainLink = new ActionChainLink(action);			
@@ -22,6 +24,7 @@ package lse.math.games.builder.presenter
 			_end = link;
 		}
 		
+		/** Executes all actions in the list */
 		public function doAction(grid:TreeGrid):void
 		{
 			var link:ActionChainLink = _start;
@@ -31,6 +34,7 @@ package lse.math.games.builder.presenter
 			}
 		}
 		
+		/** Checks if any of the actions changes data */
 		public function get changesData():Boolean {
 			var link:ActionChainLink = _start;
 			while (link != null) {
@@ -42,6 +46,7 @@ package lse.math.games.builder.presenter
 			return false;
 		}
 		
+		/** Checks if any of the actions changes data */
 		public function get changesSize():Boolean {
 			var link:ActionChainLink = _start;
 			while (link != null) {
@@ -53,6 +58,7 @@ package lse.math.games.builder.presenter
 			return false;
 		}
 		
+		/** Checks if any of the actions changes the display */
 		public function get changesDisplay():Boolean {
 			var link:ActionChainLink = _start;
 			while (link != null) {
@@ -68,6 +74,7 @@ package lse.math.games.builder.presenter
 }
 
 import lse.math.games.builder.presenter.IAction;
+//Internal class used as 'nodes' of Actions inside the Linked List
 class ActionChainLink
 {
 	private var _action:IAction;

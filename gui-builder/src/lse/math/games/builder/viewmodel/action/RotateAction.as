@@ -3,7 +3,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
-	/**
+	/**	
+	 * Rotates the tree clock or counterclockwise
+	 * <li>NOT <strike>Changes Data</strike></li>
+	 * <li>Changes Size</li>
+	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
 	public class RotateAction implements IAction

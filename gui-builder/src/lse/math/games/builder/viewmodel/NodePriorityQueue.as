@@ -3,10 +3,8 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Node;
 	
 	/**
-	 * NodePriorityQueue	 
-	 * 
-	 * @author Mark Egesdal
-	 * 
+	 * NodePriorityQueue
+	 * 	 
 	 * Sorts the nodes from front to back in a priority queue
 	 * Deeper nodes and nodes to the right are toward the end
 	 * 
@@ -21,7 +19,10 @@ package lse.math.games.builder.viewmodel
 	 * length property will iterate the queue to find a count
 	 * 
 	 * push() and remove() return position Node was inserted/removed, 
-	 * which allows for a measure of algorithm efficieny
+	 * which allows for a measure of algorithm efficieny (in remove(), if it returns -1
+	 * the actual number of iterations is equal to length-1)
+	 * 
+	 * @author Mark Egesdal
 	 */
 	public class NodePriorityQueue
 	{
@@ -35,7 +36,7 @@ package lse.math.games.builder.viewmodel
 		}
 		
 		public function get back():Node {
-			return _front.node;
+			return _back.node;
 		}
 		
 		public function get isEmpty():Boolean {
@@ -50,6 +51,9 @@ package lse.math.games.builder.viewmodel
 			return count;
 		}
 		
+		/** Inserts a node in its corresponding position, determined by belongsBefore() function 
+		 * @return The position in which it is inserted
+		 */
 		public function push(node:Node):int
 		{		
 			var idx:int = 0;
@@ -70,6 +74,9 @@ package lse.math.games.builder.viewmodel
 			return idx;
 		}
 		
+		/** Removes a certain node
+		 * @return -1 if node wasn't found, or its pos if it was found and removed
+		 */
 		public function remove(toRemove:Node):int
 		{
 			var idx:int = -1;
@@ -81,13 +88,16 @@ package lse.math.games.builder.viewmodel
 						if (enqueued.prev != null) enqueued.prev.next = enqueued.next;
 						if (_front == enqueued) _front = enqueued.next;
 						if (_back == enqueued) _back = enqueued.prev;
-						break;						
-					}					
+						break;
+					}
+					else if(enqueued.next ==null) //Haven't found the node
+						return -1;								
 				}
 			}
 			return idx;	
 		}
 		
+		/** Returns and removes front node */
 		public function shift():Node
 		{
 			var rv:Node = null;
@@ -101,6 +111,7 @@ package lse.math.games.builder.viewmodel
 			return rv;
 		}
 		
+		/** Returns and removes back node */
 		public function pop():Node
 		{
 			var rv:Node = null;
@@ -114,6 +125,7 @@ package lse.math.games.builder.viewmodel
 			return rv;
 		}
 		
+		/** Checks if the list contains certain node */
 		public function contains(toCheck:Node):Boolean
 		{
 			var found:Boolean = false;
@@ -127,7 +139,8 @@ package lse.math.games.builder.viewmodel
 			}
 			return found;
 		}
-				
+			
+		//Inserts 'toAdd' before 'enqueued'
 		private function insertBefore(enqueued:NodeWrapper, toAdd:NodeWrapper):void
 		{			
 			toAdd.next = enqueued;
@@ -141,6 +154,7 @@ package lse.math.games.builder.viewmodel
 			}
 		}
 				
+		//Inserts 'toAdd' after 'enqueued'
 		private function insertAfter(enqueued:NodeWrapper, toAdd:NodeWrapper):void
 		{			
 			toAdd.prev = enqueued;
@@ -154,6 +168,8 @@ package lse.math.games.builder.viewmodel
 			}
 		}
 		
+		//Returns true if either the enqueued node doesn't exist, if the node toAdd has less depth than it,
+		//or if they have the same length but toAdd is to the left of the enqueued one
 		private function belongsBefore(enqueued:NodeWrapper, toAdd:NodeWrapper):Boolean
 		{
 			return (enqueued == null) || 

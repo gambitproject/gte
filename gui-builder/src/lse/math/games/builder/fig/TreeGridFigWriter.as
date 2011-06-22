@@ -9,11 +9,12 @@ package lse.math.games.builder.fig
 	
 	
 	/**	 
+	 * Writer of tree grids into FIG format
 	 * @author Mark Egesdal
 	 */
 	public class TreeGridFigWriter
 	{				
-		public function TreeGridFigWriter(/*orient:String, justif:String, units:String, psize:String, magni:String, mltiPage:String, tColor:String, resolution:String*/) {}
+		public function TreeGridFigWriter() {}
 		
 		public static const newline:String = "\n"; // Since FIG is mostly used on UNIX I am assuming that \n is the newline character to write regardless of machine
 		
@@ -38,9 +39,11 @@ package lse.math.games.builder.fig
 		private var _tColor:String = "Default";
 		private var _resolution:String = "1200";
 		
+		/** Returns a String containing, in FIG format, a tree drawn by the 'painter' param */
 		public function paintFig(painter:IPainter, width:Number, height:Number, grid:TreeGrid):String
 		{  
 			var buffer:Vector.<String> = new Vector.<String>();
+			//Writes the header of the file
 			buffer.push("#FIG 3.2");
 			buffer.push(_orient);
 			buffer.push(_justif);
@@ -51,15 +54,19 @@ package lse.math.games.builder.fig
 			buffer.push(_tColor);
 			buffer.push(_resolution + " 2");
 				
+			//Adds the colors that will be used on the file
 			var graphics:FigGraphics = new FigGraphics(buffer);
 			graphics.addColor(grid.player1Color);
 			graphics.addColor(grid.player2Color);
 			//graphics.addColor(0x000000);
 			
 			// TODO: clear any temp state (merge and selected nodes) and restore it after
+			//UPdate: It seems that selected nodes automatically deselect when exporting. Same should happen with merging
 			
+			//Saves onto the file the results of all the painter operations that form the tree
 			painter.paint(graphics, width, height);
 			
+			//Finally also adds all the text labels
 			for each (var label:TextLine in painter.labels) {
 				if (label.visible) 
 				{

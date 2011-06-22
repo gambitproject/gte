@@ -1,6 +1,8 @@
 package lse.math.games.builder.view 
 {	
 	/**
+	 * Bridge between tree structure and its graphical representation.
+	 * Performs operations necessary to draw everything based in a tree representation model
 	 * @author Mark
 	 */
 	public interface IPainter 

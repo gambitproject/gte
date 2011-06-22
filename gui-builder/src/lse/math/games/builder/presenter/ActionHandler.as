@@ -5,6 +5,8 @@ package lse.math.games.builder.presenter
 	import lse.math.games.builder.io.ExtensiveFormXMLReader;
 	
 	/**
+	 * Handles Action executing, as well as undoing and redoing, and reseting the workspace either 
+	 * to the default (just root) tree, or to one loaded via an xml container
 	 * @author Mark
 	 */
 	public class ActionHandler
@@ -16,6 +18,7 @@ package lse.math.games.builder.presenter
 				
 		public function ActionHandler() {}
 				
+		/** Executes action, and stores it in 'history' vector, if it changes Data */
 		public function processAction(action:IAction, grid:TreeGrid):void
 		{			
 			if (action != null) {
@@ -26,6 +29,9 @@ package lse.math.games.builder.presenter
 			}
 		}		
 
+		/** Undoes last action by resetting the tree and reapplying all actions that had been done
+		 * @return True if there was operation to undo, False if not
+		 */
 		public function undo(grid:TreeGrid):Boolean
 		{
 			if (_history.length > 0) {				
@@ -49,6 +55,9 @@ package lse.math.games.builder.presenter
 			}
 		}
 
+		/** Repeats last undone Action
+		 * @return True if there was operation to redo, False if not
+		 */
 		public function redo(grid:TreeGrid):Boolean
 		{
 			if (_undone.length != 0)
@@ -62,6 +71,7 @@ package lse.math.games.builder.presenter
 			}		
 		}		
 		
+		//Restores tree from a xml file or creates a default one (just the root)
 		private function initTree(grid:TreeGrid):void
 		{			
 			if (_xml != null) {
@@ -76,6 +86,7 @@ package lse.math.games.builder.presenter
 			}
 		}
 		
+		/** Loads a tree from a xml file, and resets history and undone data */
 		public function load(xml:XML, grid:TreeGrid):void
 		{			
 			_xml = xml;
@@ -84,6 +95,7 @@ package lse.math.games.builder.presenter
 			_history = new Vector.<IAction>();
 		}
 		
+		/** Creates the default tree (just the root) and resets history and undone data */
 		public function reset(grid:TreeGrid):void
 		{
 			_xml = null;

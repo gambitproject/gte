@@ -5,7 +5,11 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**	
-	 * @author Mark
+	 * Merges two Isets, if possible
+	 * <li>Can change Data</li>
+	 * <li>Can change Size</li>
+	 * <li>Changes Display</li>
+	 * @author Mark Egesdal
 	 */
 	public class MergeAction implements IAction
 	{				

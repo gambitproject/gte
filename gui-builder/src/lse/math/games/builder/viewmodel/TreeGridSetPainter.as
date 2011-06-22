@@ -15,6 +15,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Player;
 	
 	/**
+	 * Painter in charge of ISets
 	 * @author Mark Egesdal
 	 */
 	public class TreeGridSetPainter extends AbstractPainter
