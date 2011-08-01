@@ -6,6 +6,9 @@ package lse.math.games.builder.io
 	import lse.math.games.builder.model.Player;
 	
 	/**	
+	 * This class needs to be adapted to follow the new XML standard format in:
+	 * https://docs.google.com/viewer?a=v&pid=explorer&chrome=true&srcid=0B331281Yuj61ZTM2Y2M0YzMtODQyNi00NGVmLWI1MjctMDY0Mzc2ZGM2MjFj&hl=en_US
+	 * 
 	 * @author Mark Egesdal
 	 */
 	public class ExtensiveFormXMLWriter

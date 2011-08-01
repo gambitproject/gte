@@ -1,10 +1,13 @@
 package lse.math.games.builder.viewmodel.action 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Move;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.presenter.IAction;
+	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.DepthAdjuster;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
@@ -22,6 +25,11 @@ package lse.math.games.builder.viewmodel.action
 		private var _nodeId:int = -1;
 		private static var _depthAdjuster:IAction = new DepthAdjuster(); //TODO: remove and use ActionChain or onAdd decorator
 		
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
 		
 		public function AddChildAction(iset:Iset, node:Node) 
 		{
@@ -31,6 +39,8 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function doAction(grid:TreeGrid):void
 		{			
+			var prevTime:int = getTimer();
+			
 			var iset:Iset = null;
 			if (_isetId >= 0) {
 				iset = grid.getIsetById(_isetId);			
@@ -47,6 +57,11 @@ package lse.math.games.builder.viewmodel.action
 					_depthAdjuster.doAction(grid);
 				}
 			}
+			
+			var labeler:AutoLabeller = new AutoLabeller;
+			labeler.doAction(grid);
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
 		private function addChildrenTo(parent:Iset, grid:TreeGrid):void
@@ -68,15 +83,21 @@ package lse.math.games.builder.viewmodel.action
 			if (parent.isChildless)
 			{				
 				var h:Iset = parent.newIset(player);
-				parent.addMoveTo(h);
-				parent.addMoveTo(h);
-			} else if (childrenInOneIsetAndChildless(parent)) {
+				parent.addMoveAndAssignChildrenTo(h);
+				parent.addMoveAndAssignChildrenTo(h);
 				
+				// parent.addMove(player); <- UNCOM ME FOR ADDING A CHILD AT A TIME
+
+			} else if (childrenInOneIsetAndChildless(parent)) {
+				parent.addMove(player);
+
 				// if all children in one Iset and without children
 				// add new child to each node in Iset and place these
 				// children in same Iset as existing children
-				parent.addMoveTo(parent.firstNode.firstChild.iset);
+				parent.addMoveAndAssignChildrenTo(parent.firstNode.firstChild.iset);
 				
+				// parent.addMove(player); <- UNCOM ME FOR ADDING A CHILD AT A TIME
+
 				// make nextInIset of new Node the nextInIset
 				// of previous lastchild and
 				// make the new node the nextInIset of lastchild				
@@ -84,6 +105,9 @@ package lse.math.games.builder.viewmodel.action
 				parent.addMove(player);
 				
 				// TODO: this behavior below needs work and has some bugs...
+				// Personal note (alfongj): believe that what it should do is that the new node created should add
+				// itself to the existing Iset (as using parent.addMoveAndAssignChildrenTo), but also assigning this node first
+				// all the moves the others have
 				
 				/*var moveNodes:Vector.<Node> = new Vector.<Node>();
 				for (var mate:Node = parent.firstNode; mate != null; mate = mate.nextInIset) {

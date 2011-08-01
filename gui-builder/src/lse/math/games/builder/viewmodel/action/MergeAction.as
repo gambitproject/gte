@@ -1,5 +1,7 @@
 package lse.math.games.builder.viewmodel.action
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
@@ -18,6 +20,12 @@ package lse.math.games.builder.viewmodel.action
 		
 		private var _onMerge:IAction;
 		
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
+		
 		public function MergeAction(grid:TreeGrid, toMerge:Iset) 
 		{			
 			if (toMerge != null) _mergeId = toMerge.idx;
@@ -35,6 +43,8 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function doAction(grid:TreeGrid):void 
 		{
+			var prevTime:int = getTimer();
+			
 			var toMerge:Iset = grid.getIsetById(_mergeId);
 			if (toMerge != null) 
 			{
@@ -49,6 +59,8 @@ package lse.math.games.builder.viewmodel.action
 			} else {
 				grid.mergeBase = null;	
 			}			
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
 		public function get changesData():Boolean {

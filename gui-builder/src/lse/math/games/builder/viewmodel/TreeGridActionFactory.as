@@ -1,14 +1,14 @@
 package lse.math.games.builder.viewmodel 
 {
-	import flashx.textLayout.operations.ModifyInlineGraphicOperation;
 	import lse.math.games.builder.model.Iset;
-	import lse.math.games.builder.model.Node;	
+	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.presenter.ActionChain;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.action.*;
 	
 	/**	
+	 * This class contains the functions needed for performing the actions in the tree grid.
 	 * @author Mark Egesdal
 	 */
 	public class TreeGridActionFactory
@@ -49,7 +49,7 @@ package lse.math.games.builder.viewmodel
 				// parse and assign moves at same time, so that undo is atomic
 				// use pop to get off the bottom work from selected leaf back up
 				var moveLabels:Array = pathIn.split(" ");
-				var numLevels:int = n.numAncestors;
+				var numLevels:int = n.depth;
 				while (numLevels > moveLabels.length) {
 					n = n.parent;
 					--numLevels;
@@ -80,19 +80,40 @@ package lse.math.games.builder.viewmodel
 			return chain;
 		}
 		
-		public function label(grid:TreeGrid):IAction
-		{			
-			return new AutoLabelAction();
-		}
-		
+		[Deprecated(replacement="orientationXXX()")]
 		public function rotateRight(grid:TreeGrid):IAction
 		{			
 			return new RotateAction(RotateAction.CLOCKWISE);
 		}
 		
+		[Deprecated(replacement="orientationXXX()")]
 		public function rotateLeft(grid:TreeGrid):IAction
 		{			
 			return new RotateAction(RotateAction.COUNTERCLOCKWISE);
+		}
+		
+		/** Displays the tree with root on top */
+		public function orientationUp(grid:TreeGrid):IAction
+		{
+			return new RotateAction(RotateAction.UP);
+		}
+		
+		/** Displays the tree with root on left side */
+		public function orientationLeft(grid:TreeGrid):IAction
+		{
+			return new RotateAction(RotateAction.LEFT);
+		}
+		
+		/** Displays the tree with root on the bottom */
+		public function orientationDown(grid:TreeGrid):IAction
+		{
+			return new RotateAction(RotateAction.DOWN);
+		}
+		
+		/** Displays the tree with root on right side */
+		public function orientationRight(grid:TreeGrid):IAction
+		{
+			return new RotateAction(RotateAction.RIGHT);
 		}
 		
 		public function perfectRecall(grid:TreeGrid):IAction
@@ -122,7 +143,7 @@ package lse.math.games.builder.viewmodel
 		{
 			var beforeCut:Node = null;
 			for (var h:Iset = grid.root.iset; h != null; h = h.nextIset) {
-				beforeCut = grid.getNodeInIsetBeforeCoords(h, x, y, TreeGrid.ISET_DIAM/2);	
+				beforeCut = grid.getNodeInIsetBeforeCoords(h, x, y, TreeGrid.ISET_DIAM * grid.scale/2);	
 				if (beforeCut != null) {					
 					break;
 				}
@@ -197,6 +218,12 @@ package lse.math.games.builder.viewmodel
 			var action:MakeChanceAction = new MakeChanceAction(h, n);
 			action.onDissolve = _depthAdjuster;
 			return action;
+		}
+		
+		/** Returns null always, used for 'not doing anything' when no other action is selected*/
+		public function nullAction(grid:TreeGrid, x:Number, y:Number):IAction
+		{
+			return null;
 		}
 		
 		// protected so it can be overridden for endo testing

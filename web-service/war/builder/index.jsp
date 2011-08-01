@@ -26,7 +26,8 @@
 			scale: "noScale",
 			allowFullscreen: "true",
 			allowScriptAccess: "always",
-			bgcolor: "#FFFFFF"			
+			bgcolor: "#FFFFFF",		
+			wmode: "transparent"
 		};
 		var attributes = {
 			id:"GuiBuilder"
@@ -36,7 +37,7 @@
 
 		swfobject.embedSWF(
 			"GuiBuilder.swf", 
-			"flashContent", 
+			"flashContainer", 
 			"100%", 
 			"100%", 
 			swfVersionStr, 
@@ -46,46 +47,113 @@
 			attributes);
 			
 			
-		function writeSolution(data)
+		//Changes the window title
+		function changeDocTitle(value)
 		{
+			document.title = 'GTE - '+value;
+		}		
+			
+		var inThisWindowOutput = false;
+		var outputWindow = null;
+			
+		function writeSolution(data)
+		{			
 			var regex = /^SUCCESS/;
-			var header = document.getElementById("solutionHeader");
 			if (regex.test(data)) {
-				header.style.backgroundColor = "#00ff6b";
+				headerBackgroundColor = "#00ff6b";
 			} else {
-				header.style.backgroundColor = "#ff0000";
+				headerBackgroundColor = "#ff0000";
 			}
-			header.style.display  = "block";
-
-			var body = document.getElementById("solution");
-			body.style.display = "block";
-			body.innerHTML = "<pre>" + data + "</pre>";
+			
+			if(outputWindow!=null)
+				outputWindow.close();
+				
+			outputWindow=window.open("", "Output", "height=500, width=500, toolbar=yes, location=no, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=yes"); 
+							
+			if(!isPopupBlocked(outputWindow))
+			{
+				outputWindow.document.write("<html><head><title>Output</title><style type='text/css'>html, body { height:100%; background-color: #FFFFFF;} body { margin:0; }	object:focus { outline:none; } </style></head>"); 
+				outputWindow.document.write("<body><div id='solutionHeader' style='background-color: "+headerBackgroundColor+"; color: #003300; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;  display: block;'>&#160;</div>");
+				outputWindow.document.write("<div id='solution' style='background-color: #ffffff;  border-top: 0; font-size: 12px; padding: 3px 5px 3px 5px; display: block; overflow: auto;'><pre>"+data+"</pre></div></body></html>"); 
+				outputWindow.document.close();
+				var desiredHeight = Math.min(outputWindow.document.getElementById("solutionHeader").offsetHeight + outputWindow.document.getElementById("solution").offsetHeight + 100 , 750);
+				outputWindow.resizeTo(500,desiredHeight);
+			} else {
+				if(!inThisWindowOutput)
+				{
+					inThisWindowOutput = confirm("Your browser is blocking popups, you should change that setting. Meanwhile, do you want to use in-window output?");
+					alert("ALERT: If you are going to enable popups in your browser, please save the current file in advance, as the window might restart");
+				}
+				
+				if(inThisWindowOutput)
+				{					
+					document.getElementById("solutionContainer").style.display="";
+					document.getElementById("solutionHeader").style.backgroundColor = headerBackgroundColor;
+					document.getElementById("solution").innerHTML = "<pre>" + data + "</pre>";				
+				}
+			}
 		}
 		
+		function isPopupBlocked(testPopup)
+		{	
+			var popupBlocked = false;
+			if (testPopup==null ||  typeof(testPopup) == "undefined" || testPopup.outerWidth == 0  || testPopup.outerHeight == 0 || testPopup.test == "undefined")
+			{	
+				//Test for most browsers
+				popupBlocked = true;
+			}
+			else 
+			{
+				//Test for chrome
+				testPopup.onload = function() {
+					setTimeout(function() {
+						if (testPopup.screenX === 0) {
+							popupsBlocked = true;
+						} 
+					}, 0);
+				};
+			}
+			
+			return popupBlocked;
+		}
 			
 		function expand()
 		{
 			if(fullwindow) //Contract
 			{
+				document.getElementById("titleContainer").style.display = "";
+				document.getElementById("creditsContainer").style.display = "";
+				
+				document.getElementById("GTEContainer").style.padding = "2px 5px 5px 5px";
+				document.getElementById("GTEContainer").style.border ="1px solid #808080";
+				
+				document.getElementById("GTEContainer").style.height = "580px";
 				document.getElementById("GTEContainer").style.width = "85%";
+				document.getElementById("solutionContainer").style.width = "85%";
+
 				document.getElementById("expandButton").innerHTML = "Expand";
-				document.getElementById("flashContainer").style.height = "580px";
 			}
 			else //Expand
 			{
-				document.getElementById("GTEContainer").style.width = "99%";
+				//Hide title and credits
+				document.getElementById("titleContainer").style.display = "none";
+				document.getElementById("creditsContainer").style.display = "none";
+				
+				//Remove borders
+				document.getElementById("GTEContainer").style.padding = "";
+				document.getElementById("GTEContainer").style.border ="";
+	
+				//Maximize GTEContainer & solutionContainer
+				document.getElementById("GTEContainer").style.height = "100%"; 
+				document.getElementById("GTEContainer").style.width = "100%";
+				document.getElementById("solutionContainer").style.width = "100%";
+				
+				//Change button text
 				document.getElementById("expandButton").innerHTML = "Contract";
-				document.getElementById("flashContainer").style.height = getFlashContainerExpandedSize(); //?
 			}
 			
 			fullwindow = !fullwindow;
 		}
-		
- 		function getFlashContainerExpandedSize()
-		{
-			var pixels = document.body.clientHeight - document.getElementById("titleContainer").offsetHeight - 50;
-			return ""+pixels+"px";
-		} 
 		
 	</script>
 	<style type="text/css">
@@ -102,10 +170,9 @@
 			<em style="font-size: 13px; font-family: Helvetica; color: #a0a0a0;">Build, explore and solve extensive form games.</em>
 		</div>
 	</div>
-	<div id="GTEContainer" style="text-align: left; width: 85%; margin: auto; background-color: #B7BABC; padding: 2px 5px 5px 5px; border: 1px solid #808080;">
+	<div id="GTEContainer" style="position: relative; text-align: left; width: 85%; margin: auto; background-color: #B7BABC;  padding: 2px 5px 5px 5px; border: 1px solid #808080;">
 		<!-- <div style="background-color: #e0e0e0; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;">Build</div> -->
-		<div id="flashContainer">
-			<div id="flashContent">			
+			<div id="flashContainer" style="height: 100%; position: absolute; top: 0px; left: 0px;" >			
 				<p>
 					To view this page ensure that Adobe Flash Player version 
 					10.0.0 or greater is installed. 
@@ -120,12 +187,14 @@
 						<param name="movie" value="GuiBuilder.swf" />
 						<param name="quality" value="high" />
 						<param name="bgcolor" value="white" />
+						<param name="wmode" value="transparent">
 						<param name="allowScriptAccess" value="sameDomain" />
 						<param name="allowFullScreen" value="true" />
 						<!--[if !IE]>-->
 						<object type="application/x-shockwave-flash" data="GuiBuilder.swf" width="100%" height="100%">
 							<param name="quality" value="high" />
 							<param name="bgcolor" value="white" />
+							<param name="wmode" value="transparent">
 							<param name="allowScriptAccess" value="sameDomain" />
 							<param name="allowFullScreen" value="true" />
 						<!--<![endif]-->
@@ -144,18 +213,21 @@
 					</object>
 				</noscript>	
 			</div>
-		</div>
-		<div id="solutionHeader" style="background-color: #00ff6b; color: #003300; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold; margin-top: 5px; display: none;">&#160;</div>
-		<div id="solution" style="background-color: #ffffff; border: #808080 solid 1px; border-top: 0; font-size: 12px; padding: 3px 5px 3px 5px; display: none; overflow: auto;">		
+		<button id="expandButton" style="position: absolute; top: 3px; right: 3px;" type="button" onclick="expand()">Expand</button><br/>
+	</div>
+	
+	<div id="solutionContainer" style="text-align: left; width: 85%; margin: auto; background-color: #B7BABC; display: none; padding: 2px 5px 5px 5px; border: 1px solid #808080;">
+		<div id="solutionHeader" style="background-color: #00ff6b; color: #003300; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold; margin-top: 5px; display: block;">&#160;</div>
+		<div id="solution" style="background-color: #ffffff; border: #808080 solid 1px; border-top: 0; font-size: 12px; padding: 3px 5px 3px 5px; display: block; overflow: auto;">		
 		</div>
 	</div>
-	<div style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
+
+	<div id="creditsContainer" style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
 		<div>
-		<button id="expandButton" type="button" onclick="expand()">Expand</button><br/>
 		<div style="display: inline-block; margin-bottom: 5px;">Last modified: yyyy-MM-dd hh:mm GMT</div><br/>
 		<!--  Copyright 2010 <span style="color: #ffffff;">Mark Egesdal</span><br/> -->
 		Developed by <span style="color: #ffffff;">Mark Egesdal</span> et al.<br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.
 		</div>
-	</div>
+	</div> 
 </body>
 </html>

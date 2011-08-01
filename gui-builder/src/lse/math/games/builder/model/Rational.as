@@ -1,6 +1,14 @@
 package lse.math.games.builder.model 
 {		
+	import util.Log;
+
 	/**
+	 * Class that represents numbers as fractions: with numerator and denominator. </p>
+	 * It contains:
+	 * <ul><li>Integers acting as numerator and denominator</li>
+	 * <li>Functions for creating rationals from Strings and numbers</li>
+	 * <li>Functions to operate with rationals</li>
+	 * 
 	 * @author Mark
 	 */
 	public class Rational
@@ -14,6 +22,11 @@ package lse.math.games.builder.model
 		private var _num:int;
 		private var _den:int;
 		
+		private var log:Log = Log.instance;
+				
+		
+		
+		/** Creates a new rational, reduced, equivalent to 'num'/'den' */
 		public function Rational(num:int, den:int)
 		{
 			_num = num;
@@ -23,12 +36,31 @@ package lse.math.games.builder.model
 			}
 		}
 		
+		/** Numerator */
+		public function get num():int { return _num; }
+		
+		/** Denominator */
+		public function get den():int { return _den; }
+		
+		/** If the fraction is 0/0 */
+		public function get isNaN():Boolean { return _den == 0 && _num == 0; }
+		
+		/** If the number is finite (the denominator isn't 0) */
+		public function get isFinite():Boolean { return _den != 0; }
+		
+		/** Float value of the rational */
+		public function get floatValue():Number { return (Number(_num)/Number(_den)); }		
+		
+		
+		
+		/** Returns a new rational with the same value as this, with opposite sign */
 		public function negate():Rational
 		{
 			if (_num == 0) return this;
 			return new Rational(-_num, _den); 
 		}
 		
+		/** Returns the product of this rational, times 'b*/
 		public function multiply(b:Rational):Rational
 		{
 			if (_num == 0 || b.num == 0) return ZERO;
@@ -37,6 +69,7 @@ package lse.math.games.builder.model
 			return c;
 		}
 		
+		/** Returns the difference between this rational and 'b' (this - b) */
 		public function subtract(b:Rational):Rational
 		{
 			if (b.num == 0) {
@@ -49,6 +82,7 @@ package lse.math.games.builder.model
 			return c;
 		}
 		
+		/** Returns the sum of this rational and 'b' */
 		public function add(b:Rational):Rational
 		{
 			if (_num == 0) return b;
@@ -58,22 +92,31 @@ package lse.math.games.builder.model
 			return c;
 		}
 		
+		/** Returns true if this rational is less than 'other' */
 		public function isLessThan(other:Rational):Boolean
 		{			
 			return (compareTo(other) < 0);
 		}
 		
+		/** Returns true if this rational is greater than 'other' */
 		public function isGreaterThan(other:Rational):Boolean
 		{
 			return (compareTo(other) > 0);
 		}
 		
+		/** Returns true if this rational and 'other' are equivalent */
 		public function equals(other:Rational):Boolean
 		{
 			return (compareTo(other) == 0);
 		}
 		
-		public function compareTo(other:Rational):int
+		/*
+		 * Compares this rational against 'b'.
+		 * @return 1: If this is greater than 'b'<br>
+		 * -1: If this is lower than 'b'<br>
+		 * 0: if both are equal
+		 */
+		private function compareTo(other:Rational):int
 		{
 			if (!isFinite && !other.isFinite) {
 				if ((_num > 0 && other.num > 0) || (_num < 0 && other.num < 0)) {
@@ -109,15 +152,7 @@ package lse.math.games.builder.model
 			return (diff.num == 0 ? 0 : (diff.num < 0 ? 1 : -1));
 		}
 		
-		public function toString():String
-		{
-			if (this.isNaN) return "NaN";
-			else if (!this.isFinite) {
-				return ((_num < 0) ? "-" : "+") + "Infinity";
-			}
-			return _num + (_den != 1 ? "/" + _den : "");
-		}
-		
+		/** Returns a Rational parsed from a String input */
 		public static function parse(s:String):Rational
 		{
 			var fraction:Array = s.split("/");
@@ -130,7 +165,7 @@ package lse.math.games.builder.model
 				return new Rational(num, den);
 			} else {
 				var dec:Number = parseFloat(s);
-				trace("getting value of " + dec.toString());
+
 				if (!isNaN(dec)) {
 					return valueOf(dec);
 				} else {
@@ -139,6 +174,7 @@ package lse.math.games.builder.model
 			}
 		}
 		
+		/** Returns a Rational containing the value of a number */
 		public static function valueOf(dec:Number):Rational
 		{
 			var nnext:Number, dnext:Number;
@@ -151,7 +187,7 @@ package lse.math.games.builder.model
                 xfl < Number(int.MIN_VALUE))
             {
 				return dec > 0 ? POS_INFINITY : NEG_INFINITY;
-                //throw new Error(x + " is too large");
+                Log.instance.add(Log.ERROR_HIDDEN, x + " is too large");
             }
 
             var n0:int = 1;
@@ -182,6 +218,7 @@ package lse.math.games.builder.model
 			return new Rational(n1, d1);            
 		}
 		
+		/** Returns the Greatest Common Divisor of two ints */
 		public static function gcd(a:int, b:int):int
 		{
 			var c:int;
@@ -204,16 +241,11 @@ package lse.math.games.builder.model
 			return a;
 		}
 		
-		public function get num():int { return _num; }
-		public function get den():int { return _den; }
-		public function get isNaN():Boolean { return _den == 0 && _num == 0; }
-		public function get isFinite():Boolean { return _den != 0; }
-		public function get floatValue():Number { return (Number(_num)/Number(_den)); }		
-		
+		// Sums 'b' to this rational, and reduces the result afterwards
 		private function addEq(b:Rational):void
 		{
 			if (this == Rational.ONE || this == Rational.ZERO) {
-				throw new Error("altering state of const var...");
+				log.add(Log.ERROR_THROW, "altering state of const var...");
 			}
 			if (_den == b.den) {
 				_num += b.num;
@@ -225,10 +257,11 @@ package lse.math.games.builder.model
 			reduce();
 		}
 		
+		// Multiplies 'b' to this rational, and reduces the result afterwards
 		private function mulEq(b:Rational):void
 		{
 			if (this == Rational.ONE || this == Rational.ZERO) {
-				throw new Error("altering state of const var...");
+				log.add(Log.ERROR_THROW, "altering state of const var...");
 			}
 			
 			_num *= b.num;
@@ -236,10 +269,11 @@ package lse.math.games.builder.model
 			reduce();
 		}
 		
+		// Reduces the fraction until numerator and denominator have no common multiples
 		private function reduce():void
 		{
 			if (this == Rational.ONE || this == Rational.ZERO) {
-				throw new Error("altering state of const var...");
+				log.add(Log.ERROR_THROW, "altering state of const var...");
 			}
 			
 			if (_num != 0) {
@@ -255,6 +289,15 @@ package lse.math.games.builder.model
 			} else {
 				_den = 1;
 			}
+		}
+		
+		public function toString():String
+		{
+			if (this.isNaN) return "NaN";
+			else if (!this.isFinite) {
+				return ((_num < 0) ? "-" : "+") + "Infinity";
+			}
+			return _num + (_den != 1 ? "/" + _den : "");
 		}
 	}
 }

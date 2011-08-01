@@ -22,11 +22,11 @@ package lse.math.games.builder.model
 			var child12:Node = root.newChild();			
 			var child22:Node = root.newChild();			
 			
-			var iset1:Iset = new Iset(player, tree);
+			var iset1:Iset = new Iset(player);
 			iset1.insertNode(child11);
 			iset1.insertNode(child12);
 			
-			var iset2:Iset = new Iset(player, tree);
+			var iset2:Iset = new Iset(player);
 			iset2.insertNode(child21);
 			iset2.insertNode(child22);
 			

@@ -1,5 +1,7 @@
 package lse.math.games.builder.viewmodel 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.presenter.IAction;
@@ -13,13 +15,22 @@ package lse.math.games.builder.viewmodel
 	 */
 	public class DepthAdjuster implements IAction
 	{
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
 		
 		public function DepthAdjuster() {}
 		
 		public function doAction(grid:TreeGrid):void
-		{						
+		{				
+			var prevTime:int = getTimer();
+			
 			alignDepths(grid);
 			sortOutCollisions(grid);
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
 		public function get changesData():Boolean {

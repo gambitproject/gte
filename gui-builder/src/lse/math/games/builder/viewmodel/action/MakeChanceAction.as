@@ -1,5 +1,7 @@
 package lse.math.games.builder.viewmodel.action 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.presenter.IAction;
@@ -18,7 +20,13 @@ package lse.math.games.builder.viewmodel.action
 		private var _nodeId:int = -1;
 		
 		private var _onDissolve:IAction;
-				
+			
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
+		
 		public function MakeChanceAction(iset:Iset, node:Node) 
 		{			
 			if (iset != null) _isetId = iset.idx;
@@ -32,6 +40,8 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function doAction(grid:TreeGrid):void
 		{			
+			var prevTime:int = getTimer();
+			
 			var iset:Iset = grid.getIsetById(_isetId);
 			if (iset == null) {
 				var node:Node = grid.getNodeById(_nodeId);
@@ -45,7 +55,9 @@ package lse.math.games.builder.viewmodel.action
 				if (dissolve) {
 					_onDissolve.doAction(grid);
 				}
-			}			
+			}
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
 		public function get changesData():Boolean {

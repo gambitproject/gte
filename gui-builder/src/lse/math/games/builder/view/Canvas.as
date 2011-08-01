@@ -13,9 +13,7 @@ package lse.math.games.builder.view
 	import flash.text.engine.TextElement;
 	import flash.text.engine.TextLine;
 	import flash.utils.getTimer;
-	
-	import mx.controls.Alert;
-	
+		
 	import mx.core.UIComponent;
 	
 	/**	 

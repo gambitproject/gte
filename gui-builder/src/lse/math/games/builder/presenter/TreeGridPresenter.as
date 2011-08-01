@@ -2,6 +2,7 @@ package lse.math.games.builder.presenter
 {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
@@ -13,23 +14,29 @@ package lse.math.games.builder.presenter
 	import flash.net.FileReference;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import flash.utils.ByteArray;
+	import flash.utils.getTimer;
 	
 	import lse.math.games.builder.fig.FigFontManager;
 	import lse.math.games.builder.fig.TreeGridFigWriter;
 	import lse.math.games.builder.io.ExtensiveFormXMLWriter;
+	import lse.math.games.builder.io.FileManager;
+	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.NormalForm;
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.model.Strategy;
 	import lse.math.games.builder.view.Canvas;
+	import lse.math.games.builder.view.MouseScroller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	import mx.collections.*;
 	import mx.controls.Alert;
 	import mx.events.*;
 	import mx.graphics.codec.PNGEncoder;
+	import mx.olap.aggregators.MinAggregator;
 	import mx.rpc.http.HTTPService;
 	
 	import util.Log;
@@ -40,46 +47,41 @@ package lse.math.games.builder.presenter
 	public class TreeGridPresenter
 	{
 		private var _canvas:Canvas;
-		
-		private var _actionHandler:ActionHandler = new ActionHandler();		
+		private var _fileManager:FileManager;  
+		private var _actionHandler:ActionHandler;		
 		private var _grid:TreeGrid;
 		
 		private var _gridData:ArrayCollection = new ArrayCollection();		
 		private var _getClickAction:Function = null;
 		private var _getDataUpdateAction:Function = null;
+				
+		private var log:Log = Log.instance;
 		
-		private var _fileName:String = "Untitled";
-		
-		private var _log:Log = Log.instance;
-		private var _lastLogMessage:String = _log.lastMessage;
+//		private var _log:Log = Log.instance;
+//		private var _lastLogMessage:String = _log.lastMessage;
 		
 		//private var _modelDirty:Boolean = true;		
-		
+				
 		public function TreeGridPresenter() 
 		{									
-			_gridData.addEventListener("collectionChange", onOutcomeEdit);	
+			_gridData.addEventListener("collectionChange", onOutcomeEdit);
+			_fileManager = new FileManager(this);
+			_actionHandler  = new ActionHandler(_fileManager);
 		}
 		
-		//TODO: This doesn't update the gui
-		public function get lastLogMessage():String
-		{
-			_lastLogMessage = _log.lastMessage;
-			return _lastLogMessage;
-		}
-		
-		[Bindable]
-		public function get fileName():String {
-			return _fileName;
-		}
-		
-		public function set fileName(value:String):void {
-			_fileName = value;
-		}
+//		//TODO: This doesn't update the gui
+//		public function get lastLogMessage():String
+//		{
+//			_lastLogMessage = _log.lastMessage;
+//			return _lastLogMessage;
+//		}
 		
 		public function set grid(value:TreeGrid):void {
 			_grid = value;
 		}
 		
+		/** Current canvas the application is running */
+		public function get canvas():Canvas { return _canvas; }
 		public function set canvas(canvas:Canvas):void {
 			if (canvas == null) {
 				throw new Error("Cannot assign a null canvas")
@@ -88,27 +90,12 @@ package lse.math.games.builder.presenter
 			_canvas.addEventListener(MouseEvent.MOUSE_WHEEL, mouseZoomHandle);
 			invalidate(true, true, true);
 		}
-
 		
-		[Bindable]
-		public function get player1Color():uint {
-			return _grid.player1Color;
-		}
-		
-		public function set player1Color(value:uint):void {
-			_grid.player1Color = value;
-			invalidate(false, false, true);
-		}
-		
-		[Bindable]
-		public function get player2Color():uint {
-			return _grid.player2Color;
-		}
-		
-		public function set player2Color(value:uint):void {
-			_grid.player2Color = value;
-			invalidate(false, false, true);
-		}
+		/** 
+		 * Object that manages all file managin operations: 
+		 * saving, loading, filename changing, etc.
+		 */
+		public function get fileManager():FileManager { return _fileManager; }
 		
 		[Bindable]
 		public function get isZeroSum():Boolean {			
@@ -141,32 +128,13 @@ package lse.math.games.builder.presenter
 		}
 		
 		[Bindable]
-		public function get fontFamily():String {			
-			return _grid.fontFamily;
-		}
-		
-		public function set fontFamily(value:String):void {
-			_grid.fontFamily = value;
-			invalidate(false, false, true); //TODO: measure needs invalidation if we do any measurement based on label sizes
-		}
-		
-		[Bindable]
 		public function get getClickAction():Function {			
 			return _getClickAction;
 		}
 		
 		public function set getClickAction(value:Function):void {
 			_getClickAction = value;
-			var invalidateDisplay:Boolean = false;
-			if (selectedNode >= 0) {
-				selectedNode = -1;
-				invalidateDisplay = true;
-			}
-			if (_grid.mergeBase != null) {			
-				_grid.mergeBase = null;
-				invalidateDisplay = true;				
-			}
-			invalidate(false, false, invalidateDisplay);
+			removeSelected(false);
 		}
 		
 		[Bindable]
@@ -232,6 +200,49 @@ package lse.math.games.builder.presenter
 				changes = true;			
 			}
 			return changes;
+		}
+		
+		private var lastSelectedNode:int = -1;
+		private var lastMergeBase:Iset = null;
+		
+		/* Removes the node and or iset currently selected. If keepCopy is true, values are kept before removing them, for later restoration using restoreSelected() */
+		private function removeSelected(keepCopy : Boolean):void
+		{
+			var invalidateDisplay:Boolean = false;
+			if (selectedNode >= 0) {
+				if(keepCopy)
+					lastSelectedNode = selectedNode;
+				
+				selectedNode = -1;
+				invalidateDisplay = true;
+			}
+			if (_grid.mergeBase != null) {	
+				if(keepCopy)
+					lastMergeBase = _grid.mergeBase;
+				
+				_grid.mergeBase = null;
+				invalidateDisplay = true;				
+			}
+			invalidate(false, false, invalidateDisplay);
+		}
+		
+		/* Restores last selected node and or Iset, removed using removeSelected() function */
+		private function restoreSelected():void
+		{
+			var invalidateDisplay:Boolean = false;
+			if(lastSelectedNode != -1)
+			{
+				selectedNode = lastSelectedNode;
+				lastSelectedNode = -1;
+				invalidateDisplay = true;
+			}
+			if(lastMergeBase != null)
+			{
+				_grid.mergeBase = lastMergeBase;
+				lastMergeBase = null;
+				invalidateDisplay = true;
+			}
+			invalidate(false, false, invalidateDisplay);
 		}
 		
 		private var _modelDirty:Boolean = true;
@@ -306,6 +317,15 @@ package lse.math.games.builder.presenter
 			}
 		}
 		
+		/** Sets zoom to 100% */
+		private function resetZoom():void
+		{
+			_canvas.painter.scale = 1.0;
+			_grid.scale = 1.0;
+			invalidate(false, true, true);
+		}
+		
+		/** Zooms in by increasing the scale in 1.1 */
 		public function zoomIn():void
 		{
 			var oldScale:Number = _canvas.painter.scale;
@@ -315,9 +335,11 @@ package lse.math.games.builder.presenter
 			}
 			
 			_canvas.painter.scale = newScale;
+			_grid.scale = newScale;
 			invalidate(false, true, true);
 		}
 		
+		/** Zooms out by dividing the scale in 1.1 */
 		public function zoomOut():void
 		{
 			var oldScale:Number = _canvas.painter.scale;
@@ -327,9 +349,46 @@ package lse.math.games.builder.presenter
 			}
 			
 			_canvas.painter.scale = newScale;
+			_grid.scale = newScale;
 			invalidate(false, true, true);
 		}
 		
+		/** Adjusts zoom to show the tree optimally */
+		public function zoomAdjust():void
+		{
+			var scroller:DisplayObjectContainer = _canvas.parent;
+						
+			var width:Number = _canvas.painter.drawWidth;
+			var height:Number = _canvas.painter.drawHeight;
+			
+			var oldScale:Number = _canvas.painter.scale;
+			var newScale:Number = oldScale;
+			
+			if(scroller.width > width && scroller.height > height)
+			{
+				//Zoom in
+				newScale = oldScale * Math.min(scroller.width/width, scroller.height/height);
+				if(newScale > 5)
+				{
+					log.add(Log.HINT, "The tree is still very small, try adding some nodes on it before auto fitting it :)");
+					newScale = oldScale;
+				}
+			}
+			else if(scroller.width < width || scroller.height < height)
+			{
+				//Zoom out
+				newScale = oldScale * Math.min(scroller.width/width, scroller.height/height);
+			}
+
+			_canvas.painter.scale = newScale;
+			_grid.scale = newScale;
+			invalidate(false, true, true);
+		}
+		
+		/** 
+		 * Creates an action from the 'getAction' function passed as parameter
+		 *  Then it executes the action and invalidates whatever is necessary.
+		 */
 		public function doAction(getAction:Function):void
 		{                   
 			var action:IAction = getAction(_grid);
@@ -339,6 +398,11 @@ package lse.math.games.builder.presenter
 			}
 		}
 		
+		/**
+		 * Creates an action from the 'getClickAction' function property, and the x and y coords passed as arguments
+		 * <br>Then it executes the action and invalidates whatever is necessary.
+		 * <br>It also deselects a node if it was selected
+		 */
 		public function doActionAt(x:Number, y:Number):void
 		{
 			if(getClickAction!= null)
@@ -350,12 +414,14 @@ package lse.math.games.builder.presenter
 					invalidate(action.changesData, action.changesSize, action.changesDisplay);
 				}
 			}
-		}
+		}		
 		
 		public function undo():void
 		{             
 			if (_actionHandler.undo(_grid)) {
 				invalidate(true, true, true);
+			} else {
+				log.add(Log.HINT, "No more operations to undo");
 			}
 		}
 		
@@ -363,9 +429,13 @@ package lse.math.games.builder.presenter
 		{             
 			if (_actionHandler.redo(_grid)) {
 				invalidate(true, true, true);
+			} else {
+				log.add(Log.HINT, "No more operations to redo");
 			}
 		}	
-				
+		
+		//When the values in the table at the right hand side get changed, this method is executed, 
+		//which creates and processes a series of actions depending on the things modified
 		private function onOutcomeEdit(event:CollectionEvent):void
 		{
 			if (event.kind == CollectionEventKind.UPDATE && _modelDirty) {
@@ -386,7 +456,8 @@ package lse.math.games.builder.presenter
 			}
 		}
 		
-		private function invalidate(model:Boolean, canvasSize:Boolean, display:Boolean):void 
+		/** Invalidates display characteristics that need to be redrawn */
+		public function invalidate(model:Boolean, canvasSize:Boolean, display:Boolean):void 
 		{
 			if (model) {
 				updateViewModel();				
@@ -416,40 +487,19 @@ package lse.math.games.builder.presenter
 			return rv.join(" ");
 		}
 		
+		
+		
+		/* ---- File Managing ---- */
+		
+		/** 
+		 * Resets everything
+		 */
 		public function clear():void
 		{
+			resetZoom();
 			_actionHandler.reset(_grid);
-			fileName = "Untitled";
+			fileManager.clear();
 			invalidate(true, true, true);
-		}
-		
-		//TODO: IOHandler from here down...
-		private static const FILE_OPEN_TYPES:Array = [new FileFilter("*.xml", "*.xml")];
-		private static const FILE_SAVE_TYPES:Array = [".xml", ".fig", ".png"];
-		private var fr:FileReference = null;
-		
-		/**
-		 * Updates the name of the current tree taking it from the file associated to it
-		 * Should be called after saving or loading a file
-		 */
-		public function updateName():void { //?
-			if(fr!=null && fr.name!=null)
-			{
-				var newFileName:String = fr.name;
-				
-				//Removes file extension (There might be a better way)
-				for(var i:int = 0; i<FILE_SAVE_TYPES.length; i++)
-				{
-					var ext:String = FILE_SAVE_TYPES[i];
-					if(newFileName.substr(newFileName.length-ext.length, ext.length).toLowerCase() == ext)
-					{
-						newFileName = newFileName.substr(0, newFileName.length-ext.length);
-						break;
-					}
-				}
-				
-				fileName = newFileName;			
-			}
 		}
 		
 		/**
@@ -458,14 +508,11 @@ package lse.math.games.builder.presenter
 		public function fig():void
 		{
 			var out:TreeGridFigWriter = new TreeGridFigWriter();
+			removeSelected(true);
 			var figStr:String = out.paintFig(_canvas.painter, _canvas.width, _canvas.height, _grid);
+			restoreSelected();
 
-			fr = new FileReference();
-			
-			fr.addEventListener(Event.COMPLETE, onSaveComplete);
-			fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-
-			fr.save(figStr, fileName+".fig"); 
+			fileManager.saveFig(figStr);
 		}
 		
 		/**
@@ -478,31 +525,29 @@ package lse.math.games.builder.presenter
 		  
 		  var ba:ByteArray = (new PNGEncoder()).encode(bd);
 		  
-		  fr = new FileReference();
-		  
-		  fr.addEventListener(Event.COMPLETE, onSaveComplete);
-		  fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-
-		  fr.save(ba, fileName+".png");
+		  fileManager.saveImage(ba);
 		}
 		
 		/**
 		 * Opens a dialog for saving the tree in xml format
 		 */
 		public function save():void 
-		{
-			var xmlWriter:ExtensiveFormXMLWriter = new ExtensiveFormXMLWriter();
-			var treeXML:XML = xmlWriter.write(_grid);		
-			
-			fr = new FileReference();
-			
-			fr.addEventListener(Event.COMPLETE, onSaveComplete);
-			fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-
-			fr.save(treeXML.toXMLString(), fileName+".xml");
+		{			
+			fileManager.saveXML(saveCurrentTreeToXML());
 		}
 		
-		public function loadXML(xml:XML):void
+		/**
+		 * Returns a XML file with the current tree packaged in it
+		 */
+		public function saveCurrentTreeToXML():XML {
+			var xmlWriter:ExtensiveFormXMLWriter = new ExtensiveFormXMLWriter();
+			return xmlWriter.write(_grid);		
+		}
+		
+		/**
+		 * Loads a tree from xml, deleting any previous states
+		 */
+		public function loadTreeFromXML(xml:XML):void
 		{			
 			_actionHandler.load(xml, _grid);
 			isZeroSum = false;			
@@ -514,87 +559,9 @@ package lse.math.games.builder.presenter
 		 */
 		public function open():void
 		{
-			//create the FileReference instance
-			fr = new FileReference();
-
-			//listen for when they select a file
-			fr.addEventListener(Event.SELECT, onFileSelect);
-
-			//listen for when then cancel out of the browse dialog
-			fr.addEventListener(Event.CANCEL, onCancel);
-						
-			//open a native browse dialog that filters for text files
-			fr.browse(FILE_OPEN_TYPES);
+			fileManager.openFile();
 		}
 
-		/************ Browse Event Handlers **************/
-
-		//called when the user selects a file from the browse dialog
-		private function onFileSelect(e:Event):void
-		{						
-			//listen for when the file has loaded
-			fr.addEventListener(Event.COMPLETE, onLoadComplete);
-
-			//listen for any errors reading the file
-			fr.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-			
-			fr.addEventListener(Event.OPEN, onFileOpen);
-
-			//load the content of the file
-			fr.load();
-		}
-
-		//called when the user cancels out of the browser dialog
-		private function onCancel(e:Event):void
-		{
-			//trace("File Browse Canceled");
-			fr = null;
-		}
-		
-		private function onFileOpen(e:Event):void
-		{
-			//trace("File Opened for loading");
-		}
-
-		/************ Select Event Handlers **************/
-
-		//called when the file has completed loading
-		//TODO: error handling of XML parsing?
-		private function onLoadComplete(e:Event):void
-		{			
-			//read the bytes of the file as a string
-			var text:String = fr.data.readUTFBytes(fr.data.bytesAvailable);		
-			
-			var xml:XML = new XML(text);						
-			loadXML(xml);
-			
-			updateName();
-			
-			fr = null;
-		}
-		
-		//called if an error occurs while loading the file contents
-		private function onLoadError(e:IOErrorEvent):void
-		{
-			trace("Error loading file : " + e.text);
-		}
-		
-		//called when the file has completed saving, independently of the file saving command chosen
-		private function onSaveComplete(evt:Event):void{
-			//trace("File saved correctly");
-			updateName();
-			
-			fr = null;
-		}
-		
-		//called if an error occurs while saving the file contents
-		private function onSaveError(e:IOErrorEvent):void
-		{
-			trace("Error saving file : " + e.text);
-		}
-		
-		
-		
 		// URL Request Handler below here...
 		public function runAlgorithm(algo:Object, seed:String):void
 		{
@@ -659,6 +626,7 @@ package lse.math.games.builder.presenter
 			for each (var strat:Strategy in strats) {				
 				line.push(strat.seqStr(true, ""));
 			}			
+						
 			return line.join(" ");
 		}
 	}

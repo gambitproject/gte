@@ -1,13 +1,15 @@
 package lse.math.games.builder.fig
 {
-	import flash.text.engine.FontPosture;
-	import flash.text.engine.FontWeight;
 	import flash.text.Font;
 	import flash.text.FontStyle;
-	import flash.text.FontType;
+	import flash.text.engine.FontPosture;
+	import flash.text.engine.FontWeight;
+	
+	import util.Log;
 	
 	/**	
 	 * Class that manages the collection of fonts embedded in the fig 
+	 * 
 	 * @author Mark Egesdal
 	 */
 	public class FigFontManager
@@ -138,9 +140,14 @@ package lse.math.games.builder.fig
 		private static var FontPalladioBoldItalic:Class;		
 
 		
+		
 		public function FigFontManager() {}
 		
+		
+		
 		private static var fontFamilies:Array = null;
+		
+		/** Returns an array with all the available font families */
 		public static function getAvailableFontFamilies():Array 
 		{			
 			if (fontFamilies == null) {
@@ -161,22 +168,21 @@ package lse.math.games.builder.fig
 			return baseFonts;
 		}
 		
-		/** Returns a font's code in the collection of fonts of the fig*/
+		/** Returns a font's code in the enum of fonts of the fig*/
 		public static function figEnumValue(fontFamily:String, weight:String, posture:String):int
 		{
 			var enum:int = -1;
 			if (_fontFamilyEnums.hasOwnProperty(fontFamily)) {
 				enum = _fontFamilyEnums[fontFamily];
-				//TODO: Check because possibly it should be enum += 1 for BOLD and +=2 for ITALIC
 				if (weight == FontWeight.BOLD) {
 					enum += 2;
 				}
 				if (posture == FontPosture.ITALIC) {
 					enum += 1;
 				}
-			} /*else {
-				trace("font " + fontFamily + " is not found.  Using default " + enum);
-			}*/
+			} else {
+				Log.instance.add(Log.ERROR_HIDDEN, "font " + fontFamily + " is not found.  Using default " + enum);
+			}
 			
 			return enum;
 		}

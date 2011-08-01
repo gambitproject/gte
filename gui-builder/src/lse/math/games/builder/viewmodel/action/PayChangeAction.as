@@ -1,10 +1,13 @@
 package lse.math.games.builder.viewmodel.action 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Outcome;
 	import lse.math.games.builder.model.Rational;
-	import lse.math.games.builder.viewmodel.TreeGrid;
 	import lse.math.games.builder.presenter.IAction;
+	import lse.math.games.builder.viewmodel.TreeGrid;
+	
 	
 	/**	
 	 * Changes the payoffs of a terminal node
@@ -19,6 +22,12 @@ package lse.math.games.builder.viewmodel.action
 		private var _pay1:Rational;
 		private var _pay2:Rational;
 		
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
+		
 		public function PayChangeAction(nodeId:int, pay1:Rational, pay2:Rational)
 		{
 			_nodeId = nodeId;
@@ -28,13 +37,19 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function doAction(grid:TreeGrid):void 		
 		{
+			var prevTime:int = getTimer();
+			
 			var node:Node = grid.getNodeById(_nodeId);
 			if (node != null && node.isLeaf) 
 			{	
-				var outcome:Outcome = (node.outcome == null ? node.makeTerminal() : node.outcome);					
-				outcome.setPay(grid.firstPlayer, _pay1);
-				outcome.setPay(grid.firstPlayer.nextPlayer, _pay2);					
+				var outcome:Outcome = (node.outcome == null ? node.makeTerminal() : node.outcome);	
+				if(_pay1!=null)
+					outcome.setPay(grid.firstPlayer, _pay1);
+				if(_pay2!=null)
+					outcome.setPay(grid.firstPlayer.nextPlayer, _pay2);					
 			}	
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
 		public function get changesData():Boolean {

@@ -14,7 +14,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Player;
 	
 	/**	 
-	 * Painter in charge of the background and the full tree, except from Isets
+	 * Painter in charge of the background and the full tree (including labels), except from Isets
 	 * @author Mark Egesdal
 	 */
 	public class TreeGridPainter extends AbstractPainter

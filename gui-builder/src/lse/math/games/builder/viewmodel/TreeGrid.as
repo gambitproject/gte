@@ -1,81 +1,121 @@
 package lse.math.games.builder.viewmodel 
 {	
-	import flash.events.Event;
-	import lse.math.games.builder.model.Node;
-	import lse.math.games.builder.model.Move;
-	import lse.math.games.builder.model.Iset;
-	import lse.math.games.builder.model.Outcome;
 	import lse.math.games.builder.model.ExtensiveForm;
-	import lse.math.games.builder.model.Player;	
-
+	import lse.math.games.builder.model.Iset;
+	import lse.math.games.builder.model.Node;
+	import lse.math.games.builder.settings.SCodes;
+	import lse.math.games.builder.settings.UserSettings;
+	
+	import util.Log;
+	
 	/**
+	 * Class extending the ExtensiveForm tree model, adding it extra functions
+	 * and properties, most of them related to the graphical representation. </p>
+	 * 
+	 * It contains:
+	 * <ul><li>Global graphical settings: Stroke widths, drawing diameters, margins, scale, rotation and distance between levels</li>
+	 * <li>Containers for selected items</li>
+	 * <li>The following 'special properties': If zeroSum is activated, if normal form is reduced, and the maxPayoff</li>
+	 * <li>Functions, apart from getters and setters, to create a TreeGrid, and to find, from
+	 * coordinates, nodes and isets<li></ul>
+	 * 
 	 * @author Mark Egesdal
 	 */
 	public class TreeGrid extends ExtensiveForm
 	{
-		public static const NODE_DIAM:Number = 10;
-		public static const ISET_DIAM:Number = 25;
+		public static const NODE_DIAM:Number = 7; //TODO: SETTING
+		public static const ISET_DIAM:Number = 25; //TODO: SETTING
 		
-		//TODO: Let rotation adjust these margins... or at least account for the label sizes in the min measurements
+		//TODO: Let rotation adjust these margins... or at least account 
+		//for the label sizes in the min measurements
 		public static const MIN_MARGIN_TOP:Number = 24;
 		public static const MIN_MARGIN_BOTTOM:Number = 24;
 		public static const MIN_MARGIN_LEFT:Number = 24;
 		public static const MIN_MARGIN_RIGHT:Number = 24;
 		
+		public var scale:Number = 1.0; //Current scale of the canvas 
 		private var _rotate:int = 0;
 		private var _leveldistance:int;
+		private var _linewidth:Number;
+		private var _ovallinewidth:Number;	
 
 		private var _mergeBase:Iset = null;
 		private var _selectedNodeId:int = -1;
+		
 		private var _isZeroSum:Boolean = true;
 		private var _isNormalReduced:Boolean = true;
-		private var _maxPayoff:Number = 25;
-		
-		private var _player1Color:uint;
-		private var _player2Color:uint;
-		
-		private var _fontFamily:String;	
-		
-		private var _linewidth:Number;
-		private var _ovallinewidth:Number;		
+		private var _maxPayoff:Number = 25; //TODO: PREFERENCE
 
+		private var userSettings:UserSettings = UserSettings.instance;
+		private var log:Log = Log.instance;
+		
+		
 		
 		public function TreeGrid() 
 		{
 			defaultTree();
-			defaultSettings();	
+			defaultSettings();
 		}
 		
+		//TODO: For all settings that can be chosen either from userSettings or from currentTreeSettings, 
+		//the getters should be the ones that control from which of the sources they return
 		
-		public function get rotate():int { return _rotate; }	
+		/** Direction of the tree, being 0 root-up, 1 root-left, 2 root-down, 3 root-right */
+		public function get rotate():int { return _rotate; }
+		public function set rotate(value:int):void
+		{
+			if(value < 0 || value > 3){
+				log.add(Log.ERROR_HIDDEN, "Bad rotation code: "+value);
+				_rotate = 0;
+			}
+			else
+				_rotate = value;
+		}
+		
+		/** Vertical distance in points/pixels between nodes in two consecutive levels */ 
 		public function get leveldistance():int { return _leveldistance; }
+		
+		/** Width in points/pixels of lines connecting nodes and lines forming isets */
 		public function get linewidth():int { return _linewidth; }
+		
+		/** Width in points/pixels of curves. Should be the same as linewidth, for aesthetical reasons */
 		public function get ovallinewidth():int { return _ovallinewidth; }		
 		
+		/** Id corresponding to the selected node. -1 if there is no node currently selected */
 		public function get selectedNodeId():int { return _selectedNodeId; }
 		public function set selectedNodeId(value:int):void { _selectedNodeId = value; }
 		
+		/** Iset 'selected' as a base for merging with another. Null if there isn't one selected */
 		public function get mergeBase():Iset { return _mergeBase; }
 		public function set mergeBase(value:Iset):void { _mergeBase = value; }
 		
-		public function get player1Color():uint { return _player1Color; }		
-		public function set player1Color(value:uint):void { _player1Color = value; }
+		/** Color of nodes, labels and payoffs of the first player */
+		public function get player1Color():uint { return userSettings.getValue(SCodes.PLAYER_1_COLOR) as uint; }		
 		
-		public function get player2Color():uint { return _player2Color; }		
-		public function set player2Color(value:uint):void { _player2Color = value; }
+		/** Color of nodes, labels and payoffs of the second player */
+		public function get player2Color():uint { return userSettings.getValue(SCodes.PLAYER_2_COLOR) as uint; }		
 		
-		public function get fontFamily():String { return _fontFamily; }		
-		public function set fontFamily(value:String):void { _fontFamily = value; }
+		/** Font family used as a default for labels in nodes, isets, labels and payoffs */
+		public function get fontFamily():String { return userSettings.getValue(SCodes.DEFAULT_FONT) as String; }	
 		
+		/** If each pair of payoffs sum 0 (two player only) */
+		//TODO: 3PLAYERCHECK 
 		public function get isZeroSum():Boolean { return _isZeroSum; }		
 		public function set isZeroSum(value:Boolean):void { _isZeroSum = value; }
 		
+		/** If the normal form is reduced. Just important in strategic form view */
 		public function get isNormalReduced():Boolean { return _isNormalReduced; }		
 		public function set isNormalReduced(value:Boolean):void { _isNormalReduced = value; }
 		
+		/** When creating random payoffs, maximum payoff possible to be created */
+		//TODO: I don't think this should be here. Could be either a preference, something that is selected when pressing the button,
+		//or other thing, but doesn't have much sense here
 		public function get maxPayoff():Number { return _maxPayoff; }		
 		public function set maxPayoff(value:Number):void { _maxPayoff = value; }			
 		
+		
+		
+		/** Creates a new tree with two players: 1 and 2, and one node */
 		public function defaultTree():void
 		{			
 			this.newPlayer("1");
@@ -85,10 +125,23 @@ package lse.math.games.builder.viewmodel
 			this.root.makeNonTerminal();
 		}
 		
+		/** Gives default values for some settings */
+		//TODO: Remove when SETTINGS system is finished
+		public function defaultSettings():void
+		{
+			_rotate = 0;
+			_leveldistance = 75; 
+			_linewidth = 1.0;  // line width for drawing Moves
+			_ovallinewidth = 1.0; // line width for drawing Isets	
+			//TODO: SETTINGS
+		}
+		
+		// Creates a TreeGridNode with a determinate 'number' (id)
 		override protected function newNode(number:int):Node {			
 			return new TreeGridNode(this, number);
 		}		
 		
+		/** Makes all the leaves in the tree non-terminal. It isn't needed currently */
 		public function leavesNonTerminal():void
 		{
 			var n:Node = this.root.firstLeaf;
@@ -97,38 +150,40 @@ package lse.math.games.builder.viewmodel
 				n = n.nextLeaf;
 			}
 		}
-
-		public function defaultSettings():void
-		{
-			_rotate = 0;
-			_leveldistance = 75;
-			_linewidth = 1.0;  // line width for drawing Moves
-			_ovallinewidth = 1.0; // line width for drawing Isets	
-			
-			player1Color = 0xFF0000; // Red
-			player2Color = 0x0000FF; // Blue
-			
-			fontFamily = "Times";
-		}
 		
+		/** 
+		 * Rotates clockwise one step the display of the tree
+		 */
+		[Deprecated(replacement="set rotate()")]
 		public function rotateRight():void
 		{
 			_rotate = ((_rotate + 3) % 4);
 		}
 
+		/** 
+		 * Rotates counterclockwise one step the display of the tree
+		 */
+		[Deprecated(replacement="set rotate()")]
 		public function rotateLeft():void
 		{
 			_rotate = ((_rotate + 1) % 4);
 		}		
 		
+		/** 
+		 * Looks if the point (x,y) given is inside the bounds of the iset.<br>
+		 * If it is, it returns the first node in the iset which is at the same depth level as the click.
+		 */ 
 		public function getNodeInIsetBeforeCoords(h:Iset, x:Number, y:Number, radius:Number):Node
 		{
+			//Gets all depths from nodes in the Iset
 			var depths:Vector.<int> = new Vector.<int>();
 			for (var mate:Node = h.firstNode; mate != null; mate = mate.nextInIset) {
 				if (depths.indexOf(mate.depth) < 0) {
 					depths.push(mate.depth);
 				}
 			}
+			
+			//Checks depth by depth, if the click is in bounds of the nodes in that level
 			var node:Node = null;
 			while (depths.length > 0 && node == null) {
 				node = getNodeInIsetBeforeCoordsAt(h, x, y, radius, depths.pop());
@@ -136,21 +191,33 @@ package lse.math.games.builder.viewmodel
 			return node;
 		}
 		
+		/** 
+		 * Looks if the point (x,y) given is inside the bounds of the iset, at the depth level given. <br>
+		 * If it is, it returns the first node in the iset which is at the same depth level as the click.
+		 */
 		public function getNodeInIsetBeforeCoordsAt(h:Iset, x:Number, y:Number, radius:Number, depth:int):Node
 		{
 			var before:TreeGridNode = h.firstNode as TreeGridNode;
 			while (before.depth != depth) {
 				before = before.nextInIset as TreeGridNode;
 				if (before == null) {
-					return null;
+					return null; 
 				}
 			}
 						
 			while (true) 
 			{
 				var after:TreeGridNode = before.nextInIsetAt(before.depth) as TreeGridNode;
-				if (after == null) {					
-					break;
+				if (after == null) {
+					//Checks if the point is inside the bounds of the last node (checking it using a square box
+					//instead of its real circular representation)
+					if ((before.xpos - radius < x)&&
+						(x < radius + before.xpos) &&
+						(before.ypos - radius < y)&&
+						(y < radius + before.ypos))
+						return before;
+					else
+						break;
 				}
 				var found:Boolean = true;				
 				
@@ -174,7 +241,6 @@ package lse.math.games.builder.viewmodel
 					// refine search		
 					// get line before before and after... find slope
 					var m:Number = (after.ypos - before.ypos) / (after.xpos - before.xpos);
-										
 					// handle common special cases
 					if (!isFinite(m)) {
 						if (before.ypos > after.ypos) {
@@ -214,7 +280,8 @@ package lse.math.games.builder.viewmodel
 			}			
 			return null;
 		}
-
+		
+		/** Searches for a node pertaining to the Iset 'h' in coordinates ('x','y'). If found, returns it, else returns null */
 		public function findNodeInIset(h:Iset, x:Number, y:Number):Node
 		{
 			var node:Node = h.firstNode;
@@ -229,11 +296,21 @@ package lse.math.games.builder.viewmodel
 			return null;
 		}
 		
+		/** Searches for a node in coordinates ('x', 'y'). If found, returns it, else returns null */
 		public function findNode(x:Number, y:Number):Node
 		{
 			return recFindNode(root, x, y);			
 		}
 		
+		//TODO: Improve this using binary search implemented with x coordinate, if possible
+		/*
+		* Recursive function that looks for a node near the pair of coords ('x', 'y')
+		* Stopping criteria: that the current node is near the coordinates
+		* Recursive expansion: to all of the node's children
+		*
+		* @return: the current node, if it is the one we're looking for; the found node coming 
+		* from a children return, or null if none of the before apply
+		*/
 		private function recFindNode(node:Node, x:Number, y:Number):Node
 		{
 			if (coordsInNode(node, x, y)) {				
@@ -251,17 +328,21 @@ package lse.math.games.builder.viewmodel
 			return rv;
 		}
 
-		// checks if the coordinates given correspond
-		// to a rectangle around each node defined by range
+		/* 
+		 * Checks if the coordinates given correspond to a square 
+		 * around each node which has a side of double the node diameter
+		 */ 
 		private function coordsInNode(node:Node, x:int, y:int):Boolean
 		{
+			var halfSide:Number = NODE_DIAM*scale;
 			var n:TreeGridNode = node as TreeGridNode;
-			return ((n.xpos - NODE_DIAM < x)&&
-					(x < NODE_DIAM + n.xpos) &&
-					(n.ypos - NODE_DIAM < y)&&
-					(y < NODE_DIAM + n.ypos));
+			return ((n.xpos - halfSide < x)&&
+					(x < halfSide + n.xpos) &&
+					(n.ypos - halfSide < y)&&
+					(y < halfSide + n.ypos));
 		}
 
+		/** Looks for an Iset in the given coords of the canvas, and returns it, or null if there isn't one */
 		public function findIset(x:int, y:int):Iset
 		{
 			var h:Iset = null;
@@ -273,12 +354,14 @@ package lse.math.games.builder.viewmodel
 			return h;
 		}
 		
-		// checks if the coordinates given are within
-		// to the area representing the given Iset
+		/* 
+		 * Checks if the coordinates given are within
+		 * to the area representing the given Iset
+		 */
 		private function coordsInIset(h:Iset, x:Number, y:Number):Boolean
 		{
 			var found:Boolean = true;
-			var radius:Number = TreeGrid.ISET_DIAM / 2;			
+			var radius:Number = ISET_DIAM * scale / 2;			
 			var node:Node = getNodeInIsetBeforeCoords(h, x, y, radius);
 			
 			if (node == null) {

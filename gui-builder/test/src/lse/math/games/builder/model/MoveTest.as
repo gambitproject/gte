@@ -12,7 +12,7 @@ package lse.math.games.builder.model
 		{
 			var tree:ExtensiveForm = new ExtensiveForm();
 			var node:Node = new Node(tree, 0);			
-			var iset:Iset = new Iset(Player.CHANCE, tree);
+			var iset:Iset = new Iset(Player.CHANCE);
 			iset.insertNode(node);
 			
 			var a:Move = iset.addMove(Player.CHANCE);
@@ -36,7 +36,7 @@ package lse.math.games.builder.model
 		{
 			var tree:ExtensiveForm = new ExtensiveForm();
 			var node:Node = new Node(tree, 0);			
-			var iset:Iset = new Iset(Player.CHANCE, tree);
+			var iset:Iset = new Iset(Player.CHANCE);
 			iset.insertNode(node);
 			
 			var a:Move = iset.addMove(Player.CHANCE);

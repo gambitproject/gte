@@ -10,7 +10,14 @@ package lse.math.games.builder.io
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.model.Rational;
 	
+	import mx.controls.Alert;
+	
 	/**	 
+	 * TODO: This class needs to be adapted to the new standard format in 
+	 * https://docs.google.com/viewer?a=v&pid=explorer&chrome=true&srcid=0B331281Yuj61ZTM2Y2M0YzMtODQyNi00NGVmLWI1MjctMDY0Mzc2ZGM2MjFj&hl=en_US
+	 * 
+	 * Also, a new NormalFormXMLReader and NormalFormXMLWriter will most probably be needed after the normalform importing is worked out
+	 * 
 	 * @author Mark Egesdal
 	 */
 	public class ExtensiveFormXMLReader
@@ -126,7 +133,7 @@ package lse.math.games.builder.io
 			
 			if (iset == null) {
 				var player:Player = (elem.@player != undefined) ? getPlayer(elem.@player) : Player.CHANCE;
-				iset = new Iset(player, tree);
+				iset = new Iset(player);
 				isets[id] = iset;
 				isetObjToId[iset] = id;
 			}
@@ -191,13 +198,13 @@ package lse.math.games.builder.io
 			var iset:Iset = null;
 			var player:Player = (elem.@player != undefined) ? getPlayer(elem.@player) : Player.CHANCE;
 			if (isetId == null) {								
-				iset = new Iset(player, tree);
+				iset = new Iset(player);
 				singletons.push(iset); // root is already taken care of				
 			} else {				
 				//look it up in the map, if it doesn't exist create it and add it
 				iset = isets[isetId];
 				if (iset == null) {
-					iset = new Iset(player, tree);
+					iset = new Iset(player);
 					isets[isetId] = iset;
 					isetObjToId[iset] = isetId;
 				} else {
@@ -206,7 +213,7 @@ package lse.math.games.builder.io
 							trace("Warning: @player attribute conflicts with earlier iset player assignment.  Ignored.");	
 						}
 						while (iset.player != player) {
-							iset.changeplayer();
+							iset.changePlayer(tree.firstPlayer);
 						}
 					}
 				}				
@@ -308,7 +315,7 @@ package lse.math.games.builder.io
 				node.reachedby = new Move();
 			}
 
-			if (elem.@prob != undefined && node.reachedby != null) {				
+			if (elem.@prob != undefined && node.reachedby != null) {
 				node.reachedby.prob = Rational.parse(elem.@prob);
 			}
 		}

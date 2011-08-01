@@ -1,10 +1,12 @@
 package lse.math.games.builder.viewmodel.action 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Move;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
-	
+		
 	/**	
 	 * Changes a selected node's label to a new one
 	 * <li>Changes Data</li>
@@ -17,6 +19,12 @@ package lse.math.games.builder.viewmodel.action
 		private var _nodeId:int;
 		private var _label:String;
 		
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
+		
 		public function LabelChangeAction(nodeId:int, label:String) 
 		{
 			_nodeId = nodeId;
@@ -25,6 +33,8 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function doAction(grid:TreeGrid):void
 		{
+			var prevTime:int = getTimer();
+			
 			var node:Node = grid.getNodeById(_nodeId);
 			if (node != null) {
 				var move:Move = node.reachedby;
@@ -32,6 +42,8 @@ package lse.math.games.builder.viewmodel.action
 					move.label = _label;
 				}
 			}
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 				
 		public function get changesData():Boolean {

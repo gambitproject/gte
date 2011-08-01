@@ -323,5 +323,5 @@ package lse.math.games.builder.model
 			}
 			return prob;			
 		}		
-	}
+	} 
 }

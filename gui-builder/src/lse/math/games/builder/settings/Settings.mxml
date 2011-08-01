@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="400" minHeight="500" xmlns:presenter="lse.math.games.builder.presenter.*"
+		 xmlns:local=".">
+	
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import lse.math.games.builder.fig.FigFontManager;
+			import lse.math.games.builder.presenter.TreeGridPresenter;
+			
+			import mx.controls.Tree;
+			import mx.managers.PopUpManager;
+			
+			import util.Log;
+			
+			
+			
+			private var unsavedChanges:Boolean = false;
+			private var settings:UserSettings = UserSettings.instance;
+			private var _controller:TreeGridPresenter;
+			
+			private var log:Log = Log.instance;
+			
+			
+			
+			public function set controller(value:TreeGridPresenter):void { _controller = value; }
+			
+			//Sets a setting
+			private function setSetting(key:String, value:Object):void
+			{				
+				if(!unsavedChanges)
+				{
+					if(settings.getValue(key) == null)
+						unsavedChanges = true;
+					else if(settings.getValue(key) != value)
+						unsavedChanges = true;
+				}
+				
+				settings.setValue(key, value);
+			}
+									
+			//Saves settings if necessary, and closes the settings panel
+			private function exit():void
+			{
+				if(unsavedChanges) 
+				{
+					//invalidate display
+					if(_controller != null)
+						_controller.invalidate(true, true, true); 
+					else
+						log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+					
+					//Store settings locally if the preference is activated
+					if(settings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean && !settings.saveCookies())
+						throw new Error("Couldn't store the cookies, please retry");
+				}
+				
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	
+
+	
+	<s:Panel width="100%" height="100%" title="Settings">	
+		<mx:TabNavigator tabHeight="22" left="-1" right="-1" top="-1" bottom="-1">
+			<s:NavigatorContent width="100%" height="100%" label="General settings" >
+				<s:Group x="10" y="10" width="95%" height="95%">
+					<mx:Form width="100%" height="100%" defaultButton="{exitBtn}" >
+						<mx:FormItem label="Save settings locally">
+							<s:CheckBox id="STORE_SETTINGS_LOCALLY"
+										change="if(STORE_SETTINGS_LOCALLY.selected)
+										{
+										if(settings.cookiesStorable)
+										setSetting(SCodes.STORE_SETTINGS_LOCALLY, true );
+										else
+										{
+										setSetting(SCodes.STORE_SETTINGS_LOCALLY, false );
+										settings.askForCookiesStorable();
+										}
+										} else
+										{
+										setSetting(SCodes.STORE_SETTINGS_LOCALLY, false );
+										settings.clearCookies();
+										}"
+										
+										selected="{settings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean}"/>
+						</mx:FormItem>					
+					</mx:Form>
+				</s:Group>
+			</s:NavigatorContent>	
+			
+			<s:NavigatorContent width="100%" height="100%" label="Graphic settings" >
+				<s:Group x="10" y="10" width="95%" height="95%">
+					<mx:Form width="100%" height="100%" defaultButton="{exitBtn}" >
+						<mx:FormItem label="Player colors">
+							<s:HGroup>
+								<mx:ColorPicker id="PLAYER_1_COLOR" toolTip="Player 1's Color" selectedColor="{settings.getValue(SCodes.PLAYER_1_COLOR) as uint}" change="setSetting(SCodes.PLAYER_1_COLOR,event.target.selectedColor);"/>
+								<mx:ColorPicker id="PLAYER_2_COLOR" toolTip="Player 2's Color" selectedColor="{settings.getValue(SCodes.PLAYER_2_COLOR) as uint}" change="setSetting(SCodes.PLAYER_2_COLOR,event.target.selectedColor);"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Default font">
+							<s:ComboBox id="DEFAULT_FONT" width="106" height="24" toolTip="Select Font" fontFamily="{settings.getValue(SCodes.DEFAULT_FONT) as String}" selectedItem="{settings.getValue(SCodes.DEFAULT_FONT) as String}" change="setSetting(SCodes.DEFAULT_FONT, DEFAULT_FONT.selectedItem);">
+								<s:dataProvider>
+									<mx:ArrayCollection id="arrColl" source="{FigFontManager.getAvailableFontFamilies()}">
+										<mx:sort><mx:Sort /></mx:sort>
+									</mx:ArrayCollection>
+								</s:dataProvider>
+								<s:itemRenderer>
+									<fx:Component>
+										<s:ItemRenderer>							
+											<s:Label left="5" height="22" width="85" maxDisplayedLines="1" verticalAlign="middle" fontFamily="{data}" toolTip="{data}" text="{data}" />
+										</s:ItemRenderer>						
+									</fx:Component>					
+								</s:itemRenderer>
+							</s:ComboBox>
+						</mx:FormItem>
+					</mx:Form>
+				</s:Group>
+			</s:NavigatorContent>			
+			
+			<s:NavigatorContent width="100%" height="100%" label="Whatever" >
+				<s:Group x="10" y="10" width="95%" height="95%">
+					<mx:Form width="100%" height="100%" defaultButton="{exitBtn}" >
+						<mx:FormItem label="Whichever">
+						</mx:FormItem>
+					</mx:Form>
+				</s:Group>
+			</s:NavigatorContent>	
+		</mx:TabNavigator>
+	</s:Panel>		
+		
+	<s:Button id="exitBtn" top="5" right="5" width="28" height="20" label="X" click="exit()"/>
+
+</s:Group>

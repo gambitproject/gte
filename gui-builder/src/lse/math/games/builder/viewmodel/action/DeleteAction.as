@@ -1,7 +1,10 @@
 package lse.math.games.builder.viewmodel.action 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.presenter.IAction;
+	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**	
@@ -15,6 +18,12 @@ package lse.math.games.builder.viewmodel.action
 	public class DeleteAction implements IAction
 	{			
 		private var _nodeId:int = -1;
+		
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
 
 		public function DeleteAction(node:Node) 
 		{
@@ -23,15 +32,22 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function doAction(grid:TreeGrid):void
 		{
+			var prevTime:int = getTimer();
+			
 			var node:Node = grid.getNodeById(_nodeId);
 			if (node != null) {
 				node.remove();
+				
+				var labeler:AutoLabeller = new AutoLabeller;
+				labeler.doAction(grid);
 			}				
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
-		public function get undoable():Boolean {
-			return true;
-		}
+//		public function get undoable():Boolean {
+//			return true;
+//		}
 		
 		public function get changesData():Boolean {
 			return true;

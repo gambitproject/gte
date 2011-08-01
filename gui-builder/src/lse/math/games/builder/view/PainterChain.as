@@ -1,6 +1,22 @@
 package lse.math.games.builder.view 
-{	
+{		
+	import flash.display.DisplayObject;
+	import flash.text.engine.TextLine;
+	
+	import lse.math.games.builder.model.Rational;
+	import lse.math.games.builder.presenter.IAction;
+	import lse.math.games.builder.presenter.TreeGridPresenter;
+	import lse.math.games.builder.viewmodel.TreeGrid;
+	import lse.math.games.builder.viewmodel.action.LabelChangeAction;
+	import lse.math.games.builder.viewmodel.action.PayChangeAction;
+	
+	import mx.controls.Alert;
+	
+	import util.PromptTextInput;
+	
 	/**
+	 * Linked list of Painters, usable as Painter itself, applying each operation to the whole list
+	 * It also contains functionality for selecting and editing labels
 	 * @author Mark
 	 */
 	public class PainterChain implements IPainter
@@ -24,6 +40,7 @@ package lse.math.games.builder.view
 			}
 		}
 		
+		/** Runs all the painters' paint function, therefore painting everything under its control */
 		public function paint(g:IGraphics, width:Number, height:Number):void 
 		{			
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {
@@ -31,6 +48,7 @@ package lse.math.games.builder.view
 			}			
 		}
 		
+		/** Assigns all labels corresponding to all the painters. They get registered under each painter's own labels array */
 		public function assignLabels():void 
 		{
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {
@@ -38,6 +56,7 @@ package lse.math.games.builder.view
 			}				
 		}
 		
+		/** Performs all the necessary measurements to perform correctly the painting operations */
 		public function measureCanvas():void 
 		{
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {
@@ -45,16 +64,18 @@ package lse.math.games.builder.view
 			}				
 		}
 		
+		/** Collects and returns an object containing all the labels inside the painters */
 		public function get labels():Object {
 			var labels:Object = new Object();
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {				
 				for (var labelKey:String in link.painter.labels) {
-					labels[labelKey] = link.painter.labels[labelKey]
+					labels[labelKey] = link.painter.labels[labelKey];
 				}
 			}
 			return labels;
 		}
 		
+		/** Returns the maximum of the drawWidths of the painters*/
 		public function get drawWidth():Number {
 			var maxWidth:Number = 0;
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {
@@ -65,6 +86,7 @@ package lse.math.games.builder.view
 			return maxWidth;
 		}
 		
+		/** Returns the maximum of the drawHeights of the painters*/
 		public function get drawHeight():Number {
 			var maxHeight:Number = 0;
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {
@@ -84,6 +106,92 @@ package lse.math.games.builder.view
 			for (var link:PainterChainLink = _start; link != null; link = link.next) {				
 				link.painter.scale = value;
 			}		
+		}
+		
+		private var _label:TextLine;
+		private var _labelKey:String;
+		private var _controller:TreeGridPresenter;
+		
+		/** Launches a prompt to edit a selected label. In future versions its functionality might be widened to nodes and other things */
+		public function selectAndEdit(controller:TreeGridPresenter, x:Number, y:Number, parent:DisplayObject):void
+		{
+			_controller = controller;
+			_label = null;
+			_labelKey = null;
+			for (var labelKey:String in labels)
+			{
+				var label:TextLine = labels[labelKey];
+				if(label.x<=x && label.x+label.width>=x &&
+					label.y>=y && label.y-label.height<=y)
+				{
+					if(labelKey.indexOf("iset_")==0)
+					{
+						Alert.show("Iset editing is not supported yet");
+					} else if(labelKey.indexOf("move_")==0)
+					{						
+						PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new name for the move");
+						_label = label;
+						_labelKey = labelKey;
+						break;
+					}
+					else if(labelKey.indexOf("outcome_")==0)
+					{
+						PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new value for the payoff");
+						_label = label;
+						_labelKey = labelKey;
+						break;
+					}
+				}
+			}
+		}
+		
+		//Executes the edit action
+		private function onReturnFromPrompt():void
+		{
+			if(PromptTextInput.lastEnteredText!=null && PromptTextInput.lastEnteredText!="")
+			{
+				_controller.doAction(getEditAction);
+			}
+		}
+		
+		//Builds a 'edit action' which can be a LabelChangeAction or a PayChangeAction, depending on what was edited
+		private function getEditAction(grid:TreeGrid):IAction
+		{
+			var action:IAction = null;
+			
+			if(_labelKey.indexOf("move_")==0)
+			{
+				var id:int = parseInt(_labelKey.split("_")[1]);
+				action = new LabelChangeAction(id, PromptTextInput.lastEnteredText);
+			} else if(_labelKey.indexOf("outcome_")==0)
+			{
+				var payCode:String = (_labelKey.split("_")[1]);
+				id = parseInt(payCode.split(":")[0]);
+				var playerName:String = payCode.split(":")[1];
+					
+				var pay:Rational = Rational.parse(PromptTextInput.lastEnteredText);
+				if(pay==Rational.NaN)
+				{
+					Alert.show("ERROR: Bad number format, please use just numbers and '/' '.' characters for decimals");
+					return null;
+				}
+				if(grid.isZeroSum)
+				{
+					if(playerName == grid.firstPlayer.name)
+						action = new PayChangeAction(id, pay, pay.negate());
+					else if(playerName == grid.firstPlayer.nextPlayer.name)
+						action = new PayChangeAction(id, pay.negate(), pay);
+				}else
+				{
+					if(playerName == grid.firstPlayer.name)
+						action = new PayChangeAction(id, pay, null);
+					else if(playerName == grid.firstPlayer.nextPlayer.name)
+						action = new PayChangeAction(id, null, pay);
+				}
+			}else
+				Alert.show("ERROR: Unknown type of Label being modified");
+			
+			return action;
 		}
 	}
 }

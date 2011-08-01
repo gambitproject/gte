@@ -24,7 +24,7 @@ package lse.math.games.builder.model
 			var child2:Node = root.newChild();
 						
 			
-			var iset1:Iset = new Iset(player, tree);
+			var iset1:Iset = new Iset(player);
 			iset1.insertNode(child1);
 			iset1.insertNode(child2);
 			
@@ -71,9 +71,7 @@ package lse.math.games.builder.model
 			
 			var child1:Node = root.newChild();
 			var child2:Node = root.newChild();
-			
-			tree.printTree();
-			
+						
 			Assert.assertEquals(tree.numberLeaves(), 2);
 
 			

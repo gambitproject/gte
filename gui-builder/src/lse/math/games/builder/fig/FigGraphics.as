@@ -3,14 +3,16 @@ package lse.math.games.builder.fig
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
-	import mx.utils.HexEncoder;
-	
 	import lse.math.games.builder.view.IGraphics;
 	
+	import mx.utils.HexEncoder;
+	
+	import util.Log;
+	
 	/**
-	 * Graphic adapter with basic painting operations. It 'paints' in a buffer String with FIG format
+	 * Graphic adapter with basic painting operations. It 'paints' in a buffer String following FIG format  
+	 * 
 	 * @author Mark Egesdal
-	 * @see IGraphics parent class IGraphics for reference on the implemented methods
 	 */
 	public class FigGraphics implements IGraphics
 	{
@@ -38,12 +40,49 @@ package lse.math.games.builder.fig
 			"#FFFFFF" : 7  //White
 		};
 		
+		
+		
 		public function FigGraphics(buffer:Vector.<String>) 
 		{
 			_buffer = buffer;
 			_colors = new Dictionary();
 			_numColors = 0;
 		}
+		
+		public function set stroke(linewidth:Number):void 
+		{			
+			_linewidth = linewidth;
+			if (_linewidth < 1) {
+				_linewidth = 1;
+			}
+		}
+		
+		/** Sets the font, including its format and size for all the following drawing operations, until it is changed again*/
+		public function setFont(name:String, weight:String, posture:String, size:Number):void 
+		{							
+			_fontEnum = FigFontManager.figEnumValue(name, weight, posture);
+			_fontSize = size * (72 / 80); //convert from pixels to points
+		}
+		
+		public function set color(color:uint):void 
+		{		
+			if (_colors[color] != null) {				
+				_colorEnum = _colors[color] as int;
+			} else {				
+				var colorHex:String = hexStr(color);
+				if (COLOR_ENUMS.hasOwnProperty(colorHex)) {
+					_colorEnum = COLOR_ENUMS[colorHex];
+				} else {
+					_colorEnum = -1; 
+					Log.instance.add(Log.ERROR_HIDDEN, "Color " + hexStr(color) + " is being set, and hasn't been added previously to the color list", "FigGraphics");
+				}
+			}
+			if (_curDepth > 0) {
+				--_curDepth;
+			}
+		}
+		
+		
 		
 		public function fillRect(x:Number, y:Number, width:Number, height:Number):void
 		{
@@ -100,41 +139,10 @@ package lse.math.games.builder.fig
 							+ height * UNITS_PER_PIXEL + " " + width * UNITS_PER_PIXEL + " " 
 							+ int(x * UNITS_PER_PIXEL) + " " + int(y * UNITS_PER_PIXEL) + " " + str + "\\001");			
 		}
-	
-		public function set stroke(linewidth:Number):void 
-		{			
-			_linewidth = linewidth;
-			if (_linewidth < 1) {
-				_linewidth = 1;
-			}
-		}
 		
-		/** Sets the font, including its format and size for all the following drawing operations, until it is changed again*/
-		public function setFont(name:String, weight:String, posture:String, size:Number):void 
-		{							
-			_fontEnum = FigFontManager.figEnumValue(name, weight, posture);
-			_fontSize = size * (72 / 80); //convert from pixels to points
-		}
-		
-		public function set color(color:uint):void 
-		{		
-			if (_colors[color] != null) {				
-				_colorEnum = _colors[color] as int;
-			} else {				
-				var colorHex:String = hexStr(color);
-				if (COLOR_ENUMS.hasOwnProperty(colorHex)) {
-					_colorEnum = COLOR_ENUMS[colorHex];
-				} else {
-					_colorEnum = -1; //TODO: Should Log an error also.
-				}
-			}
-			if (_curDepth > 0) {
-				--_curDepth;
-			}
-		}
-		
-		/** Adds a new color to the list of existing ones in the fig. 
-		 * If a color wants to be used and is not in the COLOR_ENUM list, it needs to be added first using this function.
+		/** 
+		 * Adds a new color to the list of usable ones in the fig. Think of it as a painter's 'palette' of colors. 
+		 * <br>If a color wants to be used and is not in the COLOR_ENUM list of default colors, it must be added first using this function.
 		 */
 		public function addColor(color:uint):void
 		{

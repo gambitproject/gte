@@ -1,9 +1,13 @@
 package lse.math.games.builder.presenter 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**
-	 * Linked list of Actions, usable as an action itself, applying each operation to the whole list
+	 * Linked list of Actions, usable as an action itself, 
+	 * that applies each operation to the whole list.</p>
+	 * 
 	 * @author Mark
 	 */
 	public class ActionChain implements IAction
@@ -11,28 +15,11 @@ package lse.math.games.builder.presenter
 		private var _start:ActionChainLink;
 		private var _end:ActionChainLink;
 		
-		/** Adds new action to the end of the linked list */
-		public function push(action:IAction):void
-		{
-			var link:ActionChainLink = new ActionChainLink(action);			
-			if (_start == null) {
-				_start = link;
-			}
-			if (_end != null) {
-				_end.next = link;
-			}
-			_end = link;
-		}
+		private var _timeElapsed:int = 0;
 		
-		/** Executes all actions in the list */
-		public function doAction(grid:TreeGrid):void
-		{
-			var link:ActionChainLink = _start;
-			while (link != null) {
-				link.action.doAction(grid);
-				link = link.next;
-			}
-		}
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
 		
 		/** Checks if any of the actions changes data */
 		public function get changesData():Boolean {
@@ -68,6 +55,35 @@ package lse.math.games.builder.presenter
 				link = link.next;
 			}
 			return false;
+		}
+		
+		
+		
+		/** Adds new action to the end of the linked list */
+		public function push(action:IAction):void
+		{
+			var link:ActionChainLink = new ActionChainLink(action);			
+			if (_start == null) {
+				_start = link;
+			}
+			if (_end != null) {
+				_end.next = link;
+			}
+			_end = link;
+		}
+		
+		/** Executes all actions in the list */
+		public function doAction(grid:TreeGrid):void
+		{
+			var prevTime:int = getTimer();
+			
+			var link:ActionChainLink = _start;
+			while (link != null) {
+				link.action.doAction(grid);
+				link = link.next;
+			}
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 	}
 

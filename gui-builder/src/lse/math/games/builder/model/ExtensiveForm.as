@@ -1,25 +1,39 @@
 package lse.math.games.builder.model 
 {	
-	/**	 
+	import util.Log;
+
+	/**	  
+	 * This class represents a full game-tree in its extensive form. 
+	 * </p>It contains:
+	 * <ul><li>Reference to the root node and to the first player.</li>
+	 * <li>Functions to add players, nodes and information sets to the game tree, as well as to access them by id</li>
+	 * <li>Functions related to making perfect recall</li>
+	 * <li>Functions to get the following tree properties: depth & number of leaves</li>
+	 * 
 	 * @author Mark Egesdal
-	 * Represents a full game-tree in its extensive form
 	 */
 	public class ExtensiveForm
-	{										
+	{			
 		private var _root:Node;
 		private var _firstPlayer:Player = null;
 		
 		private var lastNodeNumber:int = 0;
 		
+		private var log:Log = Log.instance;
+		
+		
 		public function ExtensiveForm() { }
 		
+		/** First node of the tree */
 		public function get root():Node { return _root; }
 		public function set root(value:Node):void { _root = value; }
 		
+		/** Number of nodes in the tree */
 		public function get numNodes():int {
 			return root.numNodesInSubtree();
 		}
 		
+		/** Number of information sets in the tree */
 		public function get numIsets():int {
 			var count:int = 0;
 			for (var h:Iset = root.iset; h != null; h = h.nextIset) {
@@ -28,38 +42,55 @@ package lse.math.games.builder.model
 			return count;
 		}
 		
-		internal function setFirstPlayer(player:Player):void
+		/** Player who moves first in the tree */
+		//TODO: Explain if other relations inside player or something must change also, when set
+		public function set firstPlayer(player:Player):void { _firstPlayer = player; }
+		public function get firstPlayer():Player { return _firstPlayer; }
+		
+		
+		
+		/** Clears all the info contained in the tree, creating a new one without player or nodes */
+		public function clearTree():void
 		{
-			_firstPlayer = player;
+			_root = null;
+			_firstPlayer = null;
+			lastNodeNumber = 0;
 		}
 		
-		public function get firstPlayer():Player {
-			return _firstPlayer;
-		}
-		
+		/** Creates a new player, assigning it as moving next of the last one currently existing in this tree */
 		public function newPlayer(name:String):Player {
 			return new Player(name, this);
 		}
 		
-		/** Creates a new node assigning it an autoincreasing ID*/
+		/** Creates a new node assigning it an autoincreasing ID */
 		public function createNode():Node {						
 			return newNode(getNextNodeNumber());
 		}
 		
+		//Returns an auto-increasing id for labelling the nodes in the tree
 		private function getNextNodeNumber():int {			
 			return lastNodeNumber++;
 		}
 		
+		// Creates a node with a determinate 'number' (id)
 		protected function newNode(number:int):Node {
 			return new Node(this, number);
 		}
 		
-		/** Returns a node with the corresponding id number, or null if it can't find any */
+		/** Searchs for a node with a determinate 'number' (id). If it finds it, it returns it, else it returns null */
 		public function getNodeById(number:int):Node
 		{
 			return recGetNodeById(root, number);
 		}
 		
+		/*
+		 * Recursive function that looks for a node with a certain 'number' (id)
+		 * Stopping criteria: that the current node has the id we're looking for
+		 * Recursive expansion: to all of the node's children
+		 *
+		 * @return: the current node, if it is the one we're looking for; the found node coming 
+		 * from a children return, or null if none of the before apply
+		 */
 		private function recGetNodeById(node:Node, number:int):Node
 		{
 			if (node.number == number) {
@@ -78,19 +109,22 @@ package lse.math.games.builder.model
 		}
 		
 		/**
-		 * Adds an Iset at the end of the linked list of isets.
-		 * If the Iset was already in the list, it does nothing
-		 * @return: The added isets' idx after insertion
+		 * Adds an Iset to the tree, at the end of the linked list of isets 
+		 * (which doesn't directly relate to the physiscal position in the tree).
+		 * <br>If the Iset was already in the list, it does nothing
+		 * @return (int) The added isets' idx after insertion
 		 */
 		public function addIset(toAdd:Iset):int
 		{
-			if (root == null) throw new Error("Cannot add isets until root is set");
+			if (root == null) 
+				log.add(Log.ERROR_THROW, "Cannot add isets until root is set");
 			
 			var h:Iset = root.iset;		
 			var idx:int = -1; //index if the iset already exists
 			while (true) {
 				if (h == toAdd) {
 					idx = h.idx;
+					log.add(Log.ERROR_HIDDEN, "Pretended to add an iset equal to the one existing with idx "+idx);
 					break;
 				} else if (h.nextIset == null) {
 					break;
@@ -103,6 +137,7 @@ package lse.math.games.builder.model
 			return toAdd.idx;
 		}
 
+		/** Searches for an Iset with a determinate id. It returns it if it finds it, else returns null */
 		public function getIsetById(iset:int):Iset
 		{
 			var h:Iset = root.iset;
@@ -122,9 +157,11 @@ package lse.math.games.builder.model
 		 */
 		public function makePerfectRecall():void
 		{
+			//It looks through all isets of the tree, seacrhing for those whose nodes have different move sequences
 			for (var h:Iset = _root.iset; h != null; h = h.nextIset) {
 				if (!h.hasPerfectRecall())
 				{
+					//Nodes from the iset are collected
 					var nodesInIset:Vector.<Node> = new Vector.<Node>();					
 					for (var node:Node = h.firstNode; node != null; node = node.nextInIset) {
 						nodesInIset.push(node);						
@@ -154,13 +191,6 @@ package lse.math.games.builder.model
 				}
 			}			
 		}
-		
-		public function clearTree():void
-		{
-			_root = null;
-			_firstPlayer = null;
-			lastNodeNumber = 0;
-		}
 
 		/** @return The maximum depth (distance from root to leaf) of the tree */
 		public function maxDepth():int
@@ -168,7 +198,11 @@ package lse.math.games.builder.model
 			return recMaxDepth(root);
 		}
 		
-		//returns the maximum depth out of the children of a certain node, recursively
+		/*
+		* Recursive function that returns the max depth of a node's children
+		* Stopping criteria: that the current node is a leaf
+		* Recursive expansion: to all of the node's children
+		*/
 		private function recMaxDepth(node:Node):int
 		{
 			if (node.isLeaf) {
@@ -188,30 +222,29 @@ package lse.math.games.builder.model
 			}
 		}
 		
-		/** @return the number of leaves (nodes without children) of the tree */
+		/** @return (int) the number of leaves (nodes without children) of the tree */
 		public function numberLeaves():int
 		{
-			return recNumberLeaves(_root, 0);
+			return recNumberLeaves(_root);
 		}
 	
-		/** //?
-		 * number the leaves of the subtree starting at this node
-		 * where drawcurrnum is the first number to be used,
-		 * and the return value is the next number that can be used
-		 * non-leaf nodes of the subtree won't have their number affected
-		 */
-		protected function recNumberLeaves(node:Node, count:int):int
+		/*
+		* Recursive function that returns the number of leaves below a determinate node
+		* Stopping criteria: that the current node is a leaf
+		* Recursive expansion: to all of the node's children
+		*/
+		protected function recNumberLeaves(node:Node):int
 		{			
 			if (node.isLeaf) {
-				return count + 1;
+				return 1;
 			}
 			else
 			{
-				var leafcurrnum:int = count;
+				var leafcurrnum:int = 0;
 				var y:Node = node.firstChild;
 				while (y != null)
 				{
-					leafcurrnum = recNumberLeaves(y, leafcurrnum);
+					leafcurrnum += recNumberLeaves(y);
 					y = y.sibling;
 				}
 				return leafcurrnum;
@@ -232,7 +265,7 @@ package lse.math.games.builder.model
 			}
 						
 			var y:Node = x.firstChild;
-			trace(indent + x.toString() + ((y == null) ? " (leaf)" : ""));
+			log.add(Log.DEBUG, indent + x.toString() + ((y == null) ? " (leaf)" : ""));
 			
 			while (y != null)
 			{
@@ -244,7 +277,6 @@ package lse.math.games.builder.model
 		public function toString():String
 		{
 			var numIsets:int = 0;
-			var numNodes:int = root.numNodesInSubtree();
 			var numLevels:int = maxDepth();
 			
 			for (var h:Iset = root.iset; h != null; h = h.nextIset)

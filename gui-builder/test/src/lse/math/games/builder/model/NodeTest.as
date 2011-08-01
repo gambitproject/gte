@@ -14,10 +14,10 @@ package lse.math.games.builder.model
 			var player:Player = new Player("test player", tree);
 			
 			var parent:Node = new Node(tree, 0);
-			var parentIset:Iset = new Iset(player, tree);
+			var parentIset:Iset = new Iset(player);
 			parentIset.insertNode(parent);
 			
-			var iset:Iset = new Iset(player, tree);
+			var iset:Iset = new Iset(player);
 			var child1:Node = parent.newChild();
 			var child2:Node = parent.newChild();
 			iset.insertNode(child1);

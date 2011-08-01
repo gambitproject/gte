@@ -19,5 +19,7 @@ package lse.math.games.builder.presenter
 		function get changesSize():Boolean;
 		/** Check if the action potentially modifies something that needs to display again*/
 		function get changesDisplay():Boolean;
+		/** Time elapsed when running the action */
+		function get timeElapsed():int;
 	}	
 }

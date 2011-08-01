@@ -8,6 +8,9 @@ package lse.math.games.builder.model
 	 */
 	public class NormalFormTest
 	{
+	    //TODO: TEST!	
+		
+		/*
 		private var _payMatrixMap:Dictionary = new Dictionary() // Player => String (Strategy_Tuple_Key) => Number
 		private var _strategyMap:Dictionary = new Dictionary(); // Player => String (Strategy_Key) => Strategy
 		private var _firstPlayer:Player = null;
@@ -322,6 +325,6 @@ package lse.math.games.builder.model
 				n = n.parent;
 			}
 			return prob;			
-		}		
+		}	*/	
 	}
 }

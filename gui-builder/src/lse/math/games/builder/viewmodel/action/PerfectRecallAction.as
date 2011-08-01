@@ -1,6 +1,9 @@
 package lse.math.games.builder.viewmodel.action 
 {
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.presenter.IAction;
+	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**	
@@ -12,11 +15,24 @@ package lse.math.games.builder.viewmodel.action
 	 */
 	public class PerfectRecallAction implements IAction
 	{		
+		private var _timeElapsed:int = 0;
+		
+		
+		
+		public function get timeElapsed():int {return _timeElapsed; }
+		
 		public function PerfectRecallAction() { }
 		
 		public function doAction(grid:TreeGrid):void 
 		{
-			grid.makePerfectRecall();					
+			var prevTime:int = getTimer();
+			
+			grid.makePerfectRecall();
+			
+			var labeler:AutoLabeller = new AutoLabeller;
+			labeler.doAction(grid);
+			
+			_timeElapsed = getTimer() - prevTime;
 		}
 		
 		public function get changesData():Boolean {

@@ -64,6 +64,16 @@ package lse.math.games.builder.model
 					
 			Assert.assertEquals(1, a.num);
 			Assert.assertEquals(8, a.den);
+			
+			a = Rational.parse("1.125");
+			
+			Assert.assertEquals(9, a.num);
+			Assert.assertEquals(8, a.den);
+			
+			a = Rational.parse("-2.5");
+			
+			Assert.assertEquals(-5, a.num);
+			Assert.assertEquals(2, a.den);
 		}
 		
 		[Test]

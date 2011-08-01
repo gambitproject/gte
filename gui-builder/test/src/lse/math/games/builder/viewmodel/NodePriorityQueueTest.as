@@ -8,16 +8,16 @@ package lse.math.games.builder.viewmodel
 	 */
 	public class NodePriorityQueueTest
 	{
-		var queue:NodePriorityQueue;
-		var n1:Node;
-		var n11:Node;
-		var n12:Node;
-		var n13:Node;
-		var n121:Node;
-		var n1211:Node;
-		var n12111:Node;
-		var n111:Node;
-		var n131:Node;
+		private var queue:NodePriorityQueue;
+		private var n1:Node;
+		private var n11:Node;
+		private var n12:Node;
+		private var n13:Node;
+		private var n121:Node;
+		private var n1211:Node;
+		private var n12111:Node;
+		private var n111:Node;
+		private var n131:Node;
 		
 		[Before]
 		public function init():void

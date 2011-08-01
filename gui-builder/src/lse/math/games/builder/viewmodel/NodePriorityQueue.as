@@ -6,21 +6,21 @@ package lse.math.games.builder.viewmodel
 	 * NodePriorityQueue
 	 * 	 
 	 * Sorts the nodes from front to back in a priority queue
-	 * Deeper nodes and nodes to the right are toward the end
+	 * Deeper nodes and nodes to the right are toward the end.</p>
 	 * 
-	 * In keeping consistent with the Array class:
+	 * In keeping consistent with the Array class:<br><ul>
 	 * 
-	 * push(value:Node)		adds an item to the queue
-	 * remove(value:Node)	removes an item from the queue
-	 * shift():Node			remove/return the front of the queue
-	 * pop():Node			remove/return the back of the queue 
+	 * <li>push(value:Node)		adds an item to the queue</li>
+	 * <li>remove(value:Node)	removes an item from the queue</li>
+	 * <li>shift():Node			remove/return the front of the queue</li>
+	 * <li>pop():Node			remove/return the back of the queue </li></ul></p>
 	 * 
-	 * front and back properties can be used to peak
-	 * length property will iterate the queue to find a count
+	 * front and back properties can be used to peak. <br>
+	 * length property will iterate the queue to find a count. </p>
 	 * 
 	 * push() and remove() return position Node was inserted/removed, 
 	 * which allows for a measure of algorithm efficieny (in remove(), if it returns -1
-	 * the actual number of iterations is equal to length-1)
+	 * the actual number of iterations is equal to length-1)</p>
 	 * 
 	 * @author Mark Egesdal
 	 */
@@ -51,7 +51,8 @@ package lse.math.games.builder.viewmodel
 			return count;
 		}
 		
-		/** Inserts a node in its corresponding position, determined by belongsBefore() function 
+		/** 
+		 * Inserts a node in its corresponding position, determined by belongsBefore() function 
 		 * @return The position in which it is inserted
 		 */
 		public function push(node:Node):int
@@ -74,7 +75,8 @@ package lse.math.games.builder.viewmodel
 			return idx;
 		}
 		
-		/** Removes a certain node
+		/** 
+		 * Removes a certain node
 		 * @return -1 if node wasn't found, or its pos if it was found and removed
 		 */
 		public function remove(toRemove:Node):int

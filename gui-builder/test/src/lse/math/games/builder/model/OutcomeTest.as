@@ -15,7 +15,7 @@ package lse.math.games.builder.model
 			var player:Player = new Player("1", tree);
 			var player2:Player = new Player("2", tree);
 			
-			var outcome:Outcome = new Outcome(root);
+			var outcome:Outcome = new Outcome();
 			
 			outcome.setPay(player, Rational.parse("5"));
 			outcome.setPay(player2, Rational.parse("-1"));

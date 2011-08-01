@@ -5,12 +5,14 @@ package lse.math.games.builder.view
 	import flash.text.engine.ElementFormat;
 	import flash.text.engine.FontDescription;
 	import flash.text.engine.FontLookup;
+	import flash.text.engine.FontPosture;
+	import flash.text.engine.FontWeight;
 	import flash.text.engine.TextBlock;
 	import flash.text.engine.TextElement;
 	import flash.text.engine.TextLine;
-	import flash.text.engine.FontWeight;
-	import flash.text.engine.FontPosture;
+	
 	import lse.math.games.builder.viewmodel.TreeGrid;
+	
 	
 	/**
 	 * @author Mark Egesdal
@@ -70,13 +72,14 @@ package lse.math.games.builder.view
 			_scale = value;
 		}
 		
+		/** Moves a label to a point(x,y) */
 		protected function moveLabel(label:DisplayObject, x:Number, y:Number):void
 		{
 			label.x = x ;
 			label.y = y ;
 		}		
 		
-		//Registers a label with a TextLine that contains the info necessary for rendering, including format
+		//Registers inside the 'labels' array a label with a TextLine that contains the info necessary for rendering, including format
 		protected function registerLabel(key:String, text:String, color:uint, fontFamily:String, styles:Object):void
 		{
 			if (text.length > 0) {
