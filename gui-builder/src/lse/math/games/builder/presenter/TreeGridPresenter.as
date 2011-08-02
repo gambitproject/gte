@@ -471,7 +471,7 @@ package lse.math.games.builder.presenter
 			}
 			if (display) {				
 				_canvas.invalidateDisplayList();
-			}				
+			}	
 		}
 		
 		private function pathInString(node:Node):String
@@ -508,6 +508,7 @@ package lse.math.games.builder.presenter
 		public function fig():void
 		{
 			var out:TreeGridFigWriter = new TreeGridFigWriter();
+			
 			removeSelected(true);
 			var figStr:String = out.paintFig(_canvas.painter, _canvas.width, _canvas.height, _grid);
 			restoreSelected();
@@ -521,7 +522,11 @@ package lse.math.games.builder.presenter
 		public function image():void
 		{
 		  var bd:BitmapData = new BitmapData(_canvas.width, _canvas.height);
+		  
+		  removeSelected(true);
+		  _canvas.validateNow();
 		  bd.draw(_canvas);
+		  restoreSelected();
 		  
 		  var ba:ByteArray = (new PNGEncoder()).encode(bd);
 		  

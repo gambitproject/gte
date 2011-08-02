@@ -12,6 +12,7 @@ package lse.math.games.builder.view
 	
 	import mx.controls.Alert;
 	
+	import util.Log;
 	import util.PromptTextInput;
 	
 	/**
@@ -23,6 +24,10 @@ package lse.math.games.builder.view
 	{
 		private var _start:PainterChainLink;
 		private var _end:PainterChainLink;
+		
+		private var log:Log = Log.instance;
+		
+		
 		
 		public function PainterChain() {}
 		
@@ -108,16 +113,14 @@ package lse.math.games.builder.view
 			}		
 		}
 		
-		private var _label:TextLine;
-		private var _labelKey:String;
+		private var _selectedLabelKey:String;
 		private var _controller:TreeGridPresenter;
 		
 		/** Launches a prompt to edit a selected label. In future versions its functionality might be widened to nodes and other things */
-		public function selectAndEdit(controller:TreeGridPresenter, x:Number, y:Number, parent:DisplayObject):void
+		public function selectAndEdit(controller:TreeGridPresenter, x:Number, y:Number):void
 		{
 			_controller = controller;
-			_label = null;
-			_labelKey = null;
+			_selectedLabelKey = null;
 			for (var labelKey:String in labels)
 			{
 				var label:TextLine = labels[labelKey];
@@ -126,19 +129,17 @@ package lse.math.games.builder.view
 				{
 					if(labelKey.indexOf("iset_")==0)
 					{
-						Alert.show("Iset editing is not supported yet");
+						log.add(Log.HINT, "Iset editing is not supported yet");
 					} else if(labelKey.indexOf("move_")==0)
 					{						
 						PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new name for the move");
-						_label = label;
-						_labelKey = labelKey;
+						_selectedLabelKey = labelKey;
 						break;
 					}
 					else if(labelKey.indexOf("outcome_")==0)
 					{
 						PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new value for the payoff");
-						_label = label;
-						_labelKey = labelKey;
+						_selectedLabelKey = labelKey;
 						break;
 					}
 				}
@@ -159,20 +160,20 @@ package lse.math.games.builder.view
 		{
 			var action:IAction = null;
 			
-			if(_labelKey.indexOf("move_")==0)
+			if(_selectedLabelKey.indexOf("move_")==0)
 			{
-				var id:int = parseInt(_labelKey.split("_")[1]);
+				var id:int = parseInt(_selectedLabelKey.split("_")[1]);
 				action = new LabelChangeAction(id, PromptTextInput.lastEnteredText);
-			} else if(_labelKey.indexOf("outcome_")==0)
+			} else if(_selectedLabelKey.indexOf("outcome_")==0)
 			{
-				var payCode:String = (_labelKey.split("_")[1]);
+				var payCode:String = (_selectedLabelKey.split("_")[1]);
 				id = parseInt(payCode.split(":")[0]);
 				var playerName:String = payCode.split(":")[1];
 					
 				var pay:Rational = Rational.parse(PromptTextInput.lastEnteredText);
 				if(pay==Rational.NaN)
 				{
-					Alert.show("ERROR: Bad number format, please use just numbers and '/' '.' characters for decimals");
+					log.add(Log.ERROR, "Bad number format, please use just numbers and '/' '.' characters for decimals");
 					return null;
 				}
 				if(grid.isZeroSum)
@@ -189,7 +190,7 @@ package lse.math.games.builder.view
 						action = new PayChangeAction(id, null, pay);
 				}
 			}else
-				Alert.show("ERROR: Unknown type of Label being modified");
+				log.add(Log.ERROR_THROW, "ERROR: Unknown type of Label being modified");
 			
 			return action;
 		}

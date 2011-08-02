@@ -113,7 +113,7 @@
 				if(opModeBar2.selectedIndex <= 7)
 					controller.doActionAt(canvas.mouseX, canvas.mouseY);
 				else
-					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY, this);
+					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
 			}
 			
 			// Changes orientation of the tree
