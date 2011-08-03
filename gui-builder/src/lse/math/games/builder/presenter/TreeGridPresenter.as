@@ -569,9 +569,10 @@ package lse.math.games.builder.presenter
 
 		// URL Request Handler below here...
 		public function runAlgorithm(algo:Object, seed:String):void
-		{
-			if (algo != null && algo.service == undefined || algo.url == undefined) {
-				Alert.show("Algorithm not configured");
+		{			
+			if (algo == null || algo.service == null || algo.service == undefined 
+				|| algo.url == null || algo.url == undefined) {
+				log.add(Log.ERROR, "Algorithm not configured");
 				return;
 			}
 			
@@ -594,8 +595,13 @@ package lse.math.games.builder.presenter
 			} else if (algo.type == "xf") {				
 				params.g = getTreeParam();
 			} else {
-				Alert.show("type was not recognized: " + algo.type);
+				log.add(Log.ERROR, "type was not recognized: " + algo.type);
 			}
+			
+			log.add(Log.HINT, "You don't see the output? It is shown in a PopUp window " +
+				"in your browser, so you'll have to configure it previously. Don't forget to " +
+				"save your changes before.");
+			
 			srv.send(params);
         }
 		

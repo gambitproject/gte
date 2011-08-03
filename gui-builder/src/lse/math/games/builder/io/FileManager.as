@@ -1,9 +1,7 @@
 package lse.math.games.builder.io
 {
-	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
-	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
 	import flash.net.FileFilter;
 	import flash.net.FileReference;
@@ -13,8 +11,6 @@ package lse.math.games.builder.io
 	
 	import lse.math.games.builder.presenter.TreeGridPresenter;
 	import lse.math.games.builder.settings.UserSettings;
-	
-	import mx.core.FlexGlobals;
 	
 	import util.Log;
 	import util.PromptTwoButtons;
@@ -86,8 +82,10 @@ package lse.math.games.builder.io
 			
 			if(settings.cookiesStorable /*&& autosave_on */)
 			{
-				//Have to get a new instance of the shared object because it might have not existed previously
-				SharedObject.getLocal( "autosave", "/" ).setProperty("treeXML", value);
+				if(treeStorage == null)
+					treeStorage = SharedObject.getLocal( "autosave", "/" );
+				
+				treeStorage.setProperty("treeXML", value);
 				unsavedChanges = false;
 			}
 		}
@@ -286,6 +284,10 @@ package lse.math.games.builder.io
 			log.add(Log.HINT, "File saved correctly");
 			filename = getNameFromFile(fr);
 			unsavedChanges = false;
+			
+			//As the user has its tree saved as a .xml, he wouldn't like to have it also as a SharedObject
+			if(treeStorage != null)
+				treeStorage.clear();
 			
 			fr = null;
 		}

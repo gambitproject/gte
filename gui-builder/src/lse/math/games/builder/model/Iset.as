@@ -305,7 +305,7 @@ package lse.math.games.builder.model
 		{
 			if (this == h)
 			{
-				log.add(Log.ERROR, "Couldn't merge the Isets: please select two different ones");
+				log.add(Log.HINT, "Couldn't merge the Isets: please select two different ones");
 				return false;				
 			}
 			if (this.player != h.player)
@@ -317,6 +317,10 @@ package lse.math.games.builder.model
 			{
 				log.add(Log.ERROR, "Couldn't merge the Isets: please select two with the same number of moves");
 				return false;
+			}
+			if (this.player == Player.CHANCE)
+			{
+				log.add(Log.HINT, "Chance nodes aren't mergeable into an Iset");
 			}
 			return true;
 		}

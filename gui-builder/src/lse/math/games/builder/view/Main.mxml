@@ -7,6 +7,10 @@
 	
 	<fx:Script>
 		<![CDATA[		
+			import flash.utils.clearTimeout;
+			import flash.utils.getTimer;
+			import flash.utils.setTimeout;
+			
 			import lse.math.games.builder.io.FileManager;
 			import lse.math.games.builder.settings.Settings;
 			import lse.math.games.builder.settings.UserSettings;
@@ -17,6 +21,8 @@
 			import mx.utils.OrderedObject;
 			import mx.utils.StringUtil;
 			
+			import util.EvCodes;
+			import util.EventManager;
 			import util.Log;
 			import util.PromptTwoButtons;
 						
@@ -31,11 +37,13 @@
 			
 			//TODO: If possible, move the folowing two to the <fx:declaration>
 			[Bindable]
-			public var log:Log = Log.instance;
+			private var log:Log = Log.instance;
 			
 			[Bindable]
-			public var fileManager:FileManager; 
 			//if moved to declarations, erase the 'added' property in 'filename' textbox 
+			private var fileManager:FileManager; 
+			
+			private var eventManager:EventManager = EventManager.instance;
 			
 			private function initVars():void 
 			{			
@@ -76,6 +84,19 @@
 				}
 			}
 			
+			// Handles click on the canvas
+			private function handleClickOnCanvas():void
+			{
+				if(opModeBar2.selectedIndex <= 7)
+					controller.doActionAt(canvas.mouseX, canvas.mouseY);
+				else
+					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
+			}
+			
+			
+			
+			/* <--- ---  TOOLBARS-RELATED FUNCTIONS --- ---> */
+			
 			//Pops up a settings dialog
 			private function showSettings():void
 			{
@@ -107,15 +128,6 @@
 				throw new Error("callback for index " + idx + " not found");
 			}
 			
-			// Handles click on the canvas
-			private function handleClickOnCanvas():void
-			{
-				if(opModeBar2.selectedIndex <= 7)
-					controller.doActionAt(canvas.mouseX, canvas.mouseY);
-				else
-					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
-			}
-			
 			// Changes orientation of the tree
 			private function changeOrientation(orientation:int):void
 			{
@@ -136,8 +148,53 @@
 				}
 			}
 			
-			//*** Keyboard shortcut handlers ***
+			//Executes the clear() function from the TreeGridController, epending on the button pressed as a result of the prompt
+			private function clearDependingOnPromptResult():void
+			{
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
+					controller.clear();
+			}
+			
+			
+			
+			/* <--- --- LOGLINE-RELATED FUNCTIONS --- ---> */
+			
+			//Registers a listener for HINTs added to Log, which will call updateHint
+			private function initLogLineListener():void
+			{
+				eventManager.addEventListener(EvCodes.HINT_ADDED, updateLogLine);
+			}
+			
+			private var lastLogLineTimeoutId:int = -1;
+			
+			//Updates the LogLine with the text from
+			private function updateLogLine(evt:TextEvent):void
+			{
+				logLine.text = evt.text;
+				if(lastLogLineTimeoutId != -1)
+					clearTimeout(lastLogLineTimeoutId);
+				
+				var optimalMsForReading:int = Math.max(3000, 1000+evt.text.length*67); 
+				//These ms are calculated from average lowest reading speed in english (200 wpm)
+				//and average of letters per word in english (4.5), plus two extra sources of extra
+				//time: counting the non-letter characters as letters, and giving one sec at the start for noticing
+				//there is something written.
+				
+				lastLogLineTimeoutId = setTimeout(clearLogLine, optimalMsForReading);
+			}
+			
+			//Erases the logLine text
+			private function clearLogLine():void {
+				lastLogLineTimeoutId = -1;
+				logLine.text = "";
+			}
+			
+			
+			
+			/* <--- --- KEYBOARD EVENT HANDLERS --- ---> */
 			private var opModeBar2lastSelectedIdx:int = 0;
+			
+			//Shortcuts when key is pressed
 			protected function sc_keyDownHandler(event:KeyboardEvent):void
 			{
 				var ctrl:Boolean = event.ctrlKey;
@@ -146,10 +203,11 @@
 				switch(event.keyCode)
 				{
 					case Keyboard.SPACE:
+						//TODO: DEBUG, it is not working properly
 						if(tab == "Extensive Form")
 						{
 							scrollbar.enableMouseScrolling();
-							opModeBar2lastSelectedIdx = opModeBar2.selectedIndex;
+							opModeBar2lastSelectedIdx = opModeBar2.selectedIndex; 
 							opModeBar2.selectedIndex = 7;
 						}
 						else if(tab == "Strategic Form")
@@ -158,6 +216,7 @@
 				}
 			}
 			
+			//Shortcuts when key is released
 			protected function sc_keyUpHandler(event:KeyboardEvent):void
 			{
 				var ctrl:Boolean = event.ctrlKey;
@@ -169,11 +228,11 @@
 					case Keyboard.SPACE:
 						if(tab == "Extensive Form" && opModeBar2lastSelectedIdx != 7)
 						{
+							//Although we've released spacebar, we need to check this
 							scrollbar.disableMouseScrolling();
 							opModeBar2.selectedIndex = opModeBar2lastSelectedIdx;
 						}
 						else if(tab == "Strategic Form")
-							//Although we've released spacebar, we need to check this
 							scrollbarNF.disableMouseScrolling();
 						break;
 					case 67: //'c'
@@ -207,13 +266,6 @@
 						}
 						break;
 				}
-			}
-			
-			//Executes the clear() function from the TreeGridController, epending on the button pressed as a result of the prompt
-			private function clearDependingOnPromptResult():void
-			{
-				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
-					controller.clear();
 			}
 		]]>
 	</fx:Script>
@@ -253,11 +305,10 @@
 		<TreeGridActionFactory id="actions" xmlns="lse.math.games.builder.viewmodel.*" />		
 		<MatrixPainter id="matrixPainter" xmlns="lse.math.games.builder.viewmodel.*" grid="{grid}" />
 		<TreeGridPresenter id="controller" xmlns="lse.math.games.builder.presenter.*" grid="{grid}" getDataUpdateAction="actions.outcomeDataUpdate" />
-		<!--<Log id="log" xmlns="util.*" />-->
 	</fx:Declarations>
 	
 	<s:Group left="0" right="0" top="0" bottom="0" >
-		<s:BorderContainer top="30" bottom="0" left="0" right="185" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+		<s:BorderContainer top="30" bottom="18" left="0" right="185" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
 			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" change="controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; algoComboBox.selectedIndex = 0;">
 				<s:NavigatorContent label="Extensive Form">
 					<MouseScroller id="scrollbar" width="100%" height="100%">
@@ -267,8 +318,6 @@
 					</MouseScroller>
 					
 					<s:Label id="info" top="5" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvas.width)} x {int(canvas.height)} ({int(treePainter.scale * 100)}%)" />
-					<s:Label id="logLine" bottom="{scrollbar.horizontalScrollBar.visible ? 20 : 5}" left="20" fontFamily="Helvetica" text="log: {log.lastMessage}" />
-
 					
 					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
@@ -333,13 +382,15 @@
 			</mx:TabNavigator>
 		</s:BorderContainer>
 		
-		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="0" top="30" right="0" width="180" editable="true" borderColor="0x808080" draggableColumns="false" sortableColumns="false" change="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" focusOut="controller.selectedNode = -1" focusIn="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
+		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="18" top="30" right="0" width="180" editable="true" borderColor="0x808080" draggableColumns="false" sortableColumns="false" change="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" focusOut="controller.selectedNode = -1" focusIn="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
 			<mx:columns>
 				<mx:DataGridColumn headerText="Sequence" dataField="leaf" width="110" editable="true"/>				
 				<mx:DataGridColumn headerText="{controller.player1Name}" dataField="pay1" width="33" editable="true" />
-				<mx:DataGridColumn headerText="{controller.player2Name}" dataField="pay2" width="33" editable="{!controller.isZeroSum}" />
+				<mx:DataGridColumn headerText="{controller.player2Name}" dataField="pay2" width="33" editable="{!controller.isZeroSum}"/>
 			</mx:columns>
 		</mx:DataGrid>
+		
+		<s:Label id="logLine" bottom="2" left="5" fontSize="11" text="" creationComplete="initLogLineListener();" color="#434546"/>
 		
 		<s:HGroup left="0" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
 			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
@@ -354,7 +405,7 @@
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r] - Needs PopUps allowed in your browser" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
 			<mx:Spacer width="4"/>
 			<s:ComboBox id="algoComboBox" width="106" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>

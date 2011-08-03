@@ -23,11 +23,8 @@ package lse.math.games.builder.settings
 	 * @author <b>alfongj</b> based on <a href="http://ianserlin.com">Ian Serlin</a>'s work 
 	 */
 	public class UserSettings
-	{
-		/**
-		 * The Singleton instance of the Settings to use when accessing properties and methods of the Settings.
-		 */		
-		public static const instance:UserSettings = new UserSettings( SettingsSingletonLock );
+	{		
+		private static var _instance:UserSettings = null;
 		
 		private const FILENAME:String = "settings";
 		
@@ -50,6 +47,19 @@ package lse.math.games.builder.settings
 				_settings_RSO = SharedObject.getLocal( FILENAME, "/" );
 				data = new Object();
 			}
+		}
+		
+		/**
+		 * The Singleton instance of the Settings to use when accessing properties and methods of the Settings.
+		 */		
+		public static function get instance():UserSettings
+		{
+			if(_instance == null)
+			{
+				_instance = new UserSettings(SettingsSingletonLock);
+			}
+			
+			return _instance;
 		}
 		
 		/** If the settings have been loaded from local storage */

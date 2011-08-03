@@ -18,10 +18,18 @@ package lse.math.games.builder.viewmodel
 		private var _timeElapsed:int = 0;
 		
 		
+				
+		public function DepthAdjuster() {}
 		
 		public function get timeElapsed():int {return _timeElapsed; }
 		
-		public function DepthAdjuster() {}
+		public function get changesData():Boolean { return true; }
+		
+		public function get changesSize():Boolean { return true; }
+		
+		public function get changesDisplay():Boolean { return true; }
+
+		
 		
 		public function doAction(grid:TreeGrid):void
 		{				
@@ -33,16 +41,91 @@ package lse.math.games.builder.viewmodel
 			_timeElapsed = getTimer() - prevTime;
 		}
 		
-		public function get changesData():Boolean {
-			return true;
-		}
+		//Aligns the 'adjusted' depths of all nodes to be the equal if they belong to the same Iset, taking the maximum possible
+		private function alignDepths(grid:TreeGrid):void
+		{
+			// sort nodes with (1) lowest BASE depth first and (2) left Of first 
+			// so, we should clear depth delta before insertion into the pqueue
+			var queue:NodePriorityQueue = new NodePriorityQueue();
+			recAddToQueue(grid.root, queue);
+			
+			while (!queue.isEmpty) {				
+				var node:Node = queue.shift();
+				
+				// nothing to do for nodes with no isets or singleton isets
+				if (node.iset == null || node.iset.numNodes == 1) {
+					continue;
+				}
+				
+				// record current depth
+				var below:int = node.depth;
+				var above:int = -1;
+				var potentialPulls:Vector.<Node> = new Vector.<Node>();
+				
+				// find the next lower (closest to the root) depth in the iset
+				// while we are at it remove all items in the iset at the same depth from the queue
+				for (var isetNode:Node = node.iset.firstNode; isetNode != null; isetNode = isetNode.nextInIset) {
+					if (isetNode != node) {
+						if (isetNode.depth < below) {							
+							if (isetNode.depth > above) {
+								above = isetNode.depth;
+							}
+						} else if (isetNode.depth == below) {
+							var removeIdx:int = queue.remove(isetNode);
+							if (removeIdx == -1) throw new Error("Node was not found in queue");
+						}
+					}
+				}				
+				
+				// if the next lower depth == the current depth, this iset is finished and we move on			
+				if (above == -1) {
+					continue;
+				}
+				
+				// add all the potential pulls
+				for (var potentialPull:Node = node.iset.firstNode; potentialPull != null; potentialPull = potentialPull.nextInIset) {
+					if (potentialPull.depth == above) {
+						potentialPulls.push(potentialPull);
+					}
+				}
+				
+				// ignore nodes in iset with greater depth			
+				// otherwise for all nodes <= currentDepth and > lowestDepth 
+				// recursively add all nodes in ancestor isets smaller than the currentDepth
+				var nodeSet:Vector.<Node> = new Vector.<Node>();
+				recAddAncestorIsetNodes(below, above, node.iset, nodeSet);
+				
+				// once we have that set complete, we can go through the nodes in the starting iset that are less than the current depth
+				// on a node-by-node basis, check to see if it has descendants in the set (only need to check descendants up to the current depth)
+				// if there are no descendants, move to current depth and remove from queue... otherwise stay put
+				while (potentialPulls.length > 0) {
+					var toPull:TreeGridNode = potentialPulls.pop() as TreeGridNode;
+					if (!recHasDecendantsInNodeSet(toPull, below, nodeSet)) {
+						toPull.assignDepth(below);						
+						
+						// any depth change of a node requires removal from the queue to keep sort order consistent
+						queue.remove(toPull);						
+						
+						// we need to add children back to queue if they were already processed
+						for (var pulledChild:Node = toPull.firstChild; pulledChild != null; pulledChild = pulledChild.sibling) {
+							if (!queue.contains(pulledChild)) {
+								queue.push(pulledChild);
+							}
+						}
+					}
+				}				
+			}
+		}	
 		
-		public function get changesSize():Boolean {
-			return true;
-		}
-		
-		public function get changesDisplay():Boolean {
-			return true;
+		// Adds node and children to a queue ordered by depth, with their adjusted depth cleared
+		// TODO: add children from right to left to optimize queueing time... need a new pointer to prevSibling or use a DEQueue as NodePriorityQueue
+		private function recAddToQueue(node:Node, queue:NodePriorityQueue):void
+		{			
+			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
+				recAddToQueue(child, queue);				
+			}
+			(node as TreeGridNode).resetDepth();
+			queue.push(node);
 		}
 		
 		private function sortOutCollisions(grid:TreeGrid):void
@@ -143,93 +226,6 @@ package lse.math.games.builder.viewmodel
 			}						
 			
 			return didAdjustments;
-		}
-		
-		//Aligns the 'adjusted' depths of all nodes to be the equal if they belong to the same Iset, taking the maximum possible
-		private function alignDepths(grid:TreeGrid):void
-		{
-			// sort nodes with (1) lowest BASE depth first and (2) left Of first 
-			// so, we should clear depth delta before insertion into the pqueue
-			var queue:NodePriorityQueue = new NodePriorityQueue();
-			recAddToQueue(grid.root, queue);
-			
-			while (!queue.isEmpty) {				
-				var node:Node = queue.shift();
-				
-				// nothing to do for nodes with no isets or singleton isets
-				if (node.iset == null || node.iset.numNodes == 1) {
-					continue;
-				}
-				
-				// record current depth
-				var below:int = node.depth;
-				var above:int = -1;
-				var potentialPulls:Vector.<Node> = new Vector.<Node>();
-				
-				// find the next lower (closest to the root) depth in the iset
-				// while we are at it remove all items in the iset at the same depth from the queue
-				for (var isetNode:Node = node.iset.firstNode; isetNode != null; isetNode = isetNode.nextInIset) {
-					if (isetNode != node) {
-						if (isetNode.depth < below) {							
-							if (isetNode.depth > above) {
-								above = isetNode.depth;
-							}
-						} else if (isetNode.depth == below) {
-							var removeIdx:int = queue.remove(isetNode);
-							if (removeIdx == -1) throw new Error("Node was not found in queue");
-						}
-					}
-				}				
-							
-				// if the next lower depth == the current depth, this iset is finished and we move on			
-				if (above == -1) {
-					continue;
-				}
-				
-				// add all the potential pulls
-				for (var potentialPull:Node = node.iset.firstNode; potentialPull != null; potentialPull = potentialPull.nextInIset) {
-					if (potentialPull.depth == above) {
-						potentialPulls.push(potentialPull);
-					}
-				}
-				
-				// ignore nodes in iset with greater depth			
-				// otherwise for all nodes <= currentDepth and > lowestDepth 
-				// recursively add all nodes in ancestor isets smaller than the currentDepth
-				var nodeSet:Vector.<Node> = new Vector.<Node>();
-				recAddAncestorIsetNodes(below, above, node.iset, nodeSet);
-				
-				// once we have that set complete, we can go through the nodes in the starting iset that are less than the current depth
-				// on a node-by-node basis, check to see if it has descendants in the set (only need to check descendants up to the current depth)
-				// if there are no descendants, move to current depth and remove from queue... otherwise stay put
-				while (potentialPulls.length > 0) {
-					var toPull:TreeGridNode = potentialPulls.pop() as TreeGridNode;
-					if (!recHasDecendantsInNodeSet(toPull, below, nodeSet)) {
-						toPull.assignDepth(below);						
-						
-						// any depth change of a node requires removal from the queue to keep sort order consistent
-						queue.remove(toPull);						
-						
-						// we need to add children back to queue if they were already processed
-						for (var pulledChild:Node = toPull.firstChild; pulledChild != null; pulledChild = pulledChild.sibling) {
-							if (!queue.contains(pulledChild)) {
-								queue.push(pulledChild);
-							}
-						}
-					}
-				}				
-			}
-		}	
-		
-		// Adds node and children to a queue ordered by depth, with their adjusted depth cleared
-		// TODO: add children from right to left to optimize queueing time... need a new pointer to prevSibling or use a DEQueue as NodePriorityQueue
-		private function recAddToQueue(node:Node, queue:NodePriorityQueue):void
-		{			
-			for (var child:Node = node.firstChild; child != null; child = child.sibling) {
-				recAddToQueue(child, queue);				
-			}
-			(node as TreeGridNode).resetDepth();
-			queue.push(node);
 		}
 		
 		//Adds to nodeSet all nodes with a depth higher than 'top' but lower or equal than 'bottom', starting from the ones inside 

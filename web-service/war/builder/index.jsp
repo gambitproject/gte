@@ -32,6 +32,7 @@
 		var attributes = {
 			id:"GuiBuilder"
 		};
+		attributes.align = "middle";
 		
 		var fullwindow = true;
 
@@ -53,7 +54,6 @@
 			document.title = 'GTE - '+value;
 		}		
 			
-		var inThisWindowOutput = false;
 		var outputWindow = null;
 			
 		function writeSolution(data)
@@ -70,51 +70,12 @@
 				
 			outputWindow=window.open("", "Output", "height=500, width=500, toolbar=yes, location=no, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=yes"); 
 							
-			if(!isPopupBlocked(outputWindow))
-			{
-				outputWindow.document.write("<html><head><title>Output</title><style type='text/css'>html, body { height:100%; background-color: #FFFFFF;} body { margin:0; }	object:focus { outline:none; } </style></head>"); 
-				outputWindow.document.write("<body><div id='solutionHeader' style='background-color: "+headerBackgroundColor+"; color: #003300; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;  display: block;'>&#160;</div>");
-				outputWindow.document.write("<div id='solution' style='background-color: #ffffff;  border-top: 0; font-size: 12px; padding: 3px 5px 3px 5px; display: block; overflow: auto;'><pre>"+data+"</pre></div></body></html>"); 
-				outputWindow.document.close();
-				var desiredHeight = Math.min(outputWindow.document.getElementById("solutionHeader").offsetHeight + outputWindow.document.getElementById("solution").offsetHeight + 100 , 750);
-				outputWindow.resizeTo(500,desiredHeight);
-			} else {
-				if(!inThisWindowOutput)
-				{
-					inThisWindowOutput = confirm("Your browser is blocking popups, you should change that setting. Meanwhile, do you want to use in-window output?");
-					alert("ALERT: If you are going to enable popups in your browser, please save the current file in advance, as the window might restart");
-				}
-				
-				if(inThisWindowOutput)
-				{					
-					document.getElementById("solutionContainer").style.display="";
-					document.getElementById("solutionHeader").style.backgroundColor = headerBackgroundColor;
-					document.getElementById("solution").innerHTML = "<pre>" + data + "</pre>";				
-				}
-			}
-		}
-		
-		function isPopupBlocked(testPopup)
-		{	
-			var popupBlocked = false;
-			if (testPopup==null ||  typeof(testPopup) == "undefined" || testPopup.outerWidth == 0  || testPopup.outerHeight == 0 || testPopup.test == "undefined")
-			{	
-				//Test for most browsers
-				popupBlocked = true;
-			}
-			else 
-			{
-				//Test for chrome
-				testPopup.onload = function() {
-					setTimeout(function() {
-						if (testPopup.screenX === 0) {
-							popupsBlocked = true;
-						} 
-					}, 0);
-				};
-			}
-			
-			return popupBlocked;
+			outputWindow.document.write("<html><head><title>Output</title><style type='text/css'>html, body { height:100%; background-color: #FFFFFF;} body { margin:0; }	object:focus { outline:none; } </style></head>"); 
+			outputWindow.document.write("<body><div id='solutionHeader' style='background-color: "+headerBackgroundColor+"; color: #003300; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;  display: block;'>&#160;</div>");
+			outputWindow.document.write("<div id='solution' style='background-color: #ffffff;  border-top: 0; font-size: 12px; padding: 3px 5px 3px 5px; display: block; overflow: auto;'><pre>"+data+"</pre></div></body></html>"); 
+			outputWindow.document.close();
+			var desiredHeight = Math.min(outputWindow.document.getElementById("solutionHeader").offsetHeight + outputWindow.document.getElementById("solution").offsetHeight + 100 , 750);
+			outputWindow.resizeTo(500,desiredHeight); 
 		}
 			
 		function expand()
@@ -129,7 +90,6 @@
 				
 				document.getElementById("GTEContainer").style.height = "580px";
 				document.getElementById("GTEContainer").style.width = "85%";
-				document.getElementById("solutionContainer").style.width = "85%";
 
 				document.getElementById("expandButton").innerHTML = "Expand";
 			}
@@ -141,12 +101,11 @@
 				
 				//Remove borders
 				document.getElementById("GTEContainer").style.padding = "";
-				document.getElementById("GTEContainer").style.border ="";
+				document.getElementById("GTEContainer").style.border ="0px";
 	
 				//Maximize GTEContainer & solutionContainer
 				document.getElementById("GTEContainer").style.height = "100%"; 
 				document.getElementById("GTEContainer").style.width = "100%";
-				document.getElementById("solutionContainer").style.width = "100%";
 				
 				//Change button text
 				document.getElementById("expandButton").innerHTML = "Contract";
@@ -187,14 +146,14 @@
 						<param name="movie" value="GuiBuilder.swf" />
 						<param name="quality" value="high" />
 						<param name="bgcolor" value="white" />
-						<param name="wmode" value="transparent">
+						<param name="wmode" value="transparent" />
 						<param name="allowScriptAccess" value="sameDomain" />
 						<param name="allowFullScreen" value="true" />
 						<!--[if !IE]>-->
 						<object type="application/x-shockwave-flash" data="GuiBuilder.swf" width="100%" height="100%">
 							<param name="quality" value="high" />
 							<param name="bgcolor" value="white" />
-							<param name="wmode" value="transparent">
+							<param name="wmode" value="transparent" />
 							<param name="allowScriptAccess" value="sameDomain" />
 							<param name="allowFullScreen" value="true" />
 						<!--<![endif]-->
@@ -214,12 +173,6 @@
 				</noscript>	
 			</div>
 		<button id="expandButton" style="position: absolute; top: 3px; right: 3px;" type="button" onclick="expand()">Expand</button><br/>
-	</div>
-	
-	<div id="solutionContainer" style="text-align: left; width: 85%; margin: auto; background-color: #B7BABC; display: none; padding: 2px 5px 5px 5px; border: 1px solid #808080;">
-		<div id="solutionHeader" style="background-color: #00ff6b; color: #003300; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold; margin-top: 5px; display: block;">&#160;</div>
-		<div id="solution" style="background-color: #ffffff; border: #808080 solid 1px; border-top: 0; font-size: 12px; padding: 3px 5px 3px 5px; display: block; overflow: auto;">		
-		</div>
 	</div>
 
 	<div id="creditsContainer" style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">

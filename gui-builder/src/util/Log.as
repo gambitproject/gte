@@ -1,5 +1,9 @@
 package util
 {
+	import flash.errors.IllegalOperationError;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.events.TextEvent;
 	import flash.net.FileReference;
 	
 	import mx.collections.ArrayList;
@@ -15,28 +19,35 @@ package util
 	{
 		private static var _instance : Log = null; //Instance of the class for making it a singleton (needed for binding lastMessage)
 		
+		private var dispatcher:EventManager = EventManager.instance; 
+		
+		
+		
 		public static function get instance():Log
 		{
 			if(_instance == null)
 			{
-				_instance = new Log();
+				_instance = new Log(LogSingletonLock);
 			}
 			
 			return _instance;
 		}
 		
-		//TODO: Control it has not been instantiated, as in UserSettings
-		public function Log() {}
+		public function Log(lock:Class) {
+			if( lock != LogSingletonLock ){
+				throw new IllegalOperationError( "Settings is a Singleton, please use the static instance method instead." );
+			} else {
+			}
+		}
 		
 		private var lines : ArrayList = new ArrayList();
 		private const LOG_MAX_LENGTH : int = 100;
 		
 		[Bindable]
-		private var _lastMessage : String = ""; //TODO: This isnt binding
+		private var _lastMessage : String = ""; //TODO: Possibly remove, better throw events
 		
 		public function get lastMessage():String
 		{
-			//TODO: Depending on the type of the last message, it should show or not, here
 			if(lines.length==0)
 				return "";
 			
@@ -44,23 +55,42 @@ package util
 			
 			var type:String = getStringFromType(entry.type as int);
 			
-			return (entry.time as Date).toLocaleTimeString() + " " + type + ": " + entry.line + (entry.origin==null ? "" : " - " + entry.origin);
+			return (entry.time as Date).toLocaleTimeString() + " " + type 
+				+ ": " + entry.line + (entry.origin==null ? "" : " - " + entry.origin);
 		}
 		
-		/** An ERROR occurred possibly by user interaction, which displays an alert to the user */
+		/** 
+		 * An ERROR occurred possibly by user interaction, which displays an 
+		 * alert to the user 
+		 */
 		public static const ERROR : int = 1;
 		
-		/** An ERROR so important that it must interrupt the workflow, so therefore it is thrown, apart from logged */
+		/** 
+		 * An ERROR so important that it must interrupt the workflow, so 
+		 * therefore it is thrown, apart from logged 
+		 */
 		public static const ERROR_THROW : int = 2; 
 		
-		/** A minor ERROR from which the user doesn't have to know anything and therefore isn't shown to him, but that is logged*/
-		public static const ERROR_HIDDEN : int = 3; //TODO: Functionality
+		/** 
+		 * A minor ERROR from which the user doesn't need to know anything 
+		 * and therefore isn't shown to him. It is treated the same as DEBUG,
+		 * the only difference being that this one is marked as an ERROR (something
+		 * bad), and DEBUG can just be anything that the debugger would want to track,
+		 * not necessarily somethign bad.
+		 */
+		public static const ERROR_HIDDEN : int = 3; 
 		
 		/** A substitution of trace(), just debugging info for dev use */
 		public static const DEBUG : int = 4;
 		
-		/** A message sent to the user as to recommmend him doing something */
-		public static const HINT : int = 5; //TODO: Fucntionality
+		/** 
+		 * A message sent to the user as to recommmend him doing something. Not 
+		 * as invasive as ERROR, because it doesn't show in a PopUp,it shows in the 
+		 * logLine instead (the space below the canvas).
+		 */
+		public static const HINT : int = 5;
+
+		
 		
 		/**
 		 * Traces one line, storing it in the log. Depending on the type of statement you select, it does the following:
@@ -90,13 +120,13 @@ package util
 					throw new Error(line);
 					break;
 				case ERROR_HIDDEN:
-					//Do something
+					trace("Error: "+line+(origin==null ? "" : " - "+origin));
 					break;
 				case DEBUG:
 					trace("Debug: "+line+(origin==null ? "" : " - "+origin));
 					break;
 				case HINT:
-					//Do something: it should be something the user must see
+					dispatcher.dispatchEvent(new TextEvent(EvCodes.HINT_ADDED, false, false, line));
 					break;
 				
 				default:
@@ -168,3 +198,6 @@ package util
 		}
 	}	
 }
+
+//Dummy private class for making the constructor artificially private
+class LogSingletonLock {}
