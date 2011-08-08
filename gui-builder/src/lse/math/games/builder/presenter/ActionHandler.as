@@ -40,7 +40,9 @@ package lse.math.games.builder.presenter
 		public function processAction(action:IAction, grid:TreeGrid):void
 		{			
 			if (action != null) {
-				if (action.changesData) { // TODO: else add it to a pending list of actions todo					
+				if (action.changesData) { // TODO: else add it to a pending list of actions todo	
+					
+					while(_undone.length>0) _undone.pop(); //Empty the 'undone' queue		
 					action.doAction(grid);
 					_fileManager.unsavedChanges = true;
 					manageBuffer(action, grid);

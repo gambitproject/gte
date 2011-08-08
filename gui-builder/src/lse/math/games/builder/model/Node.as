@@ -8,6 +8,7 @@ package lse.math.games.builder.model
 	 * <ul><li>Its correlative nodes: father, brother (node at its right, pertaining to the same father), and first and last of its children</li>
 	 * <li>The Iset to which it belongs, as well as his neighbours in this Iset</li>
 	 * <li>The move it is reached by</li>
+	 * <li>Its depth</li>
 	 * <li>Its outcome (if it is a terminal node)</li>
 	 * </ul>
 	 * 
@@ -28,6 +29,7 @@ package lse.math.games.builder.model
 		private var _prevInIset:Node = null;
 		
 		private var _reachedby:Move;
+		private var _depth:int = 0;
 		private var _outcome:Outcome;
 		
 		private var log:Log = Log.instance;
@@ -67,6 +69,10 @@ package lse.math.games.builder.model
 		
 		/** Node from which this one is child. Can be null if this is the root */
 		public function get parent():Node { return _father; }
+		public function set parent(value:Node):void { 
+			_father = value;
+			_depth = value.depth+1;
+		}
 		
 		/** 
 		 * First brother at the right of this node (First child after this one, 
@@ -74,19 +80,11 @@ package lse.math.games.builder.model
 		 */ 
 		public function get sibling():Node { return _brother; }		
 				
-		/* TODO: To avoid recalculating depths of all parents each time you want to know someone's depth, 
-		 * as it consumes a lot, a system must be made that consists in a method that, when run, 
-		 * it recalculates all node depths, and that it should be ran when necessary, but when not,
-		 * nodes will keep a fixed depth.
-		 */
 		/** 
 		 * Distance, in nodes, from this node to the root. <br>
 		 * i.e., <i>root's depth = 0; root children's depth = 1;</i>
 		 */
-		public function get depth():int {
-			if (_father == null) return 0;
-			else return _father.depth + 1;
-		}
+		public function get depth():int { return _depth; }
 		
 		/** Number of children this node has */
 		public function get numChildren():int { 
@@ -312,7 +310,7 @@ package lse.math.games.builder.model
 		/** Adds a node as a child at the end of teh list of children */
 		public function addChild(child:Node):void  // the new child becomes the lastchild of (this) node
 		{
-			child._father = this;
+			child.parent = this;
 			if (_firstchild == null) {
 				_firstchild = child;
 				_lastchild = child;

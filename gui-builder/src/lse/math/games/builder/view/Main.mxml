@@ -12,6 +12,7 @@
 			import flash.utils.setTimeout;
 			
 			import lse.math.games.builder.io.FileManager;
+			import lse.math.games.builder.settings.SCodes;
 			import lse.math.games.builder.settings.Settings;
 			import lse.math.games.builder.settings.UserSettings;
 			
@@ -44,6 +45,9 @@
 			private var fileManager:FileManager; 
 			
 			private var eventManager:EventManager = EventManager.instance;
+			private var settings:UserSettings = UserSettings.instance;
+			
+
 			
 			private function initVars():void 
 			{			
@@ -97,14 +101,31 @@
 			
 			/* <--- ---  TOOLBARS-RELATED FUNCTIONS --- ---> */
 			
-			//Pops up a settings dialog
+			//Pops up the settings edition window
 			private function showSettings():void
 			{
 				var s:Settings = new Settings();
 				s.controller = controller;
 				PopUpManager.addPopUp(s, this, true);
 				PopUpManager.centerPopUp(s);
-			}																														  
+			}				
+			
+			//Pops up the -internal or external- output window
+			private function showOutput(text:String):void {
+				if (ExternalInterface.available && !settings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean) {
+					ExternalInterface.call('writeSolution', text);
+					log.add(Log.HINT, "You don't see the output? Then you must allow popups " +
+						"in your browser. Don't forget to save your changes before. Or you could " +
+						"activate the 'Display output internally' setting in the Settings panel.");
+				}
+				else {
+						var o:OutputWindow = new OutputWindow();
+						PopUpManager.addPopUp(o, this, false);
+						PopUpManager.centerPopUp(o);
+						o.height = canvas.height-50;
+						o.setText(text);
+				}
+			}
 			
 			//Return the action corresponding to the button pressed in opModeBar2
 			private function getClickCallback(idx:int):Function 
@@ -290,8 +311,8 @@
 						method="POST"		 
 						resultFormat="text"
 						showBusyCursor="true"
-						fault="Alert.show(event.fault.faultCode + ':' + event.fault.faultString + ':' + event.fault.faultDetail)"
-						result="if (ExternalInterface.available) {ExternalInterface.call('writeSolution', event.result);} else { trace(event.result); }"
+						fault="log.add(Log.ERROR, event.fault.faultCode + ':' + event.fault.faultString + ':' + event.fault.faultDetail)"
+						result="showOutput(event.result as String);"
 						/>
 		<TreeGrid id="grid" xmlns="lse.math.games.builder.viewmodel.*" />
 		<PainterChain id="treePainter" xmlns="lse.math.games.builder.view.*">

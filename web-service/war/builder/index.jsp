@@ -56,6 +56,7 @@
 			
 		var outputWindow = null;
 			
+		//Writes the output solution from an algo into a pop-up window
 		function writeSolution(data)
 		{			
 			var regex = /^SUCCESS/;
@@ -78,6 +79,7 @@
 			outputWindow.resizeTo(500,desiredHeight); 
 		}
 			
+		//Expands / Contracts the gui
 		function expand()
 		{
 			if(fullwindow) //Contract
@@ -114,6 +116,25 @@
 			fullwindow = !fullwindow;
 		}
 		
+		//Returns the flashmovie
+		function getFlashMovie() {
+			if (navigator.appName.indexOf("Microsoft") != -1) {
+				 return window["GuiBuilder"];
+			} else {
+				 return document["GuiBuilder"];
+			}
+		}
+		
+		//Before closing the browser window, it prompts if there are unsaved changes
+		window.onbeforeunload = function (evt)
+		{ 
+		   if(getFlashMovie().askBeforeQuit())
+		   {
+			  var message = 'The current file has unsaved changes. '
+							+ 'Do you really want to quit?'; 
+			  return message;
+		   }
+		}		
 	</script>
 	<style type="text/css">
 		html, body { height:100%; background-color: #303030;}		
@@ -147,15 +168,15 @@
 						<param name="quality" value="high" />
 						<param name="bgcolor" value="white" />
 						<param name="wmode" value="transparent" />
-						<param name="allowScriptAccess" value="sameDomain" />
 						<param name="allowFullScreen" value="true" />
+						<param name="allowScriptAccess" value="always" />
 						<!--[if !IE]>-->
 						<object type="application/x-shockwave-flash" data="GuiBuilder.swf" width="100%" height="100%">
 							<param name="quality" value="high" />
 							<param name="bgcolor" value="white" />
 							<param name="wmode" value="transparent" />
-							<param name="allowScriptAccess" value="sameDomain" />
 							<param name="allowFullScreen" value="true" />
+							<param name="allowScriptAccess" value="always" />
 						<!--<![endif]-->
 						<!--[if gte IE 6]>-->
 							<p> 

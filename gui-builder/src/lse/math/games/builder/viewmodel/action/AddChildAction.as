@@ -89,8 +89,6 @@ package lse.math.games.builder.viewmodel.action
 				// parent.addMove(player); <- UNCOM ME FOR ADDING A CHILD AT A TIME
 
 			} else if (childrenInOneIsetAndChildless(parent)) {
-				parent.addMove(player);
-
 				// if all children in one Iset and without children
 				// add new child to each node in Iset and place these
 				// children in same Iset as existing children

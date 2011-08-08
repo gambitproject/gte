@@ -18,6 +18,13 @@ package lse.math.games.builder.settings
 		 */
 		public static var STORE_SETTINGS_LOCALLY:String = "STORE_SETTINGS_LOCALLY";
 		
+		/** 
+		 * <li><b>true:</b> The output after running an algo, instead of in an external pop-up, will be shown in an internal flash one</li>
+		 * <li><b>false:</b> The output will be shown in a browser pop-up</li>
+		 * <p><b>Default:</b> false
+		 */
+		public static var DISPLAY_OUTPUT_INTERNALLY:String = "DISPLAY_OUTPUT_INTERNALLY";
+		
 		/* <--- GRAPHIC SETTINGS ---> */
 		/** 
 		 * uint with player 1's color 
@@ -47,6 +54,7 @@ package lse.math.games.builder.settings
 			
 			//GENERAL SETTINGS
 			settings.setValue(STORE_SETTINGS_LOCALLY, false);
+			settings.setValue(DISPLAY_OUTPUT_INTERNALLY, false);
 			//GRAPHIC SETTINGS
 			settings.setValue(PLAYER_1_COLOR, 0xFF0000);
 			settings.setValue(PLAYER_2_COLOR, 0x0000FF);

@@ -7,11 +7,15 @@ package lse.math.games.builder.settings
 	import util.Log;
 	
 	/**
-	 * This class stores user settings, and can dump them to a local 'cookie-like' shared object, if the user allows local flash storage
+	 * This class stores user settings, and can dump them to a local 'cookie-like' 
+	 * shared object, if the user allows local flash storage. <p/>
 	 * 
-	 * It is a singleton, and instead of calling the constructor directly, you should use UserSettings.instance
+	 * It is a singleton, and instead of calling the constructor directly, you 
+	 * should use UserSettings.instance. <p/>
+	 * 
+	 * Instructions:
 	 * <ul>
-	 * <li>Store run-time values of the settings using getValue and setValue functions.</li> 
+	 * <li>Store and access run-time values of the settings using getValue and setValue functions.</li> 
 	 * <li>Dump stored settings from and to the local 'cookie-like' storage with loadCookies() and saveCookies()</li>
 	 * <li>Check cookies can be stored and ask the user to change the setting if necessary with checkCookiesStorable() and askForCookiesStorable() </li>
 	 * <li>Delete all saved cookies with clearCookies()</li>
@@ -69,7 +73,7 @@ package lse.math.games.builder.settings
 		}
 		
 		/**
-		 * Retrieves a value in the settings by the specified key.
+		 * Retrieves a value in the settings by the specified key. <p/>
 		 * 
 		 * @param key	(Object) the key that the desired setting data was saved under
 		 * @return 		(Object) returns the data saved by key
@@ -81,7 +85,7 @@ package lse.math.games.builder.settings
 		}
 		
 		/**
-		 * Saves a value into the settings under the specified key.
+		 * Saves a value into the settings under the specified key. <p/>
 		 * 
 		 * @param key	(String) the key under which to save the value
 		 * @param value (Object) the value to be saved
@@ -97,7 +101,7 @@ package lse.math.games.builder.settings
 		 */
 		public function get cookiesStorable():Boolean
 		{
-			//TODO: Not working in IE?
+			//TODO: Not working in IE when the user has the setting set to NEVER allow ShraedObj?
 			// Create a dummy SO and try to store it
 			var mySO:SharedObject = SharedObject.getLocal("test");
 			if (mySO==null || !mySO.flush(1)) {
@@ -117,13 +121,13 @@ package lse.math.games.builder.settings
 		private function firstLoad():void
 		{
 			if(_loaded)
-				log.add(Log.ERROR_HIDDEN, "Warning: You are potentially overwriting non-saved settings here");
+				log.add(Log.ERROR_HIDDEN, "Warning: Non-saved settings are potentially being overwriting ");
 			SCodes.defaultSettings();
 			loadCookies();
 		}
 		
 		/** 
-		 * Checks if user allows 'cookies' storage, and if there is space available.
+		 * Checks if user allows 'cookies' storage, and if there is space available. <br>
 		 * If there isn't, it prompts the user to accept them 
 		 * 
 		 * @author Jesse Stratford

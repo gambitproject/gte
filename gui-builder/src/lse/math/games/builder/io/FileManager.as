@@ -57,6 +57,22 @@ package lse.math.games.builder.io
 			{
 				setTimeout(askLoadTree, 3000); //Leave 3 seconds for the creation of canvas
 			} 
+			
+			//Add callback for the askBeforeQuit function
+			if (ExternalInterface.available){
+				try {
+					ExternalInterface.addCallback("askBeforeQuit", askBeforeQuit);
+				}
+				catch(error:Error){
+					log.add(Log.ERROR_HIDDEN, ""+error);
+				}
+				catch(secError:SecurityError){
+					log.add(Log.ERROR_HIDDEN, ""+secError);
+				}
+			}
+			else {
+				log.add(Log.ERROR_HIDDEN, "ExternalInterface is not available");
+			}
 		}
 		
 		/** Name of the file */
@@ -110,6 +126,21 @@ package lse.math.games.builder.io
 			if(_unsavedChanges)
 				backupXML = controller.saveCurrentTreeToXML();
 			setTimeout(autosave, AUTOSAVE_INTERVAL);
+		}
+		
+		/* 
+		 * This function is called before closing the Browser Window manually by the user.
+		 * It will erase any auto-saved version of the tree stored as a SharedObject, as it
+		 * should be stored only when the browser is closed by accident, without user action.
+		 * 
+		 * It returns true if there are unsaved changes, false if there aren't.
+		 */
+		private function askBeforeQuit():Boolean {
+			
+			if(treeStorage != null)
+				treeStorage.clear();
+			
+			return _unsavedChanges;
 		}
 		
 		//Asks if to load a saved tree

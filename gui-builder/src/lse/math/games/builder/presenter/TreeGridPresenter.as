@@ -598,10 +598,6 @@ package lse.math.games.builder.presenter
 				log.add(Log.ERROR, "type was not recognized: " + algo.type);
 			}
 			
-			log.add(Log.HINT, "You don't see the output? It is shown in a PopUp window " +
-				"in your browser, so you'll have to configure it previously. Don't forget to " +
-				"save your changes before.");
-			
 			srv.send(params);
         }
 		
