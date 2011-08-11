@@ -27,15 +27,12 @@
 			allowFullscreen: "true",
 			allowScriptAccess: "always",
 			bgcolor: "#FFFFFF",		
-			wmode: "transparent"
 		};
 		var attributes = {
 			id:"GuiBuilder"
 		};
 		attributes.align = "middle";
 		
-		var fullwindow = true;
-
 		swfobject.embedSWF(
 			"GuiBuilder.swf", 
 			"flashContainer", 
@@ -79,23 +76,10 @@
 			outputWindow.resizeTo(500,desiredHeight); 
 		}
 			
-		//Expands / Contracts the gui
-		function expand()
+		//Expands / Contracts the gui if setting is true / false
+		function expand(setting)
 		{
-			if(fullwindow) //Contract
-			{
-				document.getElementById("titleContainer").style.display = "";
-				document.getElementById("creditsContainer").style.display = "";
-				
-				document.getElementById("GTEContainer").style.padding = "2px 5px 5px 5px";
-				document.getElementById("GTEContainer").style.border ="1px solid #808080";
-				
-				document.getElementById("GTEContainer").style.height = "580px";
-				document.getElementById("GTEContainer").style.width = "85%";
-
-				document.getElementById("expandButton").innerHTML = "Expand";
-			}
-			else //Expand
+			if(setting) //Expand
 			{
 				//Hide title and credits
 				document.getElementById("titleContainer").style.display = "none";
@@ -108,12 +92,18 @@
 				//Maximize GTEContainer & solutionContainer
 				document.getElementById("GTEContainer").style.height = "100%"; 
 				document.getElementById("GTEContainer").style.width = "100%";
-				
-				//Change button text
-				document.getElementById("expandButton").innerHTML = "Contract";
 			}
-			
-			fullwindow = !fullwindow;
+			else //Contract
+			{
+				document.getElementById("titleContainer").style.display = "";
+				document.getElementById("creditsContainer").style.display = "";
+				
+				document.getElementById("GTEContainer").style.padding = "2px 5px 5px 5px";
+				document.getElementById("GTEContainer").style.border ="1px solid #808080";
+				
+				document.getElementById("GTEContainer").style.height = "580px";
+				document.getElementById("GTEContainer").style.width = "85%";
+			}
 		}
 		
 		//Returns the flashmovie
@@ -142,7 +132,7 @@
 		object:focus { outline:none; }		
 	</style>
 </head>
-<body onload="expand()">
+<body>
 	<div id="titleContainer" style="text-align: left; width: 85%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
 		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
@@ -167,14 +157,12 @@
 						<param name="movie" value="GuiBuilder.swf" />
 						<param name="quality" value="high" />
 						<param name="bgcolor" value="white" />
-						<param name="wmode" value="transparent" />
 						<param name="allowFullScreen" value="true" />
 						<param name="allowScriptAccess" value="always" />
 						<!--[if !IE]>-->
 						<object type="application/x-shockwave-flash" data="GuiBuilder.swf" width="100%" height="100%">
 							<param name="quality" value="high" />
 							<param name="bgcolor" value="white" />
-							<param name="wmode" value="transparent" />
 							<param name="allowFullScreen" value="true" />
 							<param name="allowScriptAccess" value="always" />
 						<!--<![endif]-->
@@ -193,7 +181,6 @@
 					</object>
 				</noscript>	
 			</div>
-		<button id="expandButton" style="position: absolute; top: 3px; right: 3px;" type="button" onclick="expand()">Expand</button><br/>
 	</div>
 
 	<div id="creditsContainer" style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">

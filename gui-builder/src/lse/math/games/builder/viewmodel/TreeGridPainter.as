@@ -68,12 +68,12 @@ package lse.math.games.builder.viewmodel
 				_minBreadth = 0;
 			} else {
 				//TODO: calculate based on leaf label height/widths
-				_minBreadth = this.scale * ((_leafCount + 1) * TreeGrid.ISET_DIAM + _leafCount * TreeGrid.NODE_DIAM + 2 * _grid.ovallinewidth);
+				_minBreadth = this.scale * ((_leafCount + 1) * _grid.isetDiameter + _leafCount * _grid.nodeDiameter + 2 * _grid.strokeWidth);
 			}
 			
 			var maxdepth:int = _grid.maxDepth();
 			//TODO: calculate leveldistance dynamically based on label height/width
-			_minDepth = this.scale * (maxdepth * _grid.leveldistance + TreeGrid.ISET_DIAM  + 2 * _grid.ovallinewidth);
+			_minDepth = this.scale * (maxdepth * _grid.leveldistance + _grid.isetDiameter  + 2 * _grid.strokeWidth);
 		}
 		
 		override public function paint(g:IGraphics, width:Number, height:Number):void
@@ -115,7 +115,7 @@ package lse.math.games.builder.viewmodel
 				marginRight += marginAdjustLR;
 			}			
 						
-			var leafDistance:Number = (( -_leafCount * this.scale * TreeGrid.ISET_DIAM) + 
+			var leafDistance:Number = (( -_leafCount * this.scale * _grid.isetDiameter) + 
 				(grid.rotate == 0 || grid.rotate == 2 ? width - marginLeft - marginRight : height - marginTop - marginBottom)) 
 					/ (_leafCount + 1);
 								
@@ -127,7 +127,7 @@ package lse.math.games.builder.viewmodel
 		// Graphics painting
 		private function paintTree(g:IGraphics, grid:TreeGrid):void
 		{
-			g.stroke = this.scale * grid.linewidth;
+			g.stroke = this.scale * grid.strokeWidth;
 			recPaintTree(g, grid, grid.root as TreeGridNode);
 		}
 		
@@ -157,9 +157,9 @@ package lse.math.games.builder.viewmodel
 			if (n.outcome == null) {
 				g.color = getNodeColor(n, grid, selectionFound);
 				if (n.iset.player == Player.CHANCE) {	
-					g.fillRect(n.xpos - this.scale * TreeGrid.NODE_DIAM/2, n.ypos - scale * TreeGrid.NODE_DIAM/2, scale * TreeGrid.NODE_DIAM, scale * TreeGrid.NODE_DIAM);
+					g.fillRect(n.xpos - this.scale * grid.nodeDiameter/2, n.ypos - scale * grid.nodeDiameter/2, scale * grid.nodeDiameter, scale * grid.nodeDiameter);
 				} else {	
-					g.fillCircle(n.xpos, n.ypos, this.scale * TreeGrid.NODE_DIAM / 2);
+					g.fillCircle(n.xpos, n.ypos, this.scale * grid.nodeDiameter / 2);
 				}
 			}
 						
@@ -170,7 +170,7 @@ package lse.math.games.builder.viewmodel
 		{
 			var color:uint = isSelected ? 0xFFD700 : 0x000000;
 			if (!isSelected && n.iset != null && n.iset.player != Player.CHANCE) {
-				color = (grid.firstPlayer == n.iset.player ? grid.player1Color : grid.player2Color);
+				color = (grid.firstPlayer == n.iset.player ? grid.player1Color : grid.player2Color); 
 				if (n.iset == grid.mergeBase) { 
 					color ^= 0xFFFFFF; // complement
 					color &= 0x7FFF7F; // not too bright, and greenish
@@ -392,7 +392,7 @@ package lse.math.games.builder.viewmodel
 			if (n.isLeaf) 
 			{
 				var breadthPos:Number = (drawnumber + 1) * leafdistance + 
-					this.scale * TreeGrid.ISET_DIAM * (drawnumber + 0.5);
+					this.scale * _grid.isetDiameter * (drawnumber + 0.5);
 					
 				if (grid.rotate == 0 || grid.rotate == 2) {
 					n.xpos = breadthPos + marginLeft;
@@ -425,7 +425,7 @@ package lse.math.games.builder.viewmodel
 		
 		private function positionNodeDepth(n:TreeGridNode, grid:TreeGrid, width:Number, height:Number):void
 		{
-			var depthPos:Number = this.scale * (n.depth * grid.leveldistance + TreeGrid.ISET_DIAM / 2);		
+			var depthPos:Number = this.scale * (n.depth * grid.leveldistance + _grid.isetDiameter / 2);		
 			if (grid.rotate == 0) {
 				n.ypos = depthPos + marginTop;
 			} else if (grid.rotate == 1) {

@@ -481,6 +481,7 @@ package lse.math.games.builder.model
 		public function get nextIset():Iset { return _nextIset; }
 		public function get prevIset():Iset { return _prevIset; }		
 		public function get idx():int { return _idx; }
+		public function set idx(value:int):void { _idx = value; }
 		
 		/** Creates a new iset and appends it at the end of the linked list */
 		public function newIset(player:Player):Iset
@@ -504,9 +505,9 @@ package lse.math.games.builder.model
 		
 		/**
 		 * Inserts an Iset after this one in the linked list of Isets,
-		 * updating the idx's accordingly.
+		 * updating the idx's accordingly if modifyIdx is true
 		 */
-		public function insertAfter(toAdd:Iset):void
+		public function insertAfter(toAdd:Iset, modifyIdx:Boolean):void
 		{
 			toAdd._nextIset = _nextIset;
 			_nextIset = toAdd;
@@ -517,11 +518,15 @@ package lse.math.games.builder.model
 			
 			toAdd._prevIset = this;
 			
-			toAdd._idx = _idx + 1;
-			for (var h:Iset = toAdd._nextIset; h != null; h = h._nextIset) {					
-				++h._idx;
+			if(modifyIdx)
+			{
+				toAdd._idx = _idx + 1;
+				for (var h:Iset = toAdd._nextIset; h != null; h = h._nextIset) {					
+					++h._idx;
+				}
 			}
 		}
+		
 		
 		//Removes this Iset from the LinkedList
 		internal function remove():void

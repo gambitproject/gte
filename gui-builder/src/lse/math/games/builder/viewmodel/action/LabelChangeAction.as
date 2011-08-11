@@ -6,6 +6,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
+	
+	import util.Log;
 		
 	/**	
 	 * Changes a selected node's label to a new one
@@ -18,6 +20,7 @@ package lse.math.games.builder.viewmodel.action
 	{
 		private var _nodeId:int;
 		private var _label:String;
+		private var log:Log = Log.instance;
 		
 		private var _timeElapsed:int = 0;
 		
@@ -41,7 +44,8 @@ package lse.math.games.builder.viewmodel.action
 				if (move != null) {
 					move.label = _label;
 				}
-			}
+			} else 
+				log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "LabelChangeAction");
 			
 			_timeElapsed = getTimer() - prevTime;
 		}

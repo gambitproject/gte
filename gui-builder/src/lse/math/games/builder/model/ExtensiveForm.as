@@ -1,5 +1,7 @@
 package lse.math.games.builder.model 
 {	
+	import flash.net.FileReference;
+	
 	import util.Log;
 
 	/**	  
@@ -18,6 +20,8 @@ package lse.math.games.builder.model
 		private var _firstPlayer:Player = null;
 		
 		private var lastNodeNumber:int = 0;
+		private var lastOrderedNodeNumber:int = 0;
+		private var lastOrderedIsetNumber:int = 0;
 		
 		private var log:Log = Log.instance;
 		
@@ -38,6 +42,18 @@ package lse.math.games.builder.model
 			var count:int = 0;
 			for (var h:Iset = root.iset; h != null; h = h.nextIset) {
 				++count;
+			}
+			return count;
+		}
+		
+		/** Number of players in the tree */
+		public function get numPlayers():int {
+			var count:int = 0;
+			var player:Player = _firstPlayer;
+			while(player!=null)
+			{
+				count++;
+				player = player.nextPlayer;
 			}
 			return count;
 		}
@@ -77,6 +93,39 @@ package lse.math.games.builder.model
 			return new Node(this, number);
 		}
 		
+		/** 
+		 * Assigns nodes and isets ids in pre-order. It should be called after all
+		 * actions that might change the tree pre-order representation.
+		 */
+		public function orderIds():void
+		{
+			//Reset all iset numbers
+			var h:Iset = root.iset;
+			while(h!=null)
+			{
+				h.idx = -1;
+				h = h.nextIset;
+			}
+			
+			lastOrderedNodeNumber = 0;
+			lastOrderedIsetNumber = 0;
+			recOrderIds(_root);
+		}
+		
+		//Recursively adds new idxs to nodes and isets
+		private function recOrderIds(node:Node):void
+		{
+			node.number = lastOrderedNodeNumber++;
+			if(node.iset!=null && node.iset.idx == -1) node.iset.idx = lastOrderedIsetNumber++;
+			
+			var child:Node = node.firstChild;
+			while(child!=null) 
+			{
+				recOrderIds(child);
+				child = child.sibling;
+			}
+		}
+		
 		/** Searchs for a node with a determinate 'number' (id). If it finds it, it returns it, else it returns null */
 		public function getNodeById(number:int):Node
 		{
@@ -110,8 +159,8 @@ package lse.math.games.builder.model
 		
 		/**
 		 * Adds an Iset to the tree, at the end of the linked list of isets 
-		 * (which doesn't directly relate to the physiscal position in the tree).
-		 * <br>If the Iset was already in the list, it does nothing
+		 * (which doesn't directly relate to the spatial location in the tree).
+		 * <br>If the Iset was already in the list, it does nothing.
 		 * @return (int) The added isets' idx after insertion
 		 */
 		public function addIset(toAdd:Iset):int
@@ -126,13 +175,13 @@ package lse.math.games.builder.model
 					idx = h.idx;
 					log.add(Log.ERROR_HIDDEN, "Pretended to add an iset equal to the one existing with idx "+idx);
 					break;
-				} else if (h.nextIset == null) {
+				} else if (h.nextIset == null || h.nextIset.idx>toAdd.idx) {
 					break;
 				}
 				h = h.nextIset;
 			}
 			if (idx == -1) {
-				h.insertAfter(toAdd);
+				h.insertAfter(toAdd, false);
 			}
 			return toAdd.idx;
 		}
@@ -251,10 +300,20 @@ package lse.math.games.builder.model
 			}
 		}
 			
-		//used for debugging
-		public function printTree():void
+		/** Save a TXT representation of the tree */
+		public function saveTreeTXT():void
 		{
+			new FileReference().save(printTree(), "treedump.txt");			
+		}
+		
+		private var treeLog:String = "";
+		
+		//used for debugging
+		public function printTree():String
+		{
+			treeLog = "";
 			recPrintTree(root);
+			return treeLog;
 		}
 		
 		private function recPrintTree(x:Node):void  // preorder: node, then children
@@ -265,13 +324,13 @@ package lse.math.games.builder.model
 			}
 						
 			var y:Node = x.firstChild;
-			log.add(Log.DEBUG, indent + x.toString() + ((y == null) ? " (leaf)" : ""));
+			treeLog += (indent + x.toString() + ((y == null) ? " (leaf)" : ("")) +"\n");
 			
 			while (y != null)
 			{
 				recPrintTree(y);
 				y = y.sibling;
-			}			
+			}	
 		}
 		
 		public function toString():String

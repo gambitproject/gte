@@ -32,6 +32,8 @@ package lse.math.games.builder.viewmodel.action
 			var labeler:AutoLabeller = new AutoLabeller;
 			labeler.doAction(grid);
 			
+			grid.orderIds();
+			
 			_timeElapsed = getTimer() - prevTime;
 		}
 		

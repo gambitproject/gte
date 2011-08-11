@@ -16,7 +16,7 @@ package lse.math.games.builder.viewmodel.action
 	public class MergeAction implements IAction
 	{				
 		private var _mergeId:int = -1;
-		private var _baseId:int = -1;		
+		private var _baseId:int = -1;
 		
 		private var _onMerge:IAction;
 		
@@ -59,6 +59,8 @@ package lse.math.games.builder.viewmodel.action
 			} else {
 				grid.mergeBase = null;	
 			}			
+			
+			grid.orderIds();
 			
 			_timeElapsed = getTimer() - prevTime;
 		}

@@ -20,7 +20,7 @@ package lse.math.games.builder.presenter
 	
 	import lse.math.games.builder.fig.FigFontManager;
 	import lse.math.games.builder.fig.TreeGridFigWriter;
-	import lse.math.games.builder.io.ExtensiveFormXMLWriter;
+	import lse.math.games.builder.io.XMLExporter;
 	import lse.math.games.builder.io.FileManager;
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
@@ -28,6 +28,7 @@ package lse.math.games.builder.presenter
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.model.Strategy;
+	import lse.math.games.builder.settings.FileSettings;
 	import lse.math.games.builder.view.Canvas;
 	import lse.math.games.builder.view.MouseScroller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
@@ -44,11 +45,13 @@ package lse.math.games.builder.presenter
 	/**	
 	 * @author Mark Egesdal
 	 */
+	
+	//TODO: #33 Presenter & MatrixGridPresenter
 	public class TreeGridPresenter
 	{
 		private var _canvas:Canvas;
 		private var _fileManager:FileManager;  
-		private var _actionHandler:ActionHandler;		
+		private var _treeActionHandler:TreeActionHandler;		
 		private var _grid:TreeGrid;
 		
 		private var _gridData:ArrayCollection = new ArrayCollection();		
@@ -57,8 +60,7 @@ package lse.math.games.builder.presenter
 				
 		private var log:Log = Log.instance;
 		
-//		private var _log:Log = Log.instance;
-//		private var _lastLogMessage:String = _log.lastMessage;
+
 		
 		//private var _modelDirty:Boolean = true;		
 				
@@ -66,15 +68,8 @@ package lse.math.games.builder.presenter
 		{									
 			_gridData.addEventListener("collectionChange", onOutcomeEdit);
 			_fileManager = new FileManager(this);
-			_actionHandler  = new ActionHandler(_fileManager);
+			_treeActionHandler  = new TreeActionHandler(_fileManager);
 		}
-		
-//		//TODO: This doesn't update the gui
-//		public function get lastLogMessage():String
-//		{
-//			_lastLogMessage = _log.lastMessage;
-//			return _lastLogMessage;
-//		}
 		
 		public function set grid(value:TreeGrid):void {
 			_grid = value;
@@ -393,7 +388,7 @@ package lse.math.games.builder.presenter
 		{                   
 			var action:IAction = getAction(_grid);
 			if (action != null) {
-				_actionHandler.processAction(action, _grid);						
+				_treeActionHandler.processAction(action, _grid);						
 				invalidate(action.changesData, action.changesSize, action.changesDisplay);		
 			}
 		}
@@ -410,7 +405,7 @@ package lse.math.games.builder.presenter
 				selectedNode = -1;
 				var action:IAction = getClickAction(_grid, x, y);
 				if (action != null) {
-					_actionHandler.processAction(action, _grid);									
+					_treeActionHandler.processAction(action, _grid);									
 					invalidate(action.changesData, action.changesSize, action.changesDisplay);
 				}
 			}
@@ -418,7 +413,7 @@ package lse.math.games.builder.presenter
 		
 		public function undo():void
 		{             
-			if (_actionHandler.undo(_grid)) {
+			if (_treeActionHandler.undo(_grid)) {
 				invalidate(true, true, true);
 			} else {
 				log.add(Log.HINT, "No more operations to undo");
@@ -427,7 +422,7 @@ package lse.math.games.builder.presenter
 		
 		public function redo():void
 		{             
-			if (_actionHandler.redo(_grid)) {
+			if (_treeActionHandler.redo(_grid)) {
 				invalidate(true, true, true);
 			} else {
 				log.add(Log.HINT, "No more operations to redo");
@@ -450,7 +445,7 @@ package lse.math.games.builder.presenter
 					}
 				}
 				if (chain != null) {
-					_actionHandler.processAction(chain, _grid);						
+					_treeActionHandler.processAction(chain, _grid);						
 					invalidate(chain.changesData, chain.changesSize, chain.changesDisplay);		
 				}
 			}
@@ -497,7 +492,7 @@ package lse.math.games.builder.presenter
 		public function clear():void
 		{
 			resetZoom();
-			_actionHandler.reset(_grid);
+			_treeActionHandler.reset(_grid);
 			fileManager.clear();
 			invalidate(true, true, true);
 		}
@@ -545,22 +540,31 @@ package lse.math.games.builder.presenter
 		 * Returns a XML file with the current tree packaged in it
 		 */
 		public function saveCurrentTreeToXML():XML {
-			var xmlWriter:ExtensiveFormXMLWriter = new ExtensiveFormXMLWriter();
-			return xmlWriter.write(_grid);		
+			var xmlWriter:XMLExporter = new XMLExporter();
+			return xmlWriter.writeTree(_grid);		
 		}
 		
 		/**
-		 * Loads a tree from xml, deleting any previous states
+		 * Loads a tree/matrix from xml, deleting any previous states
 		 */
-		public function loadTreeFromXML(xml:XML):void
+		public function loadFromXML(xml:XML):void
 		{			
-			_actionHandler.load(xml, _grid);
-			isZeroSum = false;			
+			//TODO #33 check what type of data is inside the xml
+			loadTreeFromXML(xml);
+		
 			invalidate(true, true, true);
 		}
 		
+		private function loadTreeFromXML(xml:XML):void
+		{
+			_treeActionHandler.load(xml, _grid);
+			isZeroSum = false;	
+		}
+		
+		//TODO #33 loadMatrixFromXML
+		
 		/**
-		 * Opens a dialog for selecting and opening a tree in xml format
+		 * Opens a dialog for selecting and opening a file in xml format
 		 */
 		public function open():void
 		{
@@ -569,6 +573,8 @@ package lse.math.games.builder.presenter
 
 		// URL Request Handler below here...
 		public function runAlgorithm(algo:Object, seed:String):void
+			//TODO #33: Although the functionality should be the same, depending on the nf or ef mode,
+			//the data for running the algo might need to be generated
 		{			
 			if (algo == null || algo.service == null || algo.service == undefined 
 				|| algo.url == null || algo.url == undefined) {
@@ -603,8 +609,8 @@ package lse.math.games.builder.presenter
 		
 		private function getTreeParam():String
 		{
-			var xmlWriter:ExtensiveFormXMLWriter = new ExtensiveFormXMLWriter();
-			var treeXML:XML = xmlWriter.write(_grid);
+			var xmlWriter:XMLExporter = new XMLExporter();
+			var treeXML:XML = xmlWriter.writeTree(_grid);
 			XML.prettyPrinting = false;
 			var value:String = treeXML.toXMLString();
 			XML.prettyPrinting = true;

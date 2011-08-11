@@ -5,7 +5,7 @@ package lse.math.games.builder.settings
 	import flash.system.Security;
 	
 	import util.Log;
-	
+		
 	/**
 	 * This class stores user settings, and can dump them to a local 'cookie-like' 
 	 * shared object, if the user allows local flash storage. <p/>
@@ -32,7 +32,7 @@ package lse.math.games.builder.settings
 		
 		private const FILENAME:String = "settings";
 		
-		private var data:Object;
+		private var _data:Object;
 		private var _settings_RSO:SharedObject	= null;
 		private var _loaded:Boolean = false;
 		
@@ -49,7 +49,7 @@ package lse.math.games.builder.settings
 				throw new IllegalOperationError( "Settings is a Singleton, please use the static instance method instead." );
 			} else {
 				_settings_RSO = SharedObject.getLocal( FILENAME, "/" );
-				data = new Object();
+				_data = new Object();
 			}
 		}
 		
@@ -66,11 +66,8 @@ package lse.math.games.builder.settings
 			return _instance;
 		}
 		
-		/** If the settings have been loaded from local storage */
-		public function get loaded():Boolean
-		{
-			return _loaded;
-		}
+		/* Returns the data array, necessary for loading defaults in FileSettings */
+		internal function get data():Object {return _data;}
 		
 		/**
 		 * Retrieves a value in the settings by the specified key. <p/>
@@ -81,7 +78,7 @@ package lse.math.games.builder.settings
 		public function getValue( key:Object ):Object {
 			if(!_loaded)
 				firstLoad();
-			return data[key];
+			return _data[key];
 		}
 		
 		/**
@@ -91,7 +88,9 @@ package lse.math.games.builder.settings
 		 * @param value (Object) the value to be saved
 		 */
 		public function setValue( key:String, value:Object ):void {
-			data[key] = value;
+			if(!_loaded)
+				firstLoad();
+			_data[key] = value;
 		}
 		
 		/** 
@@ -122,8 +121,24 @@ package lse.math.games.builder.settings
 		{
 			if(_loaded)
 				log.add(Log.ERROR_HIDDEN, "Warning: Non-saved settings are potentially being overwriting ");
+			
+			var prevLoadedStatus:Boolean = _loaded;
+			
+			_loaded = true; //this should be here, else we enter an infinite loop
 			SCodes.defaultSettings();
+			_loaded = prevLoadedStatus; //Now we restore to the previous status
 			loadCookies();
+		}
+		
+		/* Loads all stored values from user's local 'flash cookies' */
+		private function loadCookies():void
+		{
+			for(var key:String in _settings_RSO.data)
+			{
+				_data[key] = _settings_RSO.data[key];
+			}
+			
+			_loaded = true;
 		}
 		
 		/** 
@@ -138,28 +153,34 @@ package lse.math.games.builder.settings
 				Security.showSettings();
 		}
 		
-		/** Loads all stored values from user's local 'flash cookies' */
-		public function loadCookies():void
+		/**
+		 * Saves cookies if the preference is activated, and if cookies are storable. 
+		 * @return True if they are saved correctly.
+		 */
+		public function saveCookiesIfPossible():Boolean
 		{
-			for(var key:String in _settings_RSO.data)
+			var saved:Boolean = false;
+			if(getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean && cookiesStorable)
 			{
-				data[key] = _settings_RSO.data[key];
+				saved = saveCookies();
+				if(!saved)
+					log.add(Log.ERROR, "Couldn't store the cookies for an unknown error, please retry");
 			}
 			
-			_loaded = true;
+			return saved;
 		}
 		
-		/**
+		/*
 		 * Saves all stored values onto user's local 'flash cookies'.
 		 * 
 		 * @return		(Boolean) true if the values were successfully saved
 		 */
-		public function saveCookies():Boolean
+		private function saveCookies():Boolean
 		{
-			for(var key:String in data)
+			for(var key:String in _data)
 			{
-				_settings_RSO.setProperty( key, data[key] );
-				if(_settings_RSO.data[key] != data[key])
+				_settings_RSO.setProperty( key, _data[key] );
+				if(_settings_RSO.data[key] != _data[key])
 					return false;
 			}
 			

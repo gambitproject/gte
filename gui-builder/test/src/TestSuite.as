@@ -16,5 +16,7 @@ package
 		public var playerTest:lse.math.games.builder.model.PlayerTest;
 		public var rationalTest:lse.math.games.builder.model.RationalTest;
 		public var strategyTest:lse.math.games.builder.model.StrategyTest;
+		
+		public var nodePriorityQueueTest:lse.math.games.builder.viewmodel.NodePriorityQueueTest;
 	}
 }

@@ -3,10 +3,10 @@ package lse.math.games.builder.settings
 	/**
 	 * Enum containing each Setting code, with a brief description of what the associated content should be and mean.
 	 * 
-	 * <p/>When adding a new setting, its key inside UserSettings.as and Settings.mxml 
+	 * <p/>When adding a new setting, its key inside UserSettings.as / FileSetting.as and Settings.mxml 
 	 * must be the same and taken from here, for reference purposes
 	 * 
-	 * <p/>You can call defaultSettings() to load a default value for each setting
+	 * <p/>You can call defaultSettings() to load a default value for each setting (except from File Settings)
 	 */
 	public final class SCodes
 	{
@@ -16,36 +16,105 @@ package lse.math.games.builder.settings
 		 * <li><b>false:</b> Settings are discarded once the user closes the browser window</li>
 		 * <p><b>Default:</b> false
 		 */
-		public static var STORE_SETTINGS_LOCALLY:String = "STORE_SETTINGS_LOCALLY";
+		public static const STORE_SETTINGS_LOCALLY:String = "STORE_SETTINGS_LOCALLY";
 		
 		/** 
 		 * <li><b>true:</b> The output after running an algo, instead of in an external pop-up, will be shown in an internal flash one</li>
 		 * <li><b>false:</b> The output will be shown in a browser pop-up</li>
 		 * <p><b>Default:</b> false
 		 */
-		public static var DISPLAY_OUTPUT_INTERNALLY:String = "DISPLAY_OUTPUT_INTERNALLY";
+		public static const DISPLAY_OUTPUT_INTERNALLY:String = "DISPLAY_OUTPUT_INTERNALLY";
 		
-		/* <--- GRAPHIC SETTINGS ---> */
+		/**
+		 * int containing the number of undoable actions, at least, that the user would like to keep
+		 * <p><b>Default:</b> 10
+		 */
+		public static const MINIMUM_BUFFER_SIZE:String = "MINIMUM_BUFFER_SIZE";
+		
+		
+		
+		/* <--- DEFAULT GRAPHIC SETTINGS (applied to trees with no graphic information) ---> */
 		/** 
 		 * uint with player 1's color 
 		 * <p><b>Default:</b> Red
 		 */
-		public static var PLAYER_1_COLOR:String = "PLAYER_1_COLOR";
+		public static const DEFAULT_PLAYER_1_COLOR:String = "DEFAULT_PLAYER_1_COLOR";
 		
 		/** 
 		 * uint with player 2's color 
 		 * <p><b>Default:</b> Blue
 		 */
-		public static var PLAYER_2_COLOR:String = "PLAYER_2_COLOR";
+		public static const DEFAULT_PLAYER_2_COLOR:String = "DEFAULT_PLAYER_2_COLOR";
 		
 		/** 
 		 * String with the default font family to be used 
 		 * <p><b>Default:</b> Times
 		 */
-		public static var DEFAULT_FONT:String = "DEFAULT_FONT"; 
-		//It is called DEFAULT because in the future there might be also more specific ones, such as payoff_font or player_font
-		//and then this one will be the used in whatever's not got a specific one
+		public static const DEFAULT_FONT:String = "DEFAULT_FONT"; 
 		
+		/**
+		 * Number representing the width of the strokes of lines for drawing isets and moves
+		 * <p><b>Default:</b> 1.0
+		 */
+		public static const DEFAULT_STROKE_WIDTH:String = "DEFAULT_STROKE_WIDTH";
+		
+		/** 
+		 * int representing the diameter of nodes
+		 * <p><b>Default:</b> 7
+		 */
+		public static const DEFAULT_NODE_DIAMETER:String = "DEFAULT_NODE_DIAMETER";
+		
+		/**
+		 * Number representing the diameter of isets
+		 * <p><b>Default:</b> 25
+		 */
+		public static const DEFAULT_ISET_DIAMETER:String = "DEFAULT_ISET_DIAMETER";
+		
+		/** 
+		 * int representing the distance between two consecutive node levels
+		 * <p><b>Default:</b> 75
+		 */
+		public static const DEFAULT_LEVEL_DISTANCE:String = "DEFAULT_LEVEL_DISTANCE";
+		
+		
+		
+		/* <--- FILE GRAPHIC SETTINGS (settings not stored in the users PC but on XML files. Loaded with FileSettings) ---> */
+		//NOTE: All of these must have their "DEFAULT_" counterpart, else FileSettings.setAsDefault() will need to be modified
+		/** uint with player 1's color */
+		public static const FILE_PLAYER_1_COLOR:String = "FILE_PLAYER_1_COLOR";
+		
+		/** uint with player 2's color */
+		public static const FILE_PLAYER_2_COLOR:String = "FILE_PLAYER_2_COLOR";
+		
+		/** String with the FILE font family to be used */
+		public static const FILE_FONT:String = "FILE_FONT"; 
+		
+		/** int representing the width of the strokes of lines for drawing isets and moves */
+		public static const FILE_STROKE_WIDTH:String = "FILE_STROKE_WIDTH";
+		
+		/** Number representing the diameter of nodes */
+		public static const FILE_NODE_DIAMETER:String = "FILE_NODE_DIAMETER";
+		
+		/** Number representing the diameter of isets */
+		public static const FILE_ISET_DIAMETER:String = "FILE_ISET_DIAMETER";
+		
+		/** int representing the distance between two consecutive node levels */
+		public static const FILE_LEVEL_DISTANCE:String = "FILE_LEVEL_DISTANCE";
+		
+		
+		
+		
+		/* <--- OTHER SETTINGS (Not shown under the Settings panel) ---> */
+		
+		/**
+		 * Boolean with the current expand status of the webcontainer of the GUI
+		 * <p><b>Default:</b> False
+		 */
+		public static const EXPANDED:String = "EXPANDED";
+		
+		
+		
+		/* <--- DEFAULT SETTINGS ---> */
 		
 		/** Creates a default entry for each setting that a UserSetting object should have*/
 		public static function defaultSettings():void
@@ -55,12 +124,17 @@ package lse.math.games.builder.settings
 			//GENERAL SETTINGS
 			settings.setValue(STORE_SETTINGS_LOCALLY, false);
 			settings.setValue(DISPLAY_OUTPUT_INTERNALLY, false);
+			settings.setValue(MINIMUM_BUFFER_SIZE, 10);
 			//GRAPHIC SETTINGS
-			settings.setValue(PLAYER_1_COLOR, 0xFF0000);
-			settings.setValue(PLAYER_2_COLOR, 0x0000FF);
+			settings.setValue(DEFAULT_PLAYER_1_COLOR, 0xFF0000);
+			settings.setValue(DEFAULT_PLAYER_2_COLOR, 0x0000FF);
 			settings.setValue(DEFAULT_FONT, "Times");
-
-			
+			settings.setValue(DEFAULT_STROKE_WIDTH, 1);
+			settings.setValue(DEFAULT_NODE_DIAMETER, new Number(7));
+			settings.setValue(DEFAULT_ISET_DIAMETER, new Number(25));
+			settings.setValue(DEFAULT_LEVEL_DISTANCE, 75);
+			//OTHER SETTINGS
+			settings.setValue(EXPANDED, false);
 		}
 	}
 }

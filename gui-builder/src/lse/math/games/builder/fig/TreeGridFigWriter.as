@@ -62,6 +62,7 @@ package lse.math.games.builder.fig
 			var graphics:FigGraphics = new FigGraphics(buffer);
 			graphics.addColor(grid.player1Color);
 			graphics.addColor(grid.player2Color);
+			//TODO: 3PL
 			
 			//Saves onto the file the results of all the painter operations that form the tree
 			painter.paint(graphics, width, height);

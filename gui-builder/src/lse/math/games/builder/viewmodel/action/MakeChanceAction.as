@@ -7,6 +7,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
+	import util.Log;
+	
 	/**	
 	 * Makes a node or all nodes in iset to be chances (eliminating player data and replacing move labels with probabilities)
 	 * <li>Changes Data</li>
@@ -18,6 +20,7 @@ package lse.math.games.builder.viewmodel.action
 	{
 		private var _isetId:int = -1;		
 		private var _nodeId:int = -1;
+		private var log:Log = Log.instance;
 		
 		private var _onDissolve:IAction;
 			
@@ -44,11 +47,16 @@ package lse.math.games.builder.viewmodel.action
 			
 			var iset:Iset = grid.getIsetById(_isetId);
 			if (iset == null) {
-				var node:Node = grid.getNodeById(_nodeId);
-				if (node != null) {
-					iset = node.makeNonTerminal();
-					iset.makeChance();
-				}
+				if(_nodeId >= 0)
+				{
+					var node:Node = grid.getNodeById(_nodeId);
+					if (node != null) {
+						iset = node.makeNonTerminal();
+						iset.makeChance();
+					} else
+						log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "MakeChanceAction");
+				} else
+					log.add(Log.ERROR, "Couldn't find any iset with idx "+_isetId, "MakeChanceAction");
 			} else {
 				var dissolve:Boolean = iset.numNodes > 1;
 				iset.makeChance();
@@ -56,6 +64,8 @@ package lse.math.games.builder.viewmodel.action
 					_onDissolve.doAction(grid);
 				}
 			}
+			
+			grid.orderIds();
 			
 			_timeElapsed = getTimer() - prevTime;
 		}

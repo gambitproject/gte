@@ -7,6 +7,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
+	import util.Log;
+	
 	/**	
 	 * Changes the player of all nodes inside selected Iset/selected node's Iset
 	 * <li>Changes Data</li>
@@ -17,7 +19,8 @@ package lse.math.games.builder.viewmodel.action
 	public class ChangePlayerAction implements IAction
 	{
 		private var _isetId:int = -1;		
-		private var _nodeId:int = -1;		
+		private var _nodeId:int = -1;
+		private var log:Log = Log.instance;
 		
 		private var _timeElapsed:int = 0;
 		
@@ -32,15 +35,20 @@ package lse.math.games.builder.viewmodel.action
 		}
 		
 		public function doAction(grid:TreeGrid):void
-		{			
+		{				
 			var prevTime:int = getTimer();
 			
 			var iset:Iset = grid.getIsetById(_isetId);
 			if (iset == null) {
-				var node:Node = grid.getNodeById(_nodeId);
-				if (node != null) {
-					iset = node.makeNonTerminal();
-				}
+				if(_nodeId >= 0)
+				{
+					var node:Node = grid.getNodeById(_nodeId);
+					if (node != null) {
+						iset = node.makeNonTerminal();
+					} else
+						log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "ChangePlayerAction");
+				} else
+					log.add(Log.ERROR, "Couldn't find any iset with idx "+_isetId, "ChangePlayerAction");
 			} else {
 				iset.changePlayer(grid.firstPlayer);						
 			}

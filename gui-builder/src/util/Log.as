@@ -149,8 +149,9 @@ package util
 		public function saveLogDump() : void
 		{
 			//TODO: I don't know the reason why, but the save method is ignoring the new line characters. In NotePad++ it is displayed correctly, not so in Notepad
-			var fr:FileReference = new FileReference;
-			fr.save(logDump(), "log.txt");
+//			var fr:FileReference = new FileReference;
+//			fr.save(logDump(), "log.txt");
+			//TODO: Better post to the dev in charge, should be a setting that enables it
 		}
 		
 		/** Returns a String with the content of the arraylist of lines (last LOG_MAX_LENGTH lines as a default, or 'numLines' if specified)*/

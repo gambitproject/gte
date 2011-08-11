@@ -7,6 +7,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
+	import util.Log;
+	
 	/**	
 	 * Removes a node and its children
 	 * <li><b>Is undoable</b></li>
@@ -18,6 +20,7 @@ package lse.math.games.builder.viewmodel.action
 	public class DeleteAction implements IAction
 	{			
 		private var _nodeId:int = -1;
+		private var log:Log = Log.instance;
 		
 		private var _timeElapsed:int = 0;
 		
@@ -40,7 +43,10 @@ package lse.math.games.builder.viewmodel.action
 				
 				var labeler:AutoLabeller = new AutoLabeller;
 				labeler.doAction(grid);
-			}				
+			} else
+				log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "DeleteAction");
+			
+			grid.orderIds();
 			
 			_timeElapsed = getTimer() - prevTime;
 		}

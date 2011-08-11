@@ -168,6 +168,12 @@ package lse.math.games.builder.fig
 			return baseFonts;
 		}
 		
+		/** Returns true if the font is available */
+		public static function isFontAvailable(fontName:String):Boolean
+		{
+			return (_fontFamilyEnums.hasOwnProperty(fontName));
+		}
+		
 		/** Returns a font's code in the enum of fonts of the fig*/
 		public static function figEnumValue(fontFamily:String, weight:String, posture:String):int
 		{

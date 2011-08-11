@@ -25,7 +25,7 @@
 			 * <ul><li>Set the id of the color picker/toggle/textinput... to the same as the identifier that you defined earlier</li>
 			 * 	   <li>Set the 'creationComplete' hanler to get the property of the item (e.g., 'selectedColor', 'selected', etc) 
 			 * 			with settings.getValue(SCodes.THE_ID_YOU_CREATED) as WhateverTypeItShouldBe</li>
-			 *     <li>Set the 'change' behaviour of your setting, which will normally just be setSetting(SCodes.THE_ID_YOU_CREATED, 
+			 *     <li>Set the 'change' behaviour of your setting, which will normally just be setGlobalSetting/setFileSetting(SCodes.THE_ID_YOU_CREATED, 
 			 * 			THE_ID_YOU_CREATED.valueYouReInterestedIn)</li></ul>
 			 * </li>
 			 * <li>Finally, don't forget to use your settings value wherever you need it with 
@@ -40,7 +40,8 @@
 			
 			
 			private var unsavedChanges:Boolean = false;
-			private var settings:UserSettings = UserSettings.instance;
+			private var glbSettings:UserSettings = UserSettings.instance;
+			private var fileSettings:FileSettings = FileSettings.instance;
 			private var _controller:TreeGridPresenter;
 			
 			private var log:Log = Log.instance;
@@ -49,35 +50,56 @@
 			
 			public function set controller(value:TreeGridPresenter):void { _controller = value; }
 			
-			//Sets a setting
-			private function setSetting(key:String, value:Object):void
+			//Sets a global setting
+			private function setGlobalSetting(key:String, value:Object):void
 			{				
 				if(!unsavedChanges)
 				{
-					if(settings.getValue(key) == null)
+					if(glbSettings.getValue(key) == null)
 						unsavedChanges = true;
-					else if(settings.getValue(key) != value)
+					else if(glbSettings.getValue(key) != value)
 						unsavedChanges = true;
 				}
 				
-				settings.setValue(key, value);
+				glbSettings.setValue(key, value);
+				
+				//invalidate display
+				if(_controller != null)
+					_controller.invalidate(true, true, true); 
+				else
+					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
 			}
-									
+			
+			//Sets a file setting
+			private function setFileSetting(key:String, value:Object):void
+			{				
+				fileSettings.setValue(key, value);
+				
+				//invalidate display
+				if(_controller != null)
+					_controller.invalidate(true, true, true); 
+				else
+					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+			}
+			
+			//Sets the file settings as default and closes
+			private function setFileSettingsAsDefaultAndExit():void
+			{
+				fileSettings.setAsDefault();
+				if(_controller != null)
+					_controller.invalidate(true, true, true); 
+				else
+					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+				
+				unsavedChanges = true;
+				exit();
+			}
+			
 			//Saves settings if necessary, and closes the settings panel
 			private function exit():void
 			{
-				if(unsavedChanges) 
-				{
-					//invalidate display
-					if(_controller != null)
-						_controller.invalidate(true, true, true); 
-					else
-						log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
-					
-					//Store settings locally if the preference is activated
-					if(settings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean && settings.cookiesStorable && !settings.saveCookies())
-						throw new Error("Couldn't store the cookies, please retry");
-				}
+				if(unsavedChanges) 					
+					glbSettings.saveCookiesIfPossible();
 				
 				PopUpManager.removePopUp(this);
 			}
@@ -95,68 +117,83 @@
 							<s:CheckBox id="STORE_SETTINGS_LOCALLY"
 										
 										creationComplete="STORE_SETTINGS_LOCALLY.selected = 
-										settings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean;"
+										glbSettings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean;"
 										
 										change="if(STORE_SETTINGS_LOCALLY.selected)
 										{
-										if(settings.cookiesStorable)
-										setSetting(SCodes.STORE_SETTINGS_LOCALLY, true );
+										if(glbSettings.cookiesStorable)
+										setGlobalSetting(SCodes.STORE_SETTINGS_LOCALLY, true );
 										else
 										{
-										setSetting(SCodes.STORE_SETTINGS_LOCALLY, false );
+										setGlobalSetting(SCodes.STORE_SETTINGS_LOCALLY, false );
 										STORE_SETTINGS_LOCALLY.selected = false;
-										settings.askForCookiesStorable();
+										glbSettings.askForCookiesStorable();
 										}
 										} else
 										{
-										setSetting(SCodes.STORE_SETTINGS_LOCALLY, false );
-										settings.clearCookies();
+										setGlobalSetting(SCodes.STORE_SETTINGS_LOCALLY, false );
+										glbSettings.clearCookies();
 										}"
 										/>
 						</mx:FormItem>		
 						<mx:FormItem label="Display output internally">
-							<s:CheckBox id="DISPLAY_OUTPUT_INTERNALLY"
+							<s:CheckBox id="DISPLAY_OUTPUT_INTERNALLY" 
+										toolTip="If toggled, the output from 'Run' will be displayed in an internal 
+										flash window, instead of an external popup."
 										
 										creationComplete="DISPLAY_OUTPUT_INTERNALLY.selected =
-										settings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean;"
+										glbSettings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean;"
 										
-										change="setSetting(SCodes.DISPLAY_OUTPUT_INTERNALLY,
+										change="setGlobalSetting(SCodes.DISPLAY_OUTPUT_INTERNALLY,
 										DISPLAY_OUTPUT_INTERNALLY.selected);" />			
+						</mx:FormItem>
+						<mx:FormItem label="Minimum undoable actions">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="MINIMUM_BUFFER_SIZE" toolTip="This is the minimum guarranteed actions that will be undoable."
+										   minimum="1" maximum="40" snapInterval="1"
+										   
+										   creationComplete="MINIMUM_BUFFER_SIZE.value = glbSettings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int"
+										   
+										   change="setGlobalSetting(SCodes.MINIMUM_BUFFER_SIZE, MINIMUM_BUFFER_SIZE.value as int)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{MINIMUM_BUFFER_SIZE.value}"/>
+							</s:HGroup>
 						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
 			</s:NavigatorContent>	
 			
-			<!-- Graphic settings tab -->
-			<s:NavigatorContent width="100%" height="100%" label="Graphic settings" >
+			<!-- Current file graphic settings tab -->
+			<s:NavigatorContent width="100%" height="100%" label="Current file graphic settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
 					<mx:Form width="100%" height="100%" >
 						<mx:FormItem label="Player colors">
-							<s:HGroup>
-								<mx:ColorPicker id="PLAYER_1_COLOR" toolTip="Player 1's Color" 
+							<s:HGroup verticalAlign="middle">
+								<mx:ColorPicker id="FILE_PLAYER_1_COLOR" toolTip="Player 1's Color" 
 												
-												creationComplete="PLAYER_1_COLOR.selectedColor = 
-												settings.getValue(SCodes.PLAYER_1_COLOR) as uint;" 
+												creationComplete="FILE_PLAYER_1_COLOR.selectedColor = 
+												fileSettings.getValue(SCodes.FILE_PLAYER_1_COLOR) as uint;" 
 												
-												change="setSetting(SCodes.PLAYER_1_COLOR,event.target.selectedColor);"/>
-								<mx:ColorPicker id="PLAYER_2_COLOR" toolTip="Player 2's Color" 
+												change="setFileSetting(SCodes.FILE_PLAYER_1_COLOR,event.target.selectedColor);"/>
+								<mx:ColorPicker id="FILE_PLAYER_2_COLOR" toolTip="Player 2's Color" 
 												
-												creationComplete="PLAYER_2_COLOR.selectedColor = 
-												settings.getValue(SCodes.PLAYER_2_COLOR) as uint;"
+												creationComplete="FILE_PLAYER_2_COLOR.selectedColor = 
+												fileSettings.getValue(SCodes.FILE_PLAYER_2_COLOR) as uint;"
 												
-												change="setSetting(SCodes.PLAYER_2_COLOR,event.target.selectedColor);"/>
+												change="setFileSetting(SCodes.FILE_PLAYER_2_COLOR,event.target.selectedColor);"/>
 							</s:HGroup>
 						</mx:FormItem>
 						<mx:FormItem label="Default font">
-							<s:ComboBox id="DEFAULT_FONT" width="106" height="24" toolTip="Select Font" 
-											
-										fontFamily="{DEFAULT_FONT.selectedItem as String}"
+							<s:ComboBox id="FILE_FONT" width="106" height="24" toolTip="Select the default Font" 
 										
-										creationComplete="DEFAULT_FONT.selectedItem = settings.getValue(SCodes.DEFAULT_FONT) as String"
+										fontFamily="{FILE_FONT.selectedItem as String}"
 										
-										change="setSetting(SCodes.DEFAULT_FONT, DEFAULT_FONT.selectedItem);">
+										creationComplete="FILE_FONT.selectedItem = fileSettings.getValue(SCodes.FILE_FONT) as String"
+										
+										change="setFileSetting(SCodes.FILE_FONT, FILE_FONT.selectedItem);">
 								<s:dataProvider>
-									<mx:ArrayCollection id="arrColl" source="{FigFontManager.getAvailableFontFamilies()}">
+									<mx:ArrayCollection source="{FigFontManager.getAvailableFontFamilies()}">
 										<mx:sort><mx:Sort /></mx:sort>
 									</mx:ArrayCollection>
 								</s:dataProvider>
@@ -169,18 +206,161 @@
 								</s:itemRenderer>
 							</s:ComboBox>
 						</mx:FormItem>
+						<mx:FormItem label="Stroke width">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="FILE_STROKE_WIDTH" toolTip="Increase or decrease the current file's stroke width"
+										   minimum="1" maximum="6" snapInterval="1"
+										   
+										   creationComplete="FILE_STROKE_WIDTH.value = fileSettings.getValue(SCodes.FILE_STROKE_WIDTH) as int"
+										   
+										   change="setFileSetting(SCodes.FILE_STROKE_WIDTH, FILE_STROKE_WIDTH.value as int)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{FILE_STROKE_WIDTH.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Node diameter">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="FILE_NODE_DIAMETER" toolTip="Increase or decrease the current tree's node diameter"
+										   minimum="1" maximum="20" snapInterval="2"
+										   
+										   creationComplete="FILE_NODE_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_NODE_DIAMETER) as Number)"
+										   
+										   change="setFileSetting(SCodes.FILE_NODE_DIAMETER, FILE_NODE_DIAMETER.value)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{FILE_NODE_DIAMETER.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Iset diameter">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="FILE_ISET_DIAMETER" toolTip="Increase or decrease the current tree's iset diameter"
+										   minimum="5" maximum="40" snapInterval="3"
+										   
+										   creationComplete="FILE_ISET_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_ISET_DIAMETER) as Number)"
+										   
+										   change="setFileSetting(SCodes.FILE_ISET_DIAMETER, FILE_ISET_DIAMETER.value)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{FILE_ISET_DIAMETER.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Level distance">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="FILE_LEVEL_DISTANCE" toolTip="Increase or decrease the current tree's distance between levels"
+										   minimum="35" maximum="120" snapInterval="5"
+										   
+										   creationComplete="FILE_LEVEL_DISTANCE.value = (fileSettings.getValue(SCodes.FILE_LEVEL_DISTANCE) as int)"
+										   
+										   change="setFileSetting(SCodes.FILE_LEVEL_DISTANCE, FILE_LEVEL_DISTANCE.value as int)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{FILE_LEVEL_DISTANCE.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
 					</mx:Form>
+					<s:Button bottom="0" label="Set these as the default settings and close" cornerRadius="0" 
+							  click="setFileSettingsAsDefaultAndExit()" />
 				</s:Group>
-			</s:NavigatorContent>			
+			</s:NavigatorContent>
 			
-			<s:NavigatorContent width="100%" height="100%" label="Whatever" >
+			<!-- Default graphic settings tab -->
+			<s:NavigatorContent width="100%" height="100%" label="Default graphic settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
-					<mx:Form width="100%" height="100%">
-						<mx:FormItem label="Whichever">
+					<mx:Form width="100%" height="100%" >
+						<mx:FormItem label="Player colors">
+							<s:HGroup verticalAlign="middle">
+								<mx:ColorPicker id="DEFAULT_PLAYER_1_COLOR" toolTip="Player 1's Color" 
+												
+												creationComplete="DEFAULT_PLAYER_1_COLOR.selectedColor = 
+												glbSettings.getValue(SCodes.DEFAULT_PLAYER_1_COLOR) as uint;" 
+												
+												change="setGlobalSetting(SCodes.DEFAULT_PLAYER_1_COLOR,event.target.selectedColor);"/>
+								<mx:ColorPicker id="DEFAULT_PLAYER_2_COLOR" toolTip="Player 2's Color" 
+												
+												creationComplete="DEFAULT_PLAYER_2_COLOR.selectedColor = 
+												glbSettings.getValue(SCodes.DEFAULT_PLAYER_2_COLOR) as uint;"
+												
+												change="setGlobalSetting(SCodes.DEFAULT_PLAYER_2_COLOR,event.target.selectedColor);"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Default font">
+							<s:ComboBox id="DEFAULT_FONT" width="106" height="24" toolTip="Select the default Font" 
+											
+										fontFamily="{DEFAULT_FONT.selectedItem as String}"
+										
+										creationComplete="DEFAULT_FONT.selectedItem = glbSettings.getValue(SCodes.DEFAULT_FONT) as String"
+										
+										change="setGlobalSetting(SCodes.DEFAULT_FONT, DEFAULT_FONT.selectedItem);">
+								<s:dataProvider>
+									<mx:ArrayCollection  source="{FigFontManager.getAvailableFontFamilies()}">
+										<mx:sort><mx:Sort /></mx:sort>
+									</mx:ArrayCollection>
+								</s:dataProvider>
+								<s:itemRenderer>
+									<fx:Component>
+										<s:ItemRenderer>							
+											<s:Label left="5" height="22" width="85" maxDisplayedLines="1" verticalAlign="middle" fontFamily="{data}" toolTip="{data}" text="{data}" />
+										</s:ItemRenderer>						
+									</fx:Component>					
+								</s:itemRenderer>
+							</s:ComboBox>
+						</mx:FormItem>
+						<mx:FormItem label="Stroke width">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="DEFAULT_STROKE_WIDTH" toolTip="Increase or decrease the default stroke width"
+									   minimum="1" maximum="6" snapInterval="1"
+									   
+									   creationComplete="DEFAULT_STROKE_WIDTH.value = glbSettings.getValue(SCodes.DEFAULT_STROKE_WIDTH) as int"
+									   
+									   change="setGlobalSetting(SCodes.DEFAULT_STROKE_WIDTH, DEFAULT_STROKE_WIDTH.value as int)"
+									   />
+								<mx:Spacer width="5" />
+								<s:Label text="{DEFAULT_STROKE_WIDTH.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Node diameter">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="DEFAULT_NODE_DIAMETER" toolTip="Increase or decrease the default node diameter"
+										   minimum="1" maximum="20" snapInterval="2"
+										   
+										   creationComplete="DEFAULT_NODE_DIAMETER.value = (glbSettings.getValue(SCodes.DEFAULT_NODE_DIAMETER) as Number)"
+										   
+										   change="setGlobalSetting(SCodes.DEFAULT_NODE_DIAMETER, DEFAULT_NODE_DIAMETER.value)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{DEFAULT_NODE_DIAMETER.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Iset diameter">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="DEFAULT_ISET_DIAMETER" toolTip="Increase or decrease the default iset diameter"
+										   minimum="5" maximum="40" snapInterval="3"
+										   
+										   creationComplete="DEFAULT_ISET_DIAMETER.value = (glbSettings.getValue(SCodes.DEFAULT_ISET_DIAMETER) as Number)"
+										   
+										   change="setGlobalSetting(SCodes.DEFAULT_ISET_DIAMETER, DEFAULT_ISET_DIAMETER.value)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{DEFAULT_ISET_DIAMETER.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Level distance">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="DEFAULT_LEVEL_DISTANCE" toolTip="Increase or decrease the default distance between levels"
+										   minimum="35" maximum="120" snapInterval="5"
+										   
+										   creationComplete="DEFAULT_LEVEL_DISTANCE.value = (glbSettings.getValue(SCodes.DEFAULT_LEVEL_DISTANCE) as int)"
+										   
+										   change="setGlobalSetting(SCodes.DEFAULT_LEVEL_DISTANCE, DEFAULT_LEVEL_DISTANCE.value as int)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{DEFAULT_LEVEL_DISTANCE.value}"/>
+							</s:HGroup>
 						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
-			</s:NavigatorContent>	
+			</s:NavigatorContent>				
 		</mx:TabNavigator>
 		
 

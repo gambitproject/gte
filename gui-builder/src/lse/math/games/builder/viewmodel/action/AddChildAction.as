@@ -11,6 +11,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.DepthAdjuster;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
+	import util.Log;
+	
 	/**	
 	 * Adds children to all the nodes in a selected iset/ in a selected node's iset.
 	 * If the nodes are leaves, then two children per node are added, else just one
@@ -24,6 +26,7 @@ package lse.math.games.builder.viewmodel.action
 		private var _isetId:int = -1;
 		private var _nodeId:int = -1;
 		private static var _depthAdjuster:IAction = new DepthAdjuster(); //TODO: remove and use ActionChain or onAdd decorator
+		private var log:Log = Log.instance;
 		
 		private var _timeElapsed:int = 0;
 		
@@ -55,11 +58,15 @@ package lse.math.games.builder.viewmodel.action
 					node.makeNonTerminal();
 					addChildrenTo(node.iset, grid);
 					_depthAdjuster.doAction(grid);
-				}
-			}
+				} else
+					log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "AddChildAction");
+			} else
+				log.add(Log.ERROR, "Couldn't find any iset with idx "+_isetId, "AddChildAction");
 			
 			var labeler:AutoLabeller = new AutoLabeller;
 			labeler.doAction(grid);
+			
+			grid.orderIds();
 			
 			_timeElapsed = getTimer() - prevTime;
 		}

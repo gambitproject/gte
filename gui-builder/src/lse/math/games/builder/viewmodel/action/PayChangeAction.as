@@ -8,6 +8,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
+	import util.Log;
+	
 	
 	/**	
 	 * Changes the payoffs of a terminal node
@@ -21,6 +23,7 @@ package lse.math.games.builder.viewmodel.action
 		private var _nodeId:int;
 		private var _pay1:Rational;
 		private var _pay2:Rational;
+		private var log:Log = Log.instance;
 		
 		private var _timeElapsed:int = 0;
 		
@@ -47,7 +50,8 @@ package lse.math.games.builder.viewmodel.action
 					outcome.setPay(grid.firstPlayer, _pay1);
 				if(_pay2!=null)
 					outcome.setPay(grid.firstPlayer.nextPlayer, _pay2);					
-			}	
+			} else
+				log.add(Log.ERROR, "Couldn't find any suitable node with idx "+_nodeId, "PayChangeAction");
 			
 			_timeElapsed = getTimer() - prevTime;
 		}

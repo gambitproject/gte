@@ -37,7 +37,6 @@
 			public var xfalgos:Array = new Array();
 			
 			//TODO: If possible, move the folowing two to the <fx:declaration>
-			[Bindable]
 			private var log:Log = Log.instance;
 			
 			[Bindable]
@@ -45,10 +44,36 @@
 			private var fileManager:FileManager; 
 			
 			private var eventManager:EventManager = EventManager.instance;
-			private var settings:UserSettings = UserSettings.instance;
+			private var settings:UserSettings = UserSettings.instance;			
 			
-
 			
+			
+			/* <--- ---  TOOLBARS-RELATED FUNCTIONS --- ---> */
+			
+			//Executes the clear() function from the TreeGridController, epending on the button pressed as a result of the prompt
+			private function clearDependingOnPromptResult():void
+			{
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
+					controller.clear();
+			}
+			
+			//Pops up the -internal or external- output window
+			private function showOutput(text:String):void {
+				if (ExternalInterface.available && !settings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean) {
+					ExternalInterface.call('writeSolution', text);
+					log.add(Log.HINT, "You don't see the output? Then you must allow popups " +
+						"in your browser. Don't forget to save your changes before. Or you could " +
+						"activate the 'Display output internally' setting in the Settings panel.");
+				}
+				else {
+					var o:OutputWindow = new OutputWindow();
+					PopUpManager.addPopUp(o, this, false);
+					o.setText(text);
+					PopUpManager.centerPopUp(o);
+				}
+			}
+			
+			//Populates from the external html container's params the list of algos
 			private function initVars():void 
 			{			
 				// FOR TESTING ONLY... comment this and uncomment one below before building for prod
@@ -88,43 +113,34 @@
 				}
 			}
 			
-			// Handles click on the canvas
-			private function handleClickOnCanvas():void
-			{
-				if(opModeBar2.selectedIndex <= 7)
-					controller.doActionAt(canvas.mouseX, canvas.mouseY);
-				else
-					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
-			}
-			
-			
-			
-			/* <--- ---  TOOLBARS-RELATED FUNCTIONS --- ---> */
-			
 			//Pops up the settings edition window
 			private function showSettings():void
 			{
 				var s:Settings = new Settings();
 				s.controller = controller;
-				PopUpManager.addPopUp(s, this, true);
+				PopUpManager.addPopUp(s, this, false);
 				PopUpManager.centerPopUp(s);
 			}				
 			
-			//Pops up the -internal or external- output window
-			private function showOutput(text:String):void {
-				if (ExternalInterface.available && !settings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean) {
-					ExternalInterface.call('writeSolution', text);
-					log.add(Log.HINT, "You don't see the output? Then you must allow popups " +
-						"in your browser. Don't forget to save your changes before. Or you could " +
-						"activate the 'Display output internally' setting in the Settings panel.");
-				}
-				else {
-						var o:OutputWindow = new OutputWindow();
-						PopUpManager.addPopUp(o, this, false);
-						PopUpManager.centerPopUp(o);
-						o.height = canvas.height-50;
-						o.setText(text);
-				}
+			[Bindable]
+			private var expanded:Boolean = false;
+			
+			//Checks the expand setting, and updates the 'expanded' var & the webcontainer accordingly
+			private function updateExpandStatus():void 
+			{
+				expanded = settings.getValue(SCodes.EXPANDED) as Boolean;
+				ExternalInterface.call("expand", expanded);
+				updateLogLineDimensions();
+			}
+			
+			//Should be called from the expand button, and changes the expand status, updating everything
+			private function switchExpandStatus():void 
+			{
+				expanded = !expanded;
+				settings.setValue(SCodes.EXPANDED, expanded);
+				settings.saveCookiesIfPossible();
+				ExternalInterface.call("expand", expanded);
+				updateLogLineDimensions();
 			}
 			
 			//Return the action corresponding to the button pressed in opModeBar2
@@ -169,11 +185,17 @@
 				}
 			}
 			
-			//Executes the clear() function from the TreeGridController, epending on the button pressed as a result of the prompt
-			private function clearDependingOnPromptResult():void
+			
+			
+			/* <--- --- CANVAS-RELATED FUNCTIONS --- ---> */
+			
+			// Handles click on the canvas
+			private function handleClickOnCanvas():void
 			{
-				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
-					controller.clear();
+				if(opModeBar2.selectedIndex <= 7)
+					controller.doActionAt(canvas.mouseX, canvas.mouseY);
+				else
+					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
 			}
 			
 			
@@ -188,20 +210,33 @@
 			
 			private var lastLogLineTimeoutId:int = -1;
 			
-			//Updates the LogLine with the text from
+			//Updates the LogLine with the text from a HINT event
 			private function updateLogLine(evt:TextEvent):void
 			{
 				logLine.text = evt.text;
 				if(lastLogLineTimeoutId != -1)
 					clearTimeout(lastLogLineTimeoutId);
 				
-				var optimalMsForReading:int = Math.max(3000, 1000+evt.text.length*67); 
+				var optimalMsForReading:int = Math.max(3000, evt.text.length*67); 
 				//These ms are calculated from average lowest reading speed in english (200 wpm)
-				//and average of letters per word in english (4.5), plus two extra sources of extra
-				//time: counting the non-letter characters as letters, and giving one sec at the start for noticing
-				//there is something written.
+				//and average of letters per word in english (4.5), plus a source of extra
+				//time: counting the non-letter characters as letters
 				
 				lastLogLineTimeoutId = setTimeout(clearLogLine, optimalMsForReading);
+			}
+			
+			//Changes the dimensions according to the expanded status
+			private function updateLogLineDimensions():void
+			{
+				if(expanded)
+				{
+					logLineContainer.left = 1;
+					logLineContainer.right = 1;
+				} else
+				{
+					logLineContainer.left = 0;
+					logLineContainer.right = 0;
+				}
 			}
 			
 			//Erases the logLine text
@@ -329,6 +364,56 @@
 	</fx:Declarations>
 	
 	<s:Group left="0" right="0" top="0" bottom="0" >
+		
+		<!-- TOP CONTROL BAR -->		
+		<s:HGroup left="0" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
+			
+			<mx:Spacer width="23" />
+			<mx:TextInput id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
+						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) fileManager.filename= filename.text; else filename.text = fileManager.filename" 
+						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
+						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
+			<mx:Spacer width="23"/>
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
+			<mx:Spacer width="4"/>
+			<s:ComboBox id="algoComboBox" width="106" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
+				<s:dataProvider>
+					<mx:ArrayCollection id="algos" source="{xfalgos}" />					
+				</s:dataProvider>
+				<s:itemRenderer>
+					<fx:Component>
+						<s:ItemRenderer>							
+							<s:Label left="5" height="22" width="85" maxDisplayedLines="1" verticalAlign="middle" toolTip="{data.toolTip}" text="{data.label}" />
+						</s:ItemRenderer>						
+					</fx:Component>					
+				</s:itemRenderer> 
+			</s:ComboBox>
+			<mx:Spacer width="23"/>
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" click="controller.undo()" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" click="controller.redo()" />				
+			<mx:Spacer width="23"/>			
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" click="controller.doAction(actions.randomPayoffs)" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/sum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;" />
+			<mx:Button id="recallButton" cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" click="controller.doAction(actions.perfectRecall)" />
+			<mx:Spacer width="20" />		
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" click="controller.zoomIn()" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" click="controller.zoomOut()" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom.png')" toolTip="Adjust Zoom [Ctrl+l]" click="controller.zoomAdjust()" />			
+			<mx:Spacer width="23" />
+			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" click="showSettings()"/>			
+		</s:HGroup>
+		
+		<s:Button id="expandButton" right="{expanded ? 3 : 0}" top="3" height="24" cornerRadius="0" chromeColor="#d6d6d6" 
+				  label="{expanded ? 'Contract' : 'Expand'}"
+				  click="switchExpandStatus()"
+				  add="updateExpandStatus()" />
+		
+		<!-- TABS -->
 		<s:BorderContainer top="30" bottom="18" left="0" right="185" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
 			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" change="controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; algoComboBox.selectedIndex = 0;">
 				<s:NavigatorContent label="Extensive Form">
@@ -403,6 +488,7 @@
 			</mx:TabNavigator>
 		</s:BorderContainer>
 		
+		<!-- SEQUENCE TABLE -->
 		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="18" top="30" right="0" width="180" editable="true" borderColor="0x808080" draggableColumns="false" sortableColumns="false" change="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" focusOut="controller.selectedNode = -1" focusIn="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
 			<mx:columns>
 				<mx:DataGridColumn headerText="Sequence" dataField="leaf" width="110" editable="true"/>				
@@ -411,48 +497,13 @@
 			</mx:columns>
 		</mx:DataGrid>
 		
-		<s:Label id="logLine" bottom="2" left="5" fontSize="11" text="" creationComplete="initLogLineListener();" color="#434546"/>
+		<!-- BOTTOM LOG LINE -->
+		<s:BorderContainer id="logLineContainer" left="1" right="1" bottom="1" height="16" borderColor="0x808080">
+			<s:Label id="logLine" height="100%" width="100%"  backgroundColor="#d6d6d6"
+				 color="#000000" creationComplete="initLogLineListener();"
+				 fontFamily="Verdana" fontSize="10" paddingLeft="5" 
+				 paddingRight="5" paddingTop="2" textAlign="left" verticalAlign="middle"/>
+		</s:BorderContainer>
 		
-		<s:HGroup left="0" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
-
-			<mx:Spacer width="23" />
-			<mx:TextInput id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
-						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) fileManager.filename= filename.text; else filename.text = fileManager.filename" 
-						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
-						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
-			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r] - Needs PopUps allowed in your browser" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
-			<mx:Spacer width="4"/>
-			<s:ComboBox id="algoComboBox" width="106" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
-				<s:dataProvider>
-					<mx:ArrayCollection id="algos" source="{xfalgos}" />					
-				</s:dataProvider>
-				<s:itemRenderer>
-					<fx:Component>
-						<s:ItemRenderer>							
-							<s:Label left="5" height="22" width="85" maxDisplayedLines="1" verticalAlign="middle" toolTip="{data.toolTip}" text="{data.label}" />
-						</s:ItemRenderer>						
-					</fx:Component>					
-				</s:itemRenderer> 
-			</s:ComboBox>
-			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" click="controller.undo()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" click="controller.redo()" />				
-			<mx:Spacer width="23"/>			
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" click="controller.doAction(actions.randomPayoffs)" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/sum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;" />
-			<mx:Button id="recallButton" cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" click="controller.doAction(actions.perfectRecall)" />
-			<mx:Spacer width="20" />		
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" click="controller.zoomIn()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" click="controller.zoomOut()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom.png')" toolTip="Adjust Zoom [Ctrl+l]" click="controller.zoomAdjust()" />			
-			<mx:Spacer width="23" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" click="showSettings()"/>			
-		</s:HGroup>
 	</s:Group>
 </s:Application>

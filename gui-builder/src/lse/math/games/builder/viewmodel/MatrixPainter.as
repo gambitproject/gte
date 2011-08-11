@@ -106,7 +106,7 @@ package lse.math.games.builder.viewmodel
 			g.fillRect(0, 0, width, height);
 			
 			g.color = 0x000000;
-			g.stroke = this.scale * _grid.linewidth;
+			g.stroke = this.scale * _grid.strokeWidth;
 			
 			paintMatrix(g, width, height, nf);
 		}

@@ -5,19 +5,19 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
+	import util.Log;
+	
 	/**	
-	 * Rotates the tree clock or counterclockwise
+	 * Rotates the tree to a certain orientation. <p/>
 	 * <li>NOT <strike>Changes Data</strike></li>
 	 * <li>Changes Size</li>
 	 * <li>Changes Display</li>
-	 * @author Mark Egesdal
+	 * @author Mark Egesdal & alfongj
 	 */
 	public class RotateAction implements IAction
 	{
-		[Deprecated]
-		public static const CLOCKWISE:String = "clockwise";
-		[Deprecated]
-		public static const COUNTERCLOCKWISE:String = "counterclockwise";
+		//public static const CLOCKWISE:String = "clockwise";
+		//public static const COUNTERCLOCKWISE:String = "counterclockwise";
 		
 		//Root positions
 		public static const UP:String = "up";
@@ -37,9 +37,9 @@ package lse.math.games.builder.viewmodel.action
 		{
 			switch(direction)
 			{
-				case CLOCKWISE:
-				case COUNTERCLOCKWISE:
-					trace("Rotation direction " + direction + " is deprecated. Please check the Documentation");
+//				case CLOCKWISE:
+//				case COUNTERCLOCKWISE:
+//					trace("Rotation direction " + direction + " is deprecated. Please check the Documentation");
 				case UP:
 				case DOWN:
 				case RIGHT:
@@ -47,7 +47,7 @@ package lse.math.games.builder.viewmodel.action
 					_direction = direction;
 					break;
 				default:
-					throw new Error("Rotate direction must be one of 'clockwise' or 'counterclockwise'");
+					Log.instance.add(Log.ERROR_HIDDEN, "Rotate direction must be UP, DOWN, RIGHT or LEFT");
 			}
 		}
 		
@@ -56,12 +56,12 @@ package lse.math.games.builder.viewmodel.action
 			
 			switch(_direction)
 			{
-				case CLOCKWISE:
-					grid.rotateRight();
-					break;
-				case COUNTERCLOCKWISE:
-					grid.rotateLeft();
-					break;
+//				case CLOCKWISE:
+//					grid.rotateRight();
+//					break;
+//				case COUNTERCLOCKWISE:
+//					grid.rotateLeft();
+//					break;
 				case UP:
 					grid.rotate = 0;
 					break;

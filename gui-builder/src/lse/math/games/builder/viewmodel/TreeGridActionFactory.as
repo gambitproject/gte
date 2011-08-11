@@ -80,17 +80,17 @@ package lse.math.games.builder.viewmodel
 			return chain;
 		}
 		
-		[Deprecated(replacement="orientationXXX()")]
-		public function rotateRight(grid:TreeGrid):IAction
-		{			
-			return new RotateAction(RotateAction.CLOCKWISE);
-		}
-		
-		[Deprecated(replacement="orientationXXX()")]
-		public function rotateLeft(grid:TreeGrid):IAction
-		{			
-			return new RotateAction(RotateAction.COUNTERCLOCKWISE);
-		}
+//		[Deprecated(replacement="orientationXXX()")]
+//		public function rotateRight(grid:TreeGrid):IAction
+//		{			
+//			return new RotateAction(RotateAction.CLOCKWISE);
+//		}
+//		
+//		[Deprecated(replacement="orientationXXX()")]
+//		public function rotateLeft(grid:TreeGrid):IAction
+//		{			
+//			return new RotateAction(RotateAction.COUNTERCLOCKWISE);
+//		}
 		
 		/** Displays the tree with root on top */
 		public function orientationUp(grid:TreeGrid):IAction
@@ -143,7 +143,7 @@ package lse.math.games.builder.viewmodel
 		{
 			var beforeCut:Node = null;
 			for (var h:Iset = grid.root.iset; h != null; h = h.nextIset) {
-				beforeCut = grid.getNodeInIsetBeforeCoords(h, x, y, TreeGrid.ISET_DIAM * grid.scale/2);	
+				beforeCut = grid.getNodeInIsetBeforeCoords(h, x, y, grid.isetDiameter * grid.scale/2);	
 				if (beforeCut != null) {					
 					break;
 				}

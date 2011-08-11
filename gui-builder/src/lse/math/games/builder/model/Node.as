@@ -60,6 +60,7 @@ package lse.math.games.builder.model
 
 		/** Number (or id) of this node inside the tree */
 		public function get number():int { return _number; }          	// for specification of tree
+		public function set number(value:int):void { _number = value; }
 		
 		/** First child of this node. Can be null if there isn't any */
 		public function get firstChild():Node { return _firstchild; }
@@ -264,7 +265,7 @@ package lse.math.games.builder.model
 				if (_father != null) {
 					_iset = new Iset(
 						(_father.iset.player != Player.CHANCE && _father.iset.player.nextPlayer != null) ? _father.iset.player.nextPlayer : _tree.firstPlayer);
-					_father.iset.insertAfter(_iset);
+					_father.iset.insertAfter(_iset, true);
 				} else {			
 					_iset = new Iset(_tree.firstPlayer);
 					//trace("Node.makeNonTerminal():  new root iset");

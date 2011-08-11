@@ -3,6 +3,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.ExtensiveForm;
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
+	import lse.math.games.builder.settings.FileSettings;
 	import lse.math.games.builder.settings.SCodes;
 	import lse.math.games.builder.settings.UserSettings;
 	
@@ -22,10 +23,7 @@ package lse.math.games.builder.viewmodel
 	 * @author Mark Egesdal
 	 */
 	public class TreeGrid extends ExtensiveForm
-	{
-		public static const NODE_DIAM:Number = 7; //TODO: SETTING
-		public static const ISET_DIAM:Number = 25; //TODO: SETTING
-		
+	{				
 		//TODO: Let rotation adjust these margins... or at least account 
 		//for the label sizes in the min measurements
 		public static const MIN_MARGIN_TOP:Number = 24;
@@ -35,18 +33,15 @@ package lse.math.games.builder.viewmodel
 		
 		public var scale:Number = 1.0; //Current scale of the canvas 
 		private var _rotate:int = 0;
-		private var _leveldistance:int;
-		private var _linewidth:Number;
-		private var _ovallinewidth:Number;	
 
 		private var _mergeBase:Iset = null;
 		private var _selectedNodeId:int = -1;
 		
 		private var _isZeroSum:Boolean = true;
 		private var _isNormalReduced:Boolean = true;
-		private var _maxPayoff:Number = 25; //TODO: PREFERENCE
+		private var _maxPayoff:Number = 25; //TODO: SETTING
 
-		private var userSettings:UserSettings = UserSettings.instance;
+		private var fileSettings:FileSettings = FileSettings.instance;
 		private var log:Log = Log.instance;
 		
 		
@@ -54,11 +49,7 @@ package lse.math.games.builder.viewmodel
 		public function TreeGrid() 
 		{
 			defaultTree();
-			defaultSettings();
 		}
-		
-		//TODO: For all settings that can be chosen either from userSettings or from currentTreeSettings, 
-		//the getters should be the ones that control from which of the sources they return
 		
 		/** Direction of the tree, being 0 root-up, 1 root-left, 2 root-down, 3 root-right */
 		public function get rotate():int { return _rotate; }
@@ -72,14 +63,32 @@ package lse.math.games.builder.viewmodel
 				_rotate = value;
 		}
 		
+		/* <--- --- GRAPHIC SETTINGS GETTERS --- ---> */
+		
+		/** Color of nodes, labels and payoffs of the first player */
+		public function get player1Color():uint { return fileSettings.getValue(SCodes.FILE_PLAYER_1_COLOR) as uint; }		
+		
+		/** Color of nodes, labels and payoffs of the second player */
+		public function get player2Color():uint { return fileSettings.getValue(SCodes.FILE_PLAYER_2_COLOR) as uint; }	
+		
+		//TODO: 3PL Check wherever player1Color was used, and those might all have to be modified
+		
+		/** Font family used as a default for labels in nodes, isets, labels and payoffs */
+		public function get fontFamily():String { return fileSettings.getValue(SCodes.FILE_FONT) as String; }
+		
+		/** Diameter in pixels of node points */
+		public function get nodeDiameter():Number  { return fileSettings.getValue(SCodes.FILE_NODE_DIAMETER) as Number;}
+		
+		/** Diameter in pixels of iset rounded ends */
+		public function get isetDiameter():Number { return fileSettings.getValue(SCodes.FILE_ISET_DIAMETER) as Number;}
+		
 		/** Vertical distance in points/pixels between nodes in two consecutive levels */ 
-		public function get leveldistance():int { return _leveldistance; }
+		public function get leveldistance():int { return fileSettings.getValue(SCodes.FILE_LEVEL_DISTANCE) as int; }
 		
 		/** Width in points/pixels of lines connecting nodes and lines forming isets */
-		public function get linewidth():int { return _linewidth; }
+		public function get strokeWidth():Number { return fileSettings.getValue(SCodes.FILE_STROKE_WIDTH) as Number; }	
 		
-		/** Width in points/pixels of curves. Should be the same as linewidth, for aesthetical reasons */
-		public function get ovallinewidth():int { return _ovallinewidth; }		
+		/*<--- --- SELECTED THINGS --- ---> */
 		
 		/** Id corresponding to the selected node. -1 if there is no node currently selected */
 		public function get selectedNodeId():int { return _selectedNodeId; }
@@ -87,16 +96,9 @@ package lse.math.games.builder.viewmodel
 		
 		/** Iset 'selected' as a base for merging with another. Null if there isn't one selected */
 		public function get mergeBase():Iset { return _mergeBase; }
-		public function set mergeBase(value:Iset):void { _mergeBase = value; }
+		public function set mergeBase(value:Iset):void { _mergeBase = value; }	
 		
-		/** Color of nodes, labels and payoffs of the first player */
-		public function get player1Color():uint { return userSettings.getValue(SCodes.PLAYER_1_COLOR) as uint; }		
-		
-		/** Color of nodes, labels and payoffs of the second player */
-		public function get player2Color():uint { return userSettings.getValue(SCodes.PLAYER_2_COLOR) as uint; }		
-		
-		/** Font family used as a default for labels in nodes, isets, labels and payoffs */
-		public function get fontFamily():String { return userSettings.getValue(SCodes.DEFAULT_FONT) as String; }	
+		/* <--- --- OTHERS --- ---> */
 		
 		/** If each pair of payoffs sum 0 (two player only) */
 		//TODO: 3PLAYERCHECK 
@@ -119,21 +121,10 @@ package lse.math.games.builder.viewmodel
 		public function defaultTree():void
 		{			
 			this.newPlayer("1");
-			this.newPlayer("2");
+			this.newPlayer("2"); //TODO 3PL
 			
 			this.root = createNode();	
 			this.root.makeNonTerminal();
-		}
-		
-		/** Gives default values for some settings */
-		//TODO: Remove when SETTINGS system is finished
-		public function defaultSettings():void
-		{
-			_rotate = 0;
-			_leveldistance = 75; 
-			_linewidth = 1.0;  // line width for drawing Moves
-			_ovallinewidth = 1.0; // line width for drawing Isets	
-			//TODO: SETTINGS
 		}
 		
 		// Creates a TreeGridNode with a determinate 'number' (id)
@@ -334,7 +325,7 @@ package lse.math.games.builder.viewmodel
 		 */ 
 		private function coordsInNode(node:Node, x:int, y:int):Boolean
 		{
-			var halfSide:Number = NODE_DIAM*scale;
+			var halfSide:Number = nodeDiameter*scale;
 			var n:TreeGridNode = node as TreeGridNode;
 			return ((n.xpos - halfSide < x)&&
 					(x < halfSide + n.xpos) &&
@@ -361,7 +352,7 @@ package lse.math.games.builder.viewmodel
 		private function coordsInIset(h:Iset, x:Number, y:Number):Boolean
 		{
 			var found:Boolean = true;
-			var radius:Number = ISET_DIAM * scale / 2;			
+			var radius:Number = isetDiameter * scale / 2;			
 			var node:Node = getNodeInIsetBeforeCoords(h, x, y, radius);
 			
 			if (node == null) {

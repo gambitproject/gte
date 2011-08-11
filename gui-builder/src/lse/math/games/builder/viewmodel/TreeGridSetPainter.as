@@ -58,7 +58,7 @@ package lse.math.games.builder.viewmodel
 		
 		override public function paint(g:IGraphics, width:Number, height:Number):void
 		{
-			g.stroke = this.scale * _grid.ovallinewidth;
+			g.stroke = this.scale * _grid.strokeWidth;
 			paintGrid(g, width, height, _grid);
 		}
 		
@@ -103,7 +103,7 @@ package lse.math.games.builder.viewmodel
 							var group:Vector.<TreeGridNode> = depthGroups[key];											
 							var first:TreeGridNode = group[0];
 							var last:TreeGridNode = group[group.length - 1];
-							paintSameDepthGroup(g, first, last);						
+							paintSameDepthGroup(g, first, last, grid);						
 							keys.push(key);
 						}
 						// extract and sort the keys by depth				
@@ -131,10 +131,10 @@ package lse.math.games.builder.viewmodel
 						
 						// else draw at the top of the first group
 						if (!isLabelPositioned) {
-							positionSingletonSetLabel(h, grid, label, this.scale * TreeGrid.ISET_DIAM/2);
+							positionSingletonSetLabel(h, grid, label, this.scale * grid.isetDiameter/2);
 						}
 					} else {
-						positionSingletonSetLabel(h, grid, label, this.scale * TreeGrid.NODE_DIAM/2);
+						positionSingletonSetLabel(h, grid, label, this.scale * grid.nodeDiameter/2);
 					}
 				}
 				h = h.nextIset;
@@ -157,11 +157,11 @@ package lse.math.games.builder.viewmodel
 		{			
 			var x:Number, y:Number;
 			if (grid.rotate == 0 || grid.rotate == 2) {
-				x = first.xpos != last.xpos ? (first.xpos + last.xpos) / 2 - label.width / 2 : first.xpos + this.scale * TreeGrid.ISET_DIAM;
+				x = first.xpos != last.xpos ? (first.xpos + last.xpos) / 2 - label.width / 2 : first.xpos + this.scale * grid.isetDiameter;
 				y = first.ypos + label.ascent / 2;						
 			} else {
 				x = first.xpos - label.width / 2;
-				y = first.ypos != last.ypos ? (first.ypos + last.ypos) / 2 + label.ascent / 2 : first.ypos + this.scale * TreeGrid.ISET_DIAM;
+				y = first.ypos != last.ypos ? (first.ypos + last.ypos) / 2 + label.ascent / 2 : first.ypos + this.scale * grid.isetDiameter;
 			}
 			this.moveLabel(label, x, y);
 		}
@@ -214,14 +214,14 @@ package lse.math.games.builder.viewmodel
 				var mid:Number = (intersectionRight + intersectionLeft) / 2;
 				if (grid.rotate == 0 || grid.rotate == 2) {
 					startX = mid;
-					startY = top[0].ypos + (grid.rotate == 0 ? this.scale * TreeGrid.ISET_DIAM / 2 : - this.scale * TreeGrid.ISET_DIAM / 2);
+					startY = top[0].ypos + (grid.rotate == 0 ? this.scale * grid.isetDiameter / 2 : - this.scale * grid.isetDiameter / 2);
 					endX = mid;
-					endY = bottom[0].ypos + (grid.rotate == 2 ? this.scale * TreeGrid.ISET_DIAM / 2 : - this.scale * TreeGrid.ISET_DIAM / 2);
+					endY = bottom[0].ypos + (grid.rotate == 2 ? this.scale * grid.isetDiameter / 2 : - this.scale * grid.isetDiameter / 2);
 				} else {
 					startY = mid;
-					startX = top[0].xpos + (grid.rotate == 1 ? this.scale * TreeGrid.ISET_DIAM / 2 : - this.scale * TreeGrid.ISET_DIAM / 2);
+					startX = top[0].xpos + (grid.rotate == 1 ? this.scale * grid.isetDiameter / 2 : - this.scale * grid.isetDiameter / 2);
 					endY = mid;
-					endX = bottom[0].xpos + (grid.rotate == 3 ? this.scale * TreeGrid.ISET_DIAM / 2 : - this.scale * TreeGrid.ISET_DIAM / 2);
+					endX = bottom[0].xpos + (grid.rotate == 3 ? this.scale * grid.isetDiameter / 2 : - this.scale * grid.isetDiameter / 2);
 				}
 			} else {
 				// we go node to node
@@ -248,8 +248,8 @@ package lse.math.games.builder.viewmodel
 
 				var slope:Number = (endY - startY) / (endX - startX);
 				var angle:Number = Math.atan(slope);
-				var deltaX:Number = Math.cos(angle) * this.scale * TreeGrid.ISET_DIAM / 2;				
-				var deltaY:Number = Math.sin(angle) * this.scale * TreeGrid.ISET_DIAM / 2;
+				var deltaX:Number = Math.cos(angle) * this.scale * grid.isetDiameter / 2;				
+				var deltaY:Number = Math.sin(angle) * this.scale * grid.isetDiameter / 2;
 				//trace("angle " + int(angle/Math.PI * 180) + " deltaX " + int(deltaX) + " deltaY " + int(deltaY) + " startX " + int(startX) + " startY " + int(startY) + " endX " + int(endX) + " endY " + int(endY));
 				
 				if (endX < startX) {	// quadrant 2 & 3				
@@ -265,14 +265,14 @@ package lse.math.games.builder.viewmodel
 			g.drawDashedLine(startX, startY, endX, endY);
 		}
 		
-		private function paintSameDepthGroup(g:IGraphics, first:TreeGridNode, last:TreeGridNode):void
+		private function paintSameDepthGroup(g:IGraphics, first:TreeGridNode, last:TreeGridNode, grid:TreeGrid):void
 		{
-			var x:Number = (first.xpos < last.xpos ? first.xpos : last.xpos) - this.scale * TreeGrid.ISET_DIAM / 2;
-			var y:Number = (first.ypos < last.ypos ? first.ypos : last.ypos) - this.scale * TreeGrid.ISET_DIAM / 2;
-			var width:Number = Math.abs(last.xpos - first.xpos) + this.scale * TreeGrid.ISET_DIAM;
-			var height:Number = Math.abs(last.ypos - first.ypos) + this.scale * TreeGrid.ISET_DIAM;					
+			var x:Number = (first.xpos < last.xpos ? first.xpos : last.xpos) - this.scale * grid.isetDiameter / 2;
+			var y:Number = (first.ypos < last.ypos ? first.ypos : last.ypos) - this.scale * grid.isetDiameter / 2;
+			var width:Number = Math.abs(last.xpos - first.xpos) + this.scale * grid.isetDiameter;
+			var height:Number = Math.abs(last.ypos - first.ypos) + this.scale * grid.isetDiameter;					
 
-			g.drawRoundRect(x, y, width, height, this.scale * TreeGrid.ISET_DIAM);
+			g.drawRoundRect(x, y, width, height, this.scale * grid.isetDiameter);
 		}
 		
 		private function getSetColor(h:Iset, grid:TreeGrid):uint

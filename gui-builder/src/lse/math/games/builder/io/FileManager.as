@@ -10,6 +10,7 @@ package lse.math.games.builder.io
 	import flash.utils.setTimeout;
 	
 	import lse.math.games.builder.presenter.TreeGridPresenter;
+	import lse.math.games.builder.settings.FileSettings;
 	import lse.math.games.builder.settings.UserSettings;
 	
 	import util.Log;
@@ -40,7 +41,7 @@ package lse.math.games.builder.io
 		
 		private var controller:TreeGridPresenter;
 		private var settings:UserSettings = UserSettings.instance;
-		private var treeStorage:SharedObject;
+		private var cookies:SharedObject;
 		
 		private var log:Log = Log.instance;
 		
@@ -52,10 +53,10 @@ package lse.math.games.builder.io
 			setTimeout(autosave, AUTOSAVE_INTERVAL);
 			
 			//Look if there is an autosave, and load it if so
-			treeStorage = SharedObject.getLocal( "autosave", "/" );
-			if(treeStorage != null && treeStorage.data["treeXML"] !=null)
+			cookies = SharedObject.getLocal( "autosave", "/" );
+			if(cookies != null && cookies.data[""] !=null)
 			{
-				setTimeout(askLoadTree, 3000); //Leave 3 seconds for the creation of canvas
+				setTimeout(askLoadFile, 3000); //Leave 3 seconds for the creation of canvas
 			} 
 			
 			//Add callback for the askBeforeQuit function
@@ -98,10 +99,10 @@ package lse.math.games.builder.io
 			
 			if(settings.cookiesStorable /*&& autosave_on */)
 			{
-				if(treeStorage == null)
-					treeStorage = SharedObject.getLocal( "autosave", "/" );
+				if(cookies == null)
+					cookies = SharedObject.getLocal( "autosave", "/" );
 				
-				treeStorage.setProperty("treeXML", value);
+				cookies.setProperty("", value);
 				unsavedChanges = false;
 			}
 		}
@@ -136,37 +137,38 @@ package lse.math.games.builder.io
 		 * It returns true if there are unsaved changes, false if there aren't.
 		 */
 		private function askBeforeQuit():Boolean {
-			
-			if(treeStorage != null)
-				treeStorage.clear();
+			if(cookies != null)
+				cookies.clear();
 			
 			return _unsavedChanges;
 		}
 		
 		//Asks if to load a saved tree
-		private function askLoadTree():void {
-			PromptTwoButtons.show(loadAutoSavedTree, "There is " +
-				"an auto-saved tree from last execution. Would you like to load it?")
+		private function askLoadFile():void {
+			PromptTwoButtons.show(loadAutoSavedFile, "There is " +
+				"an auto-saved file from last execution. Would you like to load it?")
 		}
 		
 		/* Loads a tree saved via autosave */
-		private function loadAutoSavedTree():void {
+		private function loadAutoSavedFile():void {
 			if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
 			{
-				backupXML = treeStorage.data["treeXML"] as XML;
-				controller.loadTreeFromXML(_backupXML);
+				backupXML = cookies.data["autosave"] as XML;
+				//TODO #33 check the type of thing stored, call correspondant function
+				controller.loadFromXML(_backupXML);
 			} else {
 				clear();
 			}
 		}
 		
-		/** Resets the filename */
+		/** Resets the filename, backup & cookies */
 		public function clear():void {
 			filename = "Untitled";
 			backupXML = null;
-			treeStorage = SharedObject.getLocal( "autosave", "/" );			
-			if(treeStorage!=null)
-				treeStorage.clear();
+			FileSettings.instance.clear();
+			cookies = SharedObject.getLocal( "autosave", "/" );			
+			if(cookies!=null)
+				cookies.clear();
 		}
 		
 		/*
@@ -227,16 +229,16 @@ package lse.math.games.builder.io
 		/**
 		 * Opens a dialog for saving the tree in xml format
 		 */
-		public function saveXML(treeXML:XML):void 
+		public function saveXML(xml:XML):void 
 		{			
-			backupXML = treeXML;
+			backupXML = xml;
 			
 			fr = new FileReference();
 			
 			fr.addEventListener(Event.COMPLETE, onSaveComplete);
 			fr.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			
-			fr.save(treeXML.toXMLString(), filename+".xml");
+			fr.save(xml.toXMLString(), filename+".xml");
 		}
 		
 		/**
@@ -295,8 +297,9 @@ package lse.math.games.builder.io
 			//read the bytes of the file as a string
 			var text:String = fr.data.readUTFBytes(fr.data.bytesAvailable);		
 			
-			var xml:XML = new XML(text);						
-			controller.loadTreeFromXML(xml);
+			var xml:XML = new XML(text);	
+
+			controller.loadFromXML(xml);
 			
 			backupXML = xml;
 			filename = getNameFromFile(fr);
@@ -317,8 +320,8 @@ package lse.math.games.builder.io
 			unsavedChanges = false;
 			
 			//As the user has its tree saved as a .xml, he wouldn't like to have it also as a SharedObject
-			if(treeStorage != null)
-				treeStorage.clear();
+			if(cookies != null)
+				cookies.clear();
 			
 			fr = null;
 		}
