@@ -165,7 +165,6 @@ package lse.math.games.builder.model
 				return new Rational(num, den);
 			} else {
 				var dec:Number = parseFloat(s);
-
 				if (!isNaN(dec)) {
 					return valueOf(dec);
 				} else {

@@ -366,7 +366,8 @@ package lse.math.games.builder.presenter
 				if(newScale > 5)
 				{
 					log.add(Log.HINT, "The tree is still very small, try adding some nodes on it before auto fitting it :)");
-					newScale = oldScale;
+					
+					newScale = (oldScale < 1 ? 1 : oldScale);
 				}
 			}
 			else if(scroller.width < width || scroller.height < height)

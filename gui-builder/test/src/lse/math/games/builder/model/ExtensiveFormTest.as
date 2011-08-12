@@ -27,6 +27,7 @@ package lse.math.games.builder.model
 			var iset1:Iset = new Iset(player);
 			iset1.insertNode(child1);
 			iset1.insertNode(child2);
+			iset1.idx=1;
 			
 			tree.addIset(iset1);
 			

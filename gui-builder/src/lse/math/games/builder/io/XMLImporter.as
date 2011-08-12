@@ -30,7 +30,6 @@ package lse.math.games.builder.io
 	//TODO: Do something with gameDescription info
 	//TODO: In the future, load node and iset names & maybe? payoffs in non-outcomes
 	//TODO #33 loadMatrix
-	//TODO #33 load players first, when they are in the spec
 	public class XMLImporter
 	{		
 		//Types of info contained:
@@ -42,13 +41,13 @@ package lse.math.games.builder.io
 		public const SF:int = 2;
 		
 		//File header properties
-		private var _version:int; 
+		private var _version:Number; 
 		private var _type:int;
+		private var _numPlayers:int;
 		private var _displayInfo:Boolean = false; //If the XML contains the <display> tag
 		private var _gameDescInfo:Boolean = false; //If the XML contains the <gameDescription> tag
 		
 		//Objects contained
-		private var nodes:Dictionary;
 		private var isets:Dictionary;
 		private var isetObjToId:Dictionary;
 		private var singletons:Vector.<Iset>;
@@ -74,10 +73,12 @@ package lse.math.games.builder.io
 		
 		/**
 		 * Version number of the XML file being read. <br>
-		 * The old version will be considered version 0. <br>
-		 * An unknown version will be considered version -1
+		 * List of versions:
+		 * <ul><li> -1 : Undetermined version </li>
+		 * <li> 0 : Old tree version (Mark Egesdal's) </li>
+		 * <li> 0.1 : First draft of unified XML version (Karen Bletzer's) </li></ul>
 		 */ 
-		public function get version():int { return _version; }
+		public function get version():Number { return _version; }
 		
 		/** 
 		 * Type of the file being read. It can be: 
@@ -108,8 +109,13 @@ package lse.math.games.builder.io
 			}
 			else if(firstChild.name() == "gte")
 			{
-				//TODO #33: Once version is included in the spec, return it
-				_version = 1
+				if(xml.@version != undefined)
+				{
+					var vers:String = xml.@version;
+					_version = parseFloat(vers);
+					if(_version < 0)
+						_version = -1;
+				}
 			} else _version = -1;
 			
 			//ANALYSE TYPE, DISPINFO & GAMEDESCRIPTIONINFO
@@ -127,12 +133,14 @@ package lse.math.games.builder.io
 					if(name==null)
 						log.add(Log.ERROR_THROW, "Corrupt XML file: empty child of <gte>");
 					
-					if(name == "display")
-						if(header.child("*").length()>0)
-							_displayInfo = true;
 					if(name == "gameDescription")
 						if(header.text().length()>0)
 							_gameDescInfo = true;
+					if(name == "players")
+						_numPlayers = header.child("player").length();
+					if(name == "display")
+						if(header.child("*").length()>0)
+							_displayInfo = true;
 					if(name == "extensiveForm")
 						ef = true;
 					if(name == "strategicForm")
@@ -175,24 +183,25 @@ package lse.math.games.builder.io
 				{
 					loadSettingsOnTree(tree as TreeGrid);
 				}			
-				
+								
 				this.tree = tree;
 				tree.clearTree();
 				
-				nodes = new Dictionary();
 				isets = new Dictionary();
 				isetObjToId = new Dictionary();
 				singletons = new Vector.<Iset>();
 				moves = new Dictionary();
 				players = new Dictionary();			
 				
+				loadPlayersOnTree(tree);
+				
 				//Depending on the version, the tree data will be in a different part
 				var childrenList:XMLList;
 				if(_version == 0)
 					childrenList = xml.children();
-				else
+				else if(_version == 0.1)
 					childrenList = xml.extensiveForm.children();
-				
+								
 				//Start processing the tree
 				for each(var child:XML in childrenList) { 
 					if (child.name() == "node") {
@@ -271,6 +280,21 @@ package lse.math.games.builder.io
 				}
 			}
 		}
+		
+		//Loads from the header the player information
+		private function loadPlayersOnTree(tree:ExtensiveForm):void
+		{
+			if(_numPlayers == 0)
+				log.add(Log.ERROR, "Warning: The tree contained no information about players. " +
+					"The loading can have errors");
+			else
+			{
+				for(var i:int = 0; i<_numPlayers; i++)
+				{
+				 	getPlayer(xml.players.player.(@playerId==""+(i+1))[0]);
+				}
+			}
+		}
 				
 		/* Parses a node with its move and iset info, adds it to the tree, 
 		 * and acts recursively by processing its children nodes and outcomes
@@ -278,70 +302,18 @@ package lse.math.games.builder.io
 		private function processNode(elem:XML, parentNode:Node):void
 		{
 			//init
-			var node:Node = null;
-			if (elem.@id != undefined) 
-			{
-				var id:String = elem.@id;
-				node = nodes[id];
-				
-				if (node == null) { //Creating a new node
-					node = tree.createNode();
-					nodes[id] = node; //TODO #46 createNode(id)
-				}
-			} else {				
-				node = tree.createNode();
-			}
+			var node:Node = null;				
+			node = tree.createNode();
 			
 			//assign parent			
-			if (parentNode == null && elem.@parent != undefined) 
-			{
-				var parentId:String = elem.@parent;
-
-				parentNode = nodes[parentId];
-				
-				if (parentNode == null) {
-					parentNode = tree.createNode(); //TODO #46 createNode(parentId)						
-					nodes[parentId] = parentNode;
-				}			 
-			}
 			if (parentNode != null) {
 				parentNode.addChild(node);
 			} else {
 				tree.root = node;
 			}
 			
-			// process iset
-			var isetId:String = null;	
-			if (elem.@iset != undefined) {
-				isetId = elem.@iset;
-			}
-			
-			var iset:Iset = null;
-			var player:Player = (elem.@player != undefined) ? getPlayer(elem.@player) : Player.CHANCE;
-			if (isetId == null) {								
-				iset = new Iset(player);
-				iset.idx = lastIsetIdx++; //This idx is different from isetId. It's not useful inside this class
-				singletons.push(iset); // root is already taken care of				
-			} else {				
-				//look it up in the map, if it doesn't exist create it and add it
-				iset = isets[isetId];
-				if (iset == null) {
-					iset = new Iset(player);
-					iset.idx = lastIsetIdx++; //This idx is different from isetId. It's not useful inside this class
-					isets[isetId] = iset;
-					isetObjToId[iset] = isetId;
-				} else {
-					if (player != Player.CHANCE) {
-						if (iset.player != Player.CHANCE && player != iset.player) {
-							log.add(Log.ERROR_HIDDEN, "Warning: @player attribute conflicts with earlier iset player assignment.  Ignored.");	
-						}
-						while (iset.player != player) {
-							iset.changePlayer(tree.firstPlayer);
-						}
-					}
-				}				
-			}
-			iset.insertNode(node);
+			// set up the iset data
+			processIset(elem, node);
 			
 			// set up the moves
 			processMove(elem, node, parentNode);
@@ -375,18 +347,20 @@ package lse.math.games.builder.io
 			
 			if(elem.child("*").length() == 0)
 			{				
-				if(tree.numPlayers == 0)
-					tree.newPlayer("1");
-				wrapNode.makeNonTerminal();
-				
-				//TODO: ERROR parsing non terminal leaves: they dont draw labels
+				// set up the iset data
+				processIset(elem, wrapNode);				
 			} else
 			{
 				var outcome:Outcome = wrapNode.makeTerminal();
 				for each (var child:XML in elem.children()) {
 					if (child.name() == "payoff") {
 						var playerId:String = child.@player;
-						var payoff:Rational = Rational.parse(child.@value);
+						
+						var payoff:Rational;
+						if(child.attribute("value").length()==0)
+							payoff = Rational.parse(child[0]);
+						else
+							payoff = Rational.parse(child.@value);
 						
 						var player:Player = players[playerId];
 						if (player == null) {
@@ -422,6 +396,42 @@ package lse.math.games.builder.io
 			if (elem.@prob != undefined && node.reachedby != null) {
 				node.reachedby.prob = Rational.parse(elem.@prob);
 			}
+		}
+		
+		/* Parses iset and player data from the element's attributes and loads it */
+		private function processIset(elem:XML, node:Node):void
+		{
+			var isetId:String = null;	
+			if (elem.@iset != undefined) {
+				isetId = elem.@iset;
+			}
+			
+			var iset:Iset = null;
+			var player:Player = (elem.@player != undefined) ? getPlayer(elem.@player) : Player.CHANCE;
+			if (isetId == null) {								
+				iset = new Iset(player);
+				iset.idx = lastIsetIdx++; //This idx is different from isetId. It's not useful inside this class
+				singletons.push(iset); // root is already taken care of				
+			} else {				
+				//look it up in the map, if it doesn't exist create it and add it
+				iset = isets[isetId];
+				if (iset == null) {
+					iset = new Iset(player);
+					iset.idx = lastIsetIdx++; //This idx is different from isetId. It's not useful inside this class
+					isets[isetId] = iset;
+					isetObjToId[iset] = isetId;
+				} else {
+					if (player != Player.CHANCE) {
+						if (iset.player != Player.CHANCE && player != iset.player) {
+							log.add(Log.ERROR_HIDDEN, "Warning: @player attribute conflicts with earlier iset player assignment.  Ignored.");	
+						}
+						while (iset.player != player) {
+							iset.changePlayer(tree.firstPlayer);
+						}
+					}
+				}				
+			}
+			iset.insertNode(node);
 		}
 		
 		//TODO: there has got to be a more efficient algorithm
@@ -476,7 +486,7 @@ package lse.math.games.builder.io
 			if (playerId == Player.CHANCE_NAME) {
 				return Player.CHANCE;
 			}
-			
+						
 			var player:Player = players[playerId];
 			if (player == null) {
 				player = new Player(playerId, tree);
