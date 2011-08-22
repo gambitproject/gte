@@ -48,6 +48,8 @@ package lse.math.games.builder.viewmodel
 		override public function assignLabels():void
 		{
 			this.clearLabels();
+			if(!_grid.isUpdated)
+				_grid.populateFromMatrix();
 			assignLabelsForGrid(_grid);
 		}
 		
@@ -58,6 +60,8 @@ package lse.math.games.builder.viewmodel
 		
 		override public function paint(g:IGraphics, width:Number, height:Number):void
 		{
+			if(!_grid.isUpdated)
+				_grid.populateFromMatrix();
 			g.stroke = this.scale * _grid.strokeWidth;
 			paintGrid(g, width, height, _grid);
 		}

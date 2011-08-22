@@ -36,11 +36,17 @@ package lse.math.games.builder.viewmodel
 		internal function assignDepth(depth:int):void
 		{
 			_adjustedDepth = depth;
+
+			for(var child:Node = firstChild; child!=null; child = child.sibling)
+				child.updateDepth();
 		}
 		
 		internal function resetDepth():void
 		{
 			_adjustedDepth = -1;
+
+			for(var child:Node = firstChild; child!=null; child = child.sibling)
+				child.updateDepth();
 		}
 	}
 }

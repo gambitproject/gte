@@ -235,7 +235,7 @@ package lse.math.games.builder.model
 			if(dest.numMoves != 0)
 				log.add(Log.ERROR_THROW, "Error in addMoveTo(): the destination Iset should be childless");
 			
-			var move:Move = newMove();
+			var move:Move = newMove(); 
 			var left:Node = dest.firstNode;
 			for (var n:Node = _firstNode; n != null; n = n.nextInIset)
 			{

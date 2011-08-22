@@ -13,12 +13,14 @@ package lse.math.games.builder.viewmodel
 	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
+	
+	//TODO: Optimize this class as much as possible, it is the main cause for the program going slow with big numbers
 	public class DepthAdjuster implements IAction
 	{
-		private var _timeElapsed:int = 0;
-		
+		private var _timeElapsed:int = 0;		
 		
 				
+		
 		public function DepthAdjuster() {}
 		
 		public function get timeElapsed():int {return _timeElapsed; }

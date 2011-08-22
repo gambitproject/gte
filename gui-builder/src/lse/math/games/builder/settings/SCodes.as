@@ -76,6 +76,18 @@ package lse.math.games.builder.settings
 		 */
 		public static const DEFAULT_LEVEL_DISTANCE:String = "DEFAULT_LEVEL_DISTANCE";
 		
+		/**
+		 * number representing the vertical padding in cells
+		 * <p><b>Default:</b> 5
+		 */
+		public static const DEFAULT_CELL_PADDING_VERT:String = "DEFAULT_CELL_PADDING_VERT";
+		
+		/**
+		 * number representing the horizontal padding in cells
+		 * <p><b>Default:</b> 5
+		 */
+		public static const DEFAULT_CELL_PADDING_HOR:String = "DEFAULT_CELL_PADDING_HOR";
+		
 		
 		
 		/* <--- FILE GRAPHIC SETTINGS (settings not stored in the users PC but on XML files. Loaded with FileSettings) ---> */
@@ -101,6 +113,11 @@ package lse.math.games.builder.settings
 		/** int representing the distance between two consecutive node levels */
 		public static const FILE_LEVEL_DISTANCE:String = "FILE_LEVEL_DISTANCE";
 		
+		/** Number representing the vertical padding in cells */
+		public static const FILE_CELL_PADDING_VERT:String = "FILE_CELL_PADDING_VERT";
+		
+		/** Number representing the horizontal padding in cells */
+		public static const FILE_CELL_PADDING_HOR:String = "FILE_CELL_PADDING_HOR";
 		
 		
 		
@@ -133,6 +150,8 @@ package lse.math.games.builder.settings
 			settings.setValue(DEFAULT_NODE_DIAMETER, new Number(7));
 			settings.setValue(DEFAULT_ISET_DIAMETER, new Number(25));
 			settings.setValue(DEFAULT_LEVEL_DISTANCE, 75);
+			settings.setValue(DEFAULT_CELL_PADDING_VERT, new Number(5));
+			settings.setValue(DEFAULT_CELL_PADDING_HOR, new Number(5));
 			//OTHER SETTINGS
 			settings.setValue(EXPANDED, false);
 		}

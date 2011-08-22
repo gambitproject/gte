@@ -10,7 +10,7 @@ package lse.math.games.builder.presenter
 	 */
 	public interface IAction 
 	{
-		/** Execute the action over the 'grid' TreeGrid*/
+		/** Execute the action over the game model*/
 		function doAction(grid:TreeGrid):void;
 		
 		/** Check if the action changes any data*/

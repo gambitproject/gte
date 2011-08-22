@@ -70,7 +70,7 @@ package lse.math.games.builder.model
 		public function set label(value:String):void {
 			if (_iset != null && _iset.player == Player.CHANCE) {
 				var ratValue:Rational = Rational.parse(value);
-				if (!ratValue.isNaN) {					
+				if (!ratValue.isNaN) {		
 					assignProb(Rational.parse(value));
 				}
 			} else if (value == defaultLabel) {
@@ -121,7 +121,7 @@ package lse.math.games.builder.model
 				log.add(Log.ERROR_HIDDEN, "prob less than 0 set to " + desiredProb);
 			}
 			
-			_prob = desiredProb;			
+			_prob = desiredProb;
 			if (iset != null) {
 				var pie:Rational = Rational.ONE.subtract(_prob);
 				//trace("pie starts at " + pie);

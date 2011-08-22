@@ -87,6 +87,18 @@ package lse.math.games.builder.model
 		 */
 		public function get depth():int { return _depth; }
 		
+		/** 
+		 * Update the depth of the node and descendants from the parent. <br/>
+		 * Has to be called only when the parent's depth (i.e., when assigning 
+		 * adjusted depth) is changed.
+		 */
+		public function updateDepth():void { 
+			_depth = _father.depth+1; 
+			
+			for(var child:Node = firstChild; child!=null; child = child.sibling)
+				child.updateDepth();
+		}
+		
 		/** Number of children this node has */
 		public function get numChildren():int { 
 			var count:int = 0;

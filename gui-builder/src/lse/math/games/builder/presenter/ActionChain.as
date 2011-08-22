@@ -2,6 +2,7 @@ package lse.math.games.builder.presenter
 {
 	import flash.utils.getTimer;
 	
+	import lse.math.games.builder.model.Game;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	/**

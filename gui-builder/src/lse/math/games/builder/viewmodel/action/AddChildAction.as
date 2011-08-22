@@ -3,7 +3,6 @@ package lse.math.games.builder.viewmodel.action
 	import flash.utils.getTimer;
 	
 	import lse.math.games.builder.model.Iset;
-	import lse.math.games.builder.model.Move;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.presenter.IAction;
@@ -14,12 +13,12 @@ package lse.math.games.builder.viewmodel.action
 	import util.Log;
 	
 	/**	
-	 * Adds children to all the nodes in a selected iset/ in a selected node's iset.
-	 * If the nodes are leaves, then two children per node are added, else just one
+	 * Adds a child to all the nodes in a selected iset/ in a selected node's iset.
+	 * If the selected nodes are childless, then it adds two children instead
 	 * <li>Changes Data</li>
 	 * <li>Changes Size</li>
 	 * <li>Changes Display</li>
-	 * @author Mark Egesdal
+	 * @author alfongj
 	 */
 	public class AddChildAction implements IAction
 	{
@@ -50,13 +49,13 @@ package lse.math.games.builder.viewmodel.action
 			}
 			
 			if (iset != null) {
-				addChildrenTo(iset, grid);
+				addChildTo(iset, grid);
 				_depthAdjuster.doAction(grid);
 			} else if (_nodeId >= 0) {				
 				var node:Node = grid.getNodeById(_nodeId);
 				if (node != null) {
 					node.makeNonTerminal();
-					addChildrenTo(node.iset, grid);
+					addChildTo(node.iset, grid);
 					_depthAdjuster.doAction(grid);
 				} else
 					log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "AddChildAction");
@@ -71,7 +70,7 @@ package lse.math.games.builder.viewmodel.action
 			_timeElapsed = getTimer() - prevTime;
 		}
 		
-		private function addChildrenTo(parent:Iset, grid:TreeGrid):void
+		private function addChildTo(parent:Iset, grid:TreeGrid):void
 		{			
 			var player:Player = null;
 			var lastPlayableNode:Node = parent.firstNode;
@@ -86,89 +85,13 @@ package lse.math.games.builder.viewmodel.action
 			}
 			if (player == null) {
 				player = grid.firstPlayer;
-			}			
+			}	
+			
 			if (parent.isChildless)
-			{				
-				var h:Iset = parent.newIset(player);
-				parent.addMoveAndAssignChildrenTo(h);
-				parent.addMoveAndAssignChildrenTo(h);
-				
-				// parent.addMove(player); <- UNCOM ME FOR ADDING A CHILD AT A TIME
-
-			} else if (childrenInOneIsetAndChildless(parent)) {
-				// if all children in one Iset and without children
-				// add new child to each node in Iset and place these
-				// children in same Iset as existing children
-				parent.addMoveAndAssignChildrenTo(parent.firstNode.firstChild.iset);
-				
-				// parent.addMove(player); <- UNCOM ME FOR ADDING A CHILD AT A TIME
-
-				// make nextInIset of new Node the nextInIset
-				// of previous lastchild and
-				// make the new node the nextInIset of lastchild				
-			} else {				
-				parent.addMove(player);
-				
-				// TODO: this behavior below needs work and has some bugs...
-				// Personal note (alfongj): believe that what it should do is that the new node created should add
-				// itself to the existing Iset (as using parent.addMoveAndAssignChildrenTo), but also assigning this node first
-				// all the moves the others have
-				
-				/*var moveNodes:Vector.<Node> = new Vector.<Node>();
-				for (var mate:Node = parent.firstNode; mate != null; mate = mate.nextInIset) {
-					moveNodes.push(mate.firstchild);
-				}				
-				var dest:Iset = null;
-				while (moveNodes[0] != null && dest == null) 
-				{					
-					var baseline:Move = null;
-					for (var i:int = 0; i < moveNodes.length; ++i) {
-						if (moveNodes[i].isLeaf) {
-							if (baseline == null) {
-								baseline = moveNodes[i].reachedby;
-								dest = moveNodes[i].iset;								
-							} else if (baseline != moveNodes[i].reachedby) {								
-								dest = null;								
-							}
-						} else {							
-							dest = null;
-						}
-						moveNodes[i] = moveNodes[i].sibling;
-					}
-				}
-				if (dest == null) {
-					dest = parent.newIset(player);
-				}
-				parent.addMoveTo(dest);*/			
-			}			
+				parent.addMove(player);	
+			
+			parent.addMove(player);	
 		}	
-		
-		private function childrenInOneIsetAndChildless(iset:Iset):Boolean
-		{
-			// true if all children of nodes in this 
-			// Iset are in one iset and childless
-			var ok:Boolean = true;
-			var y:Node = iset.firstNode;
-			if (y.isLeaf) {
-				ok = false;
-			} else {
-				var h:Iset = y.firstChild.iset;
-				if (h == null) {
-					ok = false;
-				}
-
-				while (ok && y != null) { //go through nodes in Iset
-					var z:Node = y.firstChild;
-					
-					while (ok && z != null) {
-						ok = ((z.iset == h)&&(z.firstChild == null));
-						z = z.sibling;
-					}
-					y = y.nextInIset;
-				}
-			}
-			return ok;
-		}
 		
 		public function get changesData():Boolean {
 			return true;

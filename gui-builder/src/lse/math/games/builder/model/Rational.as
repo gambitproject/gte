@@ -3,7 +3,8 @@ package lse.math.games.builder.model
 	import util.Log;
 
 	/**
-	 * Class that represents numbers as fractions: with numerator and denominator. </p>
+	 * Class that represents numbers as fractions: with numerator and denominator. 
+	 * It is used for storing probabilities and payoffs.</p>
 	 * It contains:
 	 * <ul><li>Integers acting as numerator and denominator</li>
 	 * <li>Functions for creating rationals from Strings and numbers</li>

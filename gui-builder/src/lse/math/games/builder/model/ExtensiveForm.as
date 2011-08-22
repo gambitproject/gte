@@ -14,10 +14,9 @@ package lse.math.games.builder.model
 	 * 
 	 * @author Mark Egesdal
 	 */
-	public class ExtensiveForm
+	public class ExtensiveForm extends Game
 	{			
 		private var _root:Node;
-		private var _firstPlayer:Player = null;
 		
 		private var lastNodeNumber:int = 0;
 		private var lastOrderedNodeNumber:int = 0;
@@ -26,8 +25,7 @@ package lse.math.games.builder.model
 		private var log:Log = Log.instance;
 		
 		
-		public function ExtensiveForm() { }
-		
+			
 		/** First node of the tree */
 		public function get root():Node { return _root; }
 		public function set root(value:Node):void { _root = value; }
@@ -45,24 +43,7 @@ package lse.math.games.builder.model
 			}
 			return count;
 		}
-		
-		/** Number of players in the tree */
-		public function get numPlayers():int {
-			var count:int = 0;
-			var player:Player = _firstPlayer;
-			while(player!=null)
-			{
-				count++;
-				player = player.nextPlayer;
-			}
-			return count;
-		}
-		
-		/** Player who moves first in the tree */
-		//TODO: Explain if other relations inside player or something must change also, when set
-		public function set firstPlayer(player:Player):void { _firstPlayer = player; }
-		public function get firstPlayer():Player { return _firstPlayer; }
-		
+				
 		
 		
 		/** Clears all the info contained in the tree, creating a new one without player or nodes */
@@ -71,6 +52,8 @@ package lse.math.games.builder.model
 			_root = null;
 			_firstPlayer = null;
 			lastNodeNumber = 0;
+			lastOrderedIsetNumber = 0;
+			lastOrderedNodeNumber = 0;
 		}
 		
 		/** Creates a new player, assigning it as moving next of the last one currently existing in this tree */

@@ -173,6 +173,17 @@ package lse.math.games.builder.viewmodel
 			return action;
 		}
 		
+		public function addChildIset(grid:TreeGrid, x:Number, y:Number):IAction 
+		{
+			var h:Iset = grid.findIset(x, y);
+			var n:Node = grid.findNode(x, y);
+			var action:IAction = null;
+			if (h != null || n != null) {
+				action = new AddChildIsetAction(h, n);
+			}
+			return action;
+		}
+		
 		public function dissolveIset(grid:TreeGrid, x:Number, y:Number):IAction
 		{
 			var h:Iset = grid.findIset(x, y);

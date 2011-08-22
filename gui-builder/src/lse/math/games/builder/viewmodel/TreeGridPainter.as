@@ -1,17 +1,23 @@
 package lse.math.games.builder.viewmodel
 {
-	import flash.text.engine.TextLine;
-	import flash.text.engine.FontWeight;
+	import flash.text.engine.ElementFormat;
+	import flash.text.engine.FontDescription;
+	import flash.text.engine.FontLookup;
 	import flash.text.engine.FontPosture;
-	import lse.math.games.builder.model.Rational;
-	
-	import lse.math.games.builder.view.AbstractPainter;	
-	import lse.math.games.builder.view.IGraphics;
+	import flash.text.engine.FontWeight;
+	import flash.text.engine.TextBlock;
+	import flash.text.engine.TextElement;
+	import flash.text.engine.TextLine;
 	
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Outcome;
 	import lse.math.games.builder.model.Player;
+	import lse.math.games.builder.model.Rational;
+	import lse.math.games.builder.view.AbstractPainter;
+	import lse.math.games.builder.view.IGraphics;
+	
+	import mx.controls.Alert;
 	
 	/**	 
 	 * Painter in charge of the background and the full tree (including labels), except from Isets
@@ -78,11 +84,17 @@ package lse.math.games.builder.viewmodel
 		
 		override public function paint(g:IGraphics, width:Number, height:Number):void
 		{
+			if(!_grid.isUpdated)
+				_grid.populateFromMatrix();
+			
 			paintGrid(g, width, height, _grid);
 		}
 		
 		override public function assignLabels():void
 		{
+			if(!_grid.isUpdated)
+				_grid.populateFromMatrix();
+			
 			this.clearLabels();
 			recAssignNodeLabels(_grid.root, _grid);			
 		}
@@ -346,7 +358,8 @@ package lse.math.games.builder.viewmodel
 		}
 		
 		private function positionOutcomeLabels(n:TreeGridNode, grid:TreeGrid, first:TextLine, second:TextLine):void
-		{									
+		{							
+			//TODO #52 Add a comma in between the payoffs in rotate 1 and 3 (hor. positions)
 			var width1:Number = first.width;
 			var height1:Number = first.height;
 			var width2:Number = second.width;
@@ -381,9 +394,22 @@ package lse.math.games.builder.viewmodel
 				ypos1 = n.ypos + ascent1 - height1 / 2;
 				ypos2 = n.ypos + ascent2 - height2 / 2;
 			}
+
 			this.moveLabel(first, xpos1, ypos1);
-			this.moveLabel(second, xpos2, ypos2);			
+			this.moveLabel(second, xpos2, ypos2);	
+			
+			//TODO #52
+//			if(grid.rotate == 1 || grid.rotate == 3)
+//				this.moveLabel(comma(grid), xpos1, xpos2);
 		}		
+		
+		//TODO #52: This is not drawing the comma
+//		private function comma(grid:TreeGrid):TextLine
+//		{			
+//			registerLabel("comma", ",", 0xFF0000, grid.fontFamily, styleOutcome);
+//			
+//			return this.labels["comma"];
+//		}
 		
 		private function recPositionTree(n:TreeGridNode, drawnumber:int, grid:TreeGrid, width:Number, height:Number, leafdistance:Number):int
 		{

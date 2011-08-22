@@ -1,8 +1,6 @@
 package lse.math.games.builder.view 
 {	
 	import flash.display.Graphics;
-	import flash.text.engine.FontWeight;
-	import flash.utils.Dictionary;	
 	
 	/**
 	 * @author Mark

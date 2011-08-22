@@ -1,17 +1,16 @@
 package lse.math.games.builder.view
 {
-	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
-	import flash.ui.Keyboard;
 	
 	import spark.components.Scroller;
 	
 	/**
-	 * Scroller that can scroll its contents by following mouse movement
+	 * Scroller that can scroll its contents by following mouse movement.<p/>
 	 * 
 	 * To use it, you can either force a certain scroll amount using scroll()
 	 * or you can enableMouseScrolling(), that will automatically drag the contents of the 
 	 * window when the mouse is pressed, and disableMouseScrolling() after it has been used
+	 * 
 	 * @author alfongj
 	 */
 	public class MouseScroller extends Scroller
@@ -71,7 +70,7 @@ package lse.math.games.builder.view
 		
 		//Starts tracking mouse movement and moving the Scroller contents following it 
 		private function startMouseScrolling(event:MouseEvent):void
-		{
+		{		
 			lastX = event.stageX;
 			lastY = event.stageY;
 			addEventListener(MouseEvent.MOUSE_UP, stopMouseScrolling);

@@ -1,11 +1,21 @@
 package lse.math.games.builder.viewmodel 
 {	
+	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
+	
 	import lse.math.games.builder.model.ExtensiveForm;
 	import lse.math.games.builder.model.Iset;
+	import lse.math.games.builder.model.Move;
 	import lse.math.games.builder.model.Node;
+	import lse.math.games.builder.model.Outcome;
+	import lse.math.games.builder.model.Player;
+	import lse.math.games.builder.model.StrategicForm;
+	import lse.math.games.builder.model.Strategy;
 	import lse.math.games.builder.settings.FileSettings;
 	import lse.math.games.builder.settings.SCodes;
 	import lse.math.games.builder.settings.UserSettings;
+	
+	import mx.containers.ControlBar;
 	
 	import util.Log;
 	
@@ -31,15 +41,21 @@ package lse.math.games.builder.viewmodel
 		public static const MIN_MARGIN_LEFT:Number = 24;
 		public static const MIN_MARGIN_RIGHT:Number = 24;
 		
-		public var scale:Number = 1.0; //Current scale of the canvas 
+		public var scale:Number = 1.0; //Current scale of the canvas. 
+									   //Could be changed to somewhere more suitable
 		private var _rotate:int = 0;
 
 		private var _mergeBase:Iset = null;
 		private var _selectedNodeId:int = -1;
 		
 		private var _isZeroSum:Boolean = true;
-		private var _isNormalReduced:Boolean = true;
+		private var _isStrategicReduced:Boolean = true;
 		private var _maxPayoff:Number = 25; //TODO: SETTING
+		
+		private var _matrix:StrategicForm = null;
+		private var _isSecondary:Boolean = false; //This must change to true if it is decided 
+												  //that MATRIX_MODE will be the one the GUI loads on
+		private var _isUpdated:Boolean = false;
 
 		private var fileSettings:FileSettings = FileSettings.instance;
 		private var log:Log = Log.instance;
@@ -71,7 +87,7 @@ package lse.math.games.builder.viewmodel
 		/** Color of nodes, labels and payoffs of the second player */
 		public function get player2Color():uint { return fileSettings.getValue(SCodes.FILE_PLAYER_2_COLOR) as uint; }	
 		
-		//TODO: 3PL Check wherever player1Color was used, and those might all have to be modified
+		//TODO: 3PL Check wherever player1Color was used, and those might all have to be modified to adapt to a 3rd one
 		
 		/** Font family used as a default for labels in nodes, isets, labels and payoffs */
 		public function get fontFamily():String { return fileSettings.getValue(SCodes.FILE_FONT) as String; }
@@ -105,23 +121,34 @@ package lse.math.games.builder.viewmodel
 		public function get isZeroSum():Boolean { return _isZeroSum; }		
 		public function set isZeroSum(value:Boolean):void { _isZeroSum = value; }
 		
-		/** If the normal form is reduced. Just important in strategic form view */
-		public function get isNormalReduced():Boolean { return _isNormalReduced; }		
-		public function set isNormalReduced(value:Boolean):void { _isNormalReduced = value; }
-		
 		/** When creating random payoffs, maximum payoff possible to be created */
 		//TODO: I don't think this should be here. Could be either a preference, something that is selected when pressing the button,
 		//or other thing, but doesn't have much sense here
 		public function get maxPayoff():Number { return _maxPayoff; }		
 		public function set maxPayoff(value:Number):void { _maxPayoff = value; }			
 		
+		/** If the grid is the secondary model. That happens in [MATRIX_MODE] */
+		public function set isSecondary(value:Boolean):void { _isSecondary = value; }
 		
+		/** If the grid is up-to-date with its matrix primary source. Just appliable if this is the secondary source */
+		public function get isUpdated():Boolean {
+			if(_isSecondary) return _isUpdated;
+			else return true;
+		}
+		public function set isUpdated(value:Boolean):void { _isUpdated = value; }
+		
+		/** Matrix as a primary source of data for populating the grid, appliable if this is secondary source */
+		public function set matrix(value:StrategicForm):void { _matrix = value; }
+		
+		
+		
+		/* <--- --- MODEL FUNCTIONS --- ---> */
 		
 		/** Creates a new tree with two players: 1 and 2, and one node */
 		public function defaultTree():void
 		{			
 			this.newPlayer("1");
-			this.newPlayer("2"); //TODO 3PL
+			this.newPlayer("2");
 			
 			this.root = createNode();	
 			this.root.makeNonTerminal();
@@ -142,23 +169,132 @@ package lse.math.games.builder.viewmodel
 			}
 		}
 		
-		/** 
-		 * Rotates clockwise one step the display of the tree
-		 */
-		[Deprecated(replacement="set rotate()")]
-		public function rotateRight():void
+		/** Populates the grid using the matrix as a model source */
+		public function populateFromMatrix():void
 		{
-			_rotate = ((_rotate + 3) % 4);
-		}
+			if(!_isSecondary)
+				log.add(Log.ERROR_THROW, "Tried to populate TreeGrid without it being the secondary model.");
+			
+			if(_matrix!=null)
+			{
+				clearTree();
+				this._firstPlayer = _matrix.firstPlayer;
 
-		/** 
-		 * Rotates counterclockwise one step the display of the tree
-		 */
-		[Deprecated(replacement="set rotate()")]
-		public function rotateLeft():void
+				this.root = createNode();
+				var rootIset:Iset = this.root.makeNonTerminal();
+
+				var leaves:Vector.<Node> = new Vector.<Node>();
+				recPopulateNodes(rootIset, _firstPlayer);
+				
+				_isUpdated = true;
+			} else
+				log.add(Log.ERROR_THROW, "The matrix primary source has not been set. Couldn't " +
+					"populate the tree.");
+		}
+		
+		//Recursive function that creates a new iset from the strategies of one player
+		//Useful only when populating the tree from a matrix
+		private function recPopulateNodes(parent:Iset, pl:Player):void
 		{
-			_rotate = ((_rotate + 1) % 4);
-		}		
+			var strategies:Vector.<Strategy> = _matrix.strategies(pl);
+						
+			if(!pl.isLast)
+			{
+				var newIset:Iset = parent.newIset(pl.nextPlayer);
+
+				for each(var st:Strategy in strategies)
+				{
+					var move:Move = parent.addMoveAndAssignChildrenTo(newIset);
+					move.label = st.getNameOrSeq();
+				}
+				
+				recPopulateNodes(newIset, pl.nextPlayer);
+			} else	{
+				for each(st in strategies)
+				{
+					var finalMove:Move = parent.addMove(pl);
+					finalMove.label = st.getNameOrSeq();
+				}
+				
+				populatePayoffs(parent);
+			}
+		}
+		
+		//Populates the payoffs from a the matrix's paymatrix into
+		//the children of a given iset (which should be the last non
+		//singleton Iset in a canonical tree)
+		private function populatePayoffs(parent:Iset):void 
+		{			
+			var payMatrixes:Dictionary = _matrix.payMatrixMap;
+			var i:int = 0;
+			
+			for(var node:Node = parent.firstNode; node!=null; node=node.nextInIset)
+			{
+				for(var child:Node = node.firstChild; child!=null; child = child.sibling)
+				{
+					var outcome:Outcome = child.makeTerminal();
+					
+					for(var pl:Player = _firstPlayer, k:int = 0; k<numPlayers; pl=pl.nextPlayer, k++) {
+						outcome.setPay(pl, payMatrixes[pl][getKeyNumber(i)]);
+					}
+					
+					i++;
+				}
+			}
+		}
+		
+		//Get the key for the payoffs corresponding to the i'th node
+		private function getKeyNumber(num:int):String
+		{
+			var combo:Array = new Array();
+			var cumulativeProd:int = 1; //Number of total strategies
+
+			for(var pl:Player = _firstPlayer, i:int = 0; i<numPlayers; i++)
+			{
+				cumulativeProd *= _matrix.strategies(pl).length;
+				pl = pl.nextPlayer;
+			}
+			
+			for(pl = _firstPlayer, i = 0; i<numPlayers; i++)
+			{
+				var vecStr:Vector.<Strategy> = _matrix.strategies(pl);
+				var numSt:int = vecStr.length; 
+
+				cumulativeProd /= numSt;
+				
+				var strNumber:int = (num / cumulativeProd) % numSt;
+				
+				combo.push(_matrix.strategies(pl)[strNumber]);
+				
+				pl = pl.nextPlayer;
+			}
+						
+			return Strategy.key(combo);
+		}
+		
+
+		
+//		/** 
+//		 * Rotates clockwise one step the display of the tree
+//		 */
+//		[Deprecated(replacement="set rotate()")]
+//		public function rotateRight():void
+//		{
+//			_rotate = ((_rotate + 3) % 4);
+//		}
+//
+//		/** 
+//		 * Rotates counterclockwise one step the display of the tree
+//		 */
+//		[Deprecated(replacement="set rotate()")]
+//		public function rotateLeft():void
+//		{
+//			_rotate = ((_rotate + 1) % 4);
+//		}		
+		
+		
+		
+		/* <--- --- FINDING NODES AND ISET FUNCTIONS --- ---> */
 		
 		/** 
 		 * Looks if the point (x,y) given is inside the bounds of the iset.<br>

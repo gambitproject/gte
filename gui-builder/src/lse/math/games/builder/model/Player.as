@@ -27,48 +27,52 @@ package lse.math.games.builder.model
 		
 		
 		/** Creates the player and inserts it in the linked list of players */
-		public function Player(name:String, tree:ExtensiveForm)
+		public function Player(name:String, game:Game)
 		{
 			_name = name;
-			if (tree != null) {
+			if (game != null) {
 				if (name == Player.CHANCE_NAME) {
 					log.add(Log.ERROR_THROW, "Name " + name + " reserved for chance node");
 				}
 
-				if (tree.firstPlayer == null) {
-					tree.firstPlayer = this;
+				if (game.firstPlayer == null) {
+					game.firstPlayer = this;
 					//_prevPlayer = this;
 					//_nextPlayer = this;
 				} else {				
-					var prev:Player = tree.firstPlayer;
+					var prev:Player = game.firstPlayer;
 					while (prev.nextPlayer != null) {
 						prev = prev.nextPlayer;
 					}
 					prev._nextPlayer = this;
 					//_prevPlayer = prev;
-					//_nextPlayer = tree.firstPlayer;
-					//tree.firstPlayer._prevPlayer._nextPlayer = this;
-					//tree.firstPlayer._prevPlayer = this;
+					//_nextPlayer = game.firstPlayer;
+					//game.firstPlayer._prevPlayer._nextPlayer = this;
+					//game.firstPlayer._prevPlayer = this;
 				}
 				
 			} else {
 				if (name != CHANCE_NAME) {
-					log.add(Log.ERROR_THROW, "Only chance node can have pass a null ExtensiveForm reference");
+					log.add(Log.ERROR_THROW, "Only chance node can have pass a null Game reference");
 				}
-				//_nextPlayer = tree.firstPlayer;
-				//_prevPlayer = tree.firstPlayer;
+				//_nextPlayer = game.firstPlayer;
+				//_prevPlayer = game.firstPlayer;
 			}
 		}
 		
 		/** Name of the player */
-		public function get name():String {
-			return _name;
-		}
+		public function get name():String {	return _name; }
 		
 		/** Next player */
-		public function get nextPlayer():Player {
-			return _nextPlayer;
-		}
+		public function get nextPlayer():Player { return _nextPlayer; }
+		
+		/** If the player is last */
+		public function get isLast():Boolean { return _nextPlayer==null; }
+		//Note: isLast should be modified internally if the list is made circular,
+		//and also, most loops through players in other classes that use 'player!=null' as 
+		//stopping criteria when cycling through players. To find those loop, just look 
+		//for every reference to the 'get nextPlayer()' function 
+		//(Ctrl+Shift+G in Windows FlashBuilder 4.5)
 		
 		public function toString():String {
 			return _name;

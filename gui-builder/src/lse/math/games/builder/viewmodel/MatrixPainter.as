@@ -1,34 +1,32 @@
 package lse.math.games.builder.viewmodel 
 {
-	import flash.events.StatusEvent;
-	import flash.text.engine.TextLine;
-	import flash.text.engine.FontWeight;
 	import flash.text.engine.FontPosture;
-	import lse.math.games.builder.model.Move;
-	import lse.math.games.builder.model.Rational;
-	
+	import flash.text.engine.FontWeight;
+	import flash.text.engine.TextLine;
 	import flash.utils.Dictionary;
 	
-	import lse.math.games.builder.model.NormalForm;
 	import lse.math.games.builder.model.Player;
+	import lse.math.games.builder.model.Rational;
+	import lse.math.games.builder.model.StrategicForm;
 	import lse.math.games.builder.model.Strategy;
-	import lse.math.games.builder.view.IGraphics;	
+	import lse.math.games.builder.settings.FileSettings;
+	import lse.math.games.builder.settings.SCodes;
 	import lse.math.games.builder.view.AbstractPainter;
+	import lse.math.games.builder.view.IGraphics;
+	
+	import mx.controls.Alert;
 	
 	/**
 	 * @author Mark Egesdal
 	 */
+	//TODO: 3PL Adapt all the painter to a new way to display everything, maybe using an intermediate
+	//bimatrix class, and drawing here all the bimatrixes inside one canvas
 	public class MatrixPainter extends AbstractPainter
-	{		
-		private static const PADDING_VERT:Number = 5;
-		private static const PADDING_HORT:Number = 5;		
-		
+	{				
 		private var styleOutcome:Dictionary = new Dictionary();
 		private var styleStrategy:Dictionary = new Dictionary();
 		private var stylePlayer:Dictionary = new Dictionary();
-		
-		private var _grid:TreeGrid = null;		
-				
+						
 		private var colWidth:Number;
 		private var rowHeight:Number;
 		
@@ -41,7 +39,9 @@ package lse.math.games.builder.viewmodel
 		private var numCols:int;
 		private var numRows:int;
 		
-		private var nf:NormalForm;
+		private var _matrix:StrategicForm = null; 
+		
+		private var fileSettings:FileSettings = FileSettings.instance;
 		
 		public function MatrixPainter() 
 		{
@@ -60,8 +60,8 @@ package lse.math.games.builder.viewmodel
 			stylePlayer["fontSize"] = 20.0;
 		}
 		
-		public function set grid(value:TreeGrid):void {
-			_grid = value;
+		public function set matrix(value:StrategicForm):void {
+			_matrix = value;
 		}
 		
 		override public function get drawWidth():Number {
@@ -72,52 +72,77 @@ package lse.math.games.builder.viewmodel
 			return colHeaderHeight + rowHeight * numRows + this.scale * TreeGrid.MIN_MARGIN_TOP + this.scale * TreeGrid.MIN_MARGIN_BOTTOM;
 		}
 		
+		/* <--- --- GRAPHIC SETTINGS GETTERS --- ---> */
+		
+		/* Color of nodes, labels and payoffs of the first player */
+		private function get player1Color():uint { return fileSettings.getValue(SCodes.FILE_PLAYER_1_COLOR) as uint; }		
+		
+		/* Color of nodes, labels and payoffs of the second player */
+		private function get player2Color():uint { return fileSettings.getValue(SCodes.FILE_PLAYER_2_COLOR) as uint; }	
+				
+		/* Font family used as a default for labels in nodes, isets, labels and payoffs */
+		private function get fontFamily():String { return fileSettings.getValue(SCodes.FILE_FONT) as String; }
+		
+		/* Vertical cell padding */
+		private function get vertPadding():Number { return fileSettings.getValue(SCodes.FILE_CELL_PADDING_VERT) as Number;}
+		
+		/* Horizontal cell padding */
+		private function get horPadding():Number { return fileSettings.getValue(SCodes.FILE_CELL_PADDING_HOR) as Number;}
+
+		/* Width in points/pixels of lines connecting nodes and lines forming isets */
+		private function get strokeWidth():Number { return fileSettings.getValue(SCodes.FILE_STROKE_WIDTH) as Number; }	
+		
+		
+		
 		override public function measureCanvas():void
-		{
-			//var nf:NormalForm = new NormalForm(_grid); // expensive to keep creating this...
-			
-			colWidth = getColWidth(nf);
-			rowHeight = getRowHeight(nf);
+		{		
+			colWidth = getColWidth();
+			rowHeight = getRowHeight();
 			
 			var angle:Number = Math.atan(rowHeight / colWidth);
-			var cornerDiagonal:Number = getCornerDiagonal(nf, angle);
+			var cornerDiagonal:Number = getCornerDiagonal(angle);
 			cornerWidth = cornerDiagonal * Math.cos(angle);
 			cornerHeight = cornerDiagonal * Math.sin(angle);
 			
-			var rows:Vector.<Strategy> = nf.strategies(nf.firstPlayer);		
+			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);		
 			rowHeaderWidth = getRowHeaderWidth(rows, cornerWidth);
 			
-			var cols:Vector.<Strategy> = nf.strategies(nf.firstPlayer.nextPlayer);
+			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
 			colHeaderHeight = getColHeaderHeight(cols, cornerHeight);
 		}
 		
 		override public function assignLabels():void
 		{
-			nf = new NormalForm(_grid, _grid.isNormalReduced);
-			this.clearLabels();			
-			assignLabelsForMatrix(nf, _grid.player1Color, _grid.player2Color, _grid.fontFamily);
+			if(!_matrix.isUpdated)
+				_matrix.populateFromTree();
+			
+			this.clearLabels();	
+			assignLabelsForMatrix();
 		}
 		
 		override public function paint(g:IGraphics, width:Number, height:Number):void
-		{
-			//var nf:NormalForm = new NormalForm(_grid); // expensive to keep creating this...
+		{			
+			if(!_matrix.isUpdated)
+				_matrix.populateFromTree();
 			
 			g.color = 0xFFFFFF;
 			g.fillRect(0, 0, width, height);
 			
 			g.color = 0x000000;
-			g.stroke = this.scale * _grid.strokeWidth;
+			g.stroke = this.scale * strokeWidth;
 			
-			paintMatrix(g, width, height, nf);
+			paintMatrix(g, width, height);
 		}
 		
-		private function assignLabelsForMatrix(nf:NormalForm, colorRows:uint, colorCols:uint, fontFamily:String):void 
+		private function assignLabelsForMatrix():void 
 		{
-			var rows:Vector.<Strategy> = nf.strategies(nf.firstPlayer); // could return a vector of strategies?
-			var cols:Vector.<Strategy> = nf.strategies(nf.firstPlayer.nextPlayer); // could return a vector of strategies?
+			var colorRows:uint = player1Color;
+			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer); // could return a vector of strategies?
+			var colorCols:uint = player2Color;
+			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer); // could return a vector of strategies?
 			
 			numRows = 0;
-			for each (var row:Strategy in rows) {				
+			for each (var row:Strategy in rows) {	
 				this.registerLabel("r" + numRows, row.toString(), colorRows, fontFamily, styleStrategy);				
 				++numRows;
 			}
@@ -128,11 +153,11 @@ package lse.math.games.builder.viewmodel
 				++numCols;
 			}
 			
-			for (var pl:Player = nf.firstPlayer; pl != null; pl = pl.nextPlayer)
+			for (var pl:Player = _matrix.firstPlayer; pl != null; pl = pl.nextPlayer)
 			{
-				var color:uint = pl == nf.firstPlayer ? colorRows : colorCols;
+				var color:uint = pl == _matrix.firstPlayer ? colorRows : colorCols;
 				this.registerLabel(getPlayerKey(pl), pl.name, color, fontFamily, stylePlayer);
-				var matrix:Object = nf.payMatrixMap[pl];         // could return a matrix, given as input 2 players to intersect								
+				var matrix:Object = _matrix.payMatrixMap[pl];         // could return a matrix, given as input 2 players to intersect								
 				for each (row in rows) {					
 					for each (col in cols) 
 					{												
@@ -157,14 +182,14 @@ package lse.math.games.builder.viewmodel
 			return text;
 		}
 		
-		private function paintMatrix(g:IGraphics, width:Number, height:Number, nf:NormalForm):void
+		private function paintMatrix(g:IGraphics, width:Number, height:Number):void
 		{
 			// find the the margins...
 			var marginLeft:Number = (width - drawWidth) / 2 + this.scale * TreeGrid.MIN_MARGIN_LEFT;
 			var marginTop:Number = (height - drawHeight) / 2 + this.scale * TreeGrid.MIN_MARGIN_TOP;
 			
-			var rows:Vector.<Strategy> = nf.strategies(nf.firstPlayer);
-			var cols:Vector.<Strategy> = nf.strategies(nf.firstPlayer.nextPlayer);
+			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);
+			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
 			
 			var xpos:Number = marginLeft + rowHeaderWidth;
 			var ypos:Number = marginTop + colHeaderHeight;
@@ -184,7 +209,7 @@ package lse.math.games.builder.viewmodel
 			}			
 			
 			var nplay:int = 0;
-			for (var pl:Player = nf.firstPlayer; pl != null; pl = pl.nextPlayer) 
+			for (var pl:Player = _matrix.firstPlayer; pl != null; pl = pl.nextPlayer) 
 			{
 				var diagX:Number = rowHeaderWidth > cornerWidth ? rowHeaderWidth - cornerWidth : 0;
 				diagX += marginLeft;
@@ -199,7 +224,7 @@ package lse.math.games.builder.viewmodel
 					diagX + (cornerWidth - plLabel.width)* (nplay),				
 					diagY + cornerHeight * (1 - nplay) + plLabel.ascent * nplay);
 				
-				var matrix:Object = nf.payMatrixMap[pl];
+				var matrix:Object = _matrix.payMatrixMap[pl];
 				ypos = marginTop + colHeaderHeight;
 				
 				for (var i:int = 0; i < rows.length; ++i) {
@@ -220,9 +245,10 @@ package lse.math.games.builder.viewmodel
 						
 						var pairKey:String = Strategy.key([row, col]);
 						var outcomeLabel:TextLine = this.labels[pl.name + "_" + pairKey];
+
 						this.moveLabel(outcomeLabel,							
-							xpos + colWidth * nplay - outcomeLabel.width * nplay + this.scale * PADDING_HORT - this.scale * PADDING_HORT * 2 * nplay,
-							ypos + outcomeLabel.ascent * nplay + rowHeight - rowHeight * nplay - this.scale * PADDING_VERT + this.scale * PADDING_VERT * 2 * nplay);
+							xpos + colWidth * nplay - outcomeLabel.width * nplay + this.scale * horPadding - this.scale * horPadding * 2 * nplay,
+							ypos + outcomeLabel.ascent * nplay + rowHeight - rowHeight * nplay - this.scale * vertPadding + this.scale * vertPadding * 2 * nplay);
 						
 						g.drawLine(xpos + colWidth, ypos, xpos + colWidth, ypos + rowHeight);
 						g.drawLine(xpos, ypos + rowHeight, xpos + colWidth, ypos + rowHeight);
@@ -235,31 +261,31 @@ package lse.math.games.builder.viewmodel
 			}
 		}
 		
-		private function getColWidth(nf:NormalForm):Number
+		private function getColWidth():Number
 		{
 			var width:Number = 0;
-			var rows:Vector.<Strategy> = nf.strategies(nf.firstPlayer);
-			var cols:Vector.<Strategy> = nf.strategies(nf.firstPlayer.nextPlayer);
+			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);
+			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
 			
 			for (var j:int = 0; j < cols.length; ++j) {
 				if (this.labels["c" + j] != undefined) {
 					var colLabel:TextLine = this.labels["c" + j];
-					if (colLabel.width + PADDING_HORT * 2 * scale > width) {
-						width = colLabel.width + PADDING_HORT * 2 * scale;
+					if (colLabel.width + horPadding * 2 * scale > width) {
+						width = colLabel.width + horPadding * 2 * scale;
 					}
 				}
 			}
-			for (var pl:Player = nf.firstPlayer; pl != null; pl = pl.nextPlayer)
+			for (var pl:Player = _matrix.firstPlayer; pl != null; pl = pl.nextPlayer)
 			{
-				var matrix:Object = nf.payMatrixMap[pl];				
+				var matrix:Object = _matrix.payMatrixMap[pl];				
 				for each (var row:Strategy in rows) {					
 					for each (var col:Strategy in cols) 
 					{						
 						var pairKey:String = Strategy.key([row, col]);
 						var outcomeLabel:TextLine = this.labels[pl.name + "_" + pairKey];
 						
-						if (outcomeLabel.width * 2 + this.scale * PADDING_HORT * 3 > width) {
-							width = outcomeLabel.width*2 + this.scale * PADDING_HORT * 3;
+						if (outcomeLabel.width * 2 + this.scale * horPadding * 3 > width) {
+							width = outcomeLabel.width*2 + this.scale * horPadding * 3;
 						}
 					}
 				}
@@ -267,32 +293,32 @@ package lse.math.games.builder.viewmodel
 			return width;
 		}
 		
-		private function getRowHeight(nf:NormalForm):Number
+		private function getRowHeight():Number
 		{
 			var height:Number = 0;
-			var rows:Vector.<Strategy> = nf.strategies(nf.firstPlayer);
-			var cols:Vector.<Strategy> = nf.strategies(nf.firstPlayer.nextPlayer);
+			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);
+			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
 			
 			for (var i:int = 0; i < rows.length; ++i) {
 				if (this.labels["r" + i] != undefined) {
 					var rowLabel:TextLine = this.labels["r" + i];
-					if (rowLabel.height + this.scale * PADDING_VERT * 2 > height) {
-						height = rowLabel.height + this.scale * PADDING_VERT * 2;
+					if (rowLabel.height + this.scale * vertPadding * 2 > height) {
+						height = rowLabel.height + this.scale * vertPadding * 2;
 					}
 				}
 			}
 			
-			for (var pl:Player = nf.firstPlayer; pl != null; pl = pl.nextPlayer) 
+			for (var pl:Player = _matrix.firstPlayer; pl != null; pl = pl.nextPlayer) 
 			{
-				var matrix:Object = nf.payMatrixMap[pl];
+				var matrix:Object = _matrix.payMatrixMap[pl];
 				for each (var row:Strategy in rows) {					
 					for each (var col:Strategy in cols) 
 					{						
 						var pairKey:String = Strategy.key([row, col]);
 						var outcomeLabel:TextLine = this.labels[pl.name + "_" + pairKey];
 						
-						if (outcomeLabel.height * 2 + this.scale * PADDING_VERT * 3 > height) {
-							height = outcomeLabel.height * 2 + this.scale * PADDING_VERT * 3;
+						if (outcomeLabel.height * 2 + this.scale * vertPadding * 3 > height) {
+							height = outcomeLabel.height * 2 + this.scale * vertPadding * 3;
 						}
 					}					
 				}
@@ -300,10 +326,10 @@ package lse.math.games.builder.viewmodel
 			return height;
 		}
 		
-		private function getCornerDiagonal(nf:NormalForm, angle:Number):Number
+		private function getCornerDiagonal(angle:Number):Number
 		{
 			var maxDiag:Number = 0;			
-			for (var pl:Player = nf.firstPlayer; pl != null; pl = pl.nextPlayer) 
+			for (var pl:Player = _matrix.firstPlayer; pl != null; pl = pl.nextPlayer) 
 			{				
 				var plLabel:TextLine = this.labels[getPlayerKey(pl)];
 				var diag:Number = plLabel.height / Math.sin(angle) + plLabel.width / Math.cos(angle);
@@ -355,8 +381,7 @@ package lse.math.games.builder.viewmodel
 			return maxHeight;
 		}		
 		
-		private function getPlayerKey(pl:Player):String
-		{
+		private function getPlayerKey(pl:Player):String	{
 			return "player_" + pl.name;
 		}
 	}

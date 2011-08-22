@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:local="."
+			   title="Matrix editor"
+			   close="promptExit()">
+	<fx:Script>
+		<![CDATA[
+			import lse.math.games.builder.model.Outcome;
+			import lse.math.games.builder.model.Player;
+			import lse.math.games.builder.model.Rational;
+			import lse.math.games.builder.model.StrategicForm;
+			import lse.math.games.builder.model.Strategy;
+			import lse.math.games.builder.presenter.Presenter;
+			import lse.math.games.builder.viewmodel.AutoLabeller;
+			
+			import mx.managers.PopUpManager;
+			
+			import util.Log;
+			import util.PromptTwoButtons;
+			
+			
+			private var _matrix:StrategicForm;
+			private var _strMap:Dictionary;
+			private var _payMap:Dictionary;
+			private var _controller:Presenter;
+			
+			private var log:Log = Log.instance;
+			
+			[Bindable]
+			public var alpha1:String; //String with the strategies of pl1
+			[Bindable]
+			public var pl1NumStr:int;
+			[Bindable]
+			private var pl1PayMapStr:String;
+
+			[Bindable]
+			private var alpha2:String; //String with the strategies of pl2
+			[Bindable]
+			private var pl2NumStr:int;
+			[Bindable]
+			private var pl2PayMapStr:String;
+			
+			
+			
+			/** Matrix which is being edited */
+			public function set matrix(value:StrategicForm):void { 
+				_matrix = value;
+				
+				_strMap = new Dictionary();
+				_payMap = _matrix.payMatrixMap;
+				
+				for(var i:int = 0, pl:Player = _matrix.firstPlayer; i<_matrix.numPlayers; i++, pl=pl.nextPlayer)
+					_strMap[pl] = _matrix.strategies(pl);
+				
+				populate(0);
+				populate(1);
+			}
+			
+			/** Presenter to which changes should be invalidated */
+			public function set controller(value:Presenter):void {
+				_controller = value;
+			}
+			
+			
+			
+			//Populates the matrix payoffs and strategies of player number 'plIdx' (starting in 0)
+			//onto the graphical components
+			private function populate(plIdx:int):void {
+				var pl:Player = _matrix.firstPlayer;
+				for(var i:int = 0; i<plIdx; i++)
+					pl = pl.nextPlayer;
+				
+				var strVec:Vector.<Strategy> = _strMap[pl];
+				
+				if(plIdx == 0)
+				{
+					alpha1 = strVec.join(" ");
+					pl1NumStr = strVec.length;
+					pl1PayMapStr = payoffMatrixString(pl);
+				} else if(plIdx == 1)
+				{
+					alpha2 = strVec.join(" ");
+					pl2NumStr = strVec.length;		
+					pl2PayMapStr = payoffMatrixString(pl);
+				}
+			}
+			
+			//Update the alphabets with 
+			private function updateAlphabets():void {
+				var strVec1:Vector.<Strategy> = _strMap[_matrix.firstPlayer];
+				var strVec2:Vector.<Strategy> = _strMap[_matrix.firstPlayer.nextPlayer];
+				var inUse:Vector.<String> = new Vector.<String>();
+
+				for each(var st:Strategy in strVec1) inUse.push(st.toString());
+				for each(st in strVec2) inUse.push(st.toString().toLowerCase());
+				
+				var al:AutoLabeller = new AutoLabeller();
+				al.uniqueLabelNum = (pl1NumStr+pl2NumStr-strVec1.length-strVec2.length) > 0 ? pl1NumStr+pl2NumStr-strVec1.length-strVec2.length : 0;
+				
+				alpha1 = "";
+				for(var i:int = 0; i<pl1NumStr; i++)
+				{
+					var stratName:String;
+					if(i<strVec1.length) 
+					 stratName = strVec1[i].toString()
+					else {
+						while(true){
+							stratName = al.getNextAutoLabel(_matrix.firstPlayer, _matrix);
+							if(inUse.indexOf(stratName.toLowerCase())<0)
+								break;
+						}
+					}
+					alpha1+= (stratName+" ");
+				}
+				
+				alpha2 = "";
+				for(i = 0; i<pl2NumStr; i++)
+				{
+					if(i<strVec2.length) 
+						stratName = strVec2[i].toString()
+					else {
+						while(true){
+							stratName = al.getNextAutoLabel(_matrix.firstPlayer.nextPlayer, _matrix);
+							if(inUse.indexOf(stratName.toLowerCase())<0)
+								break;
+						}
+					}
+					alpha2+= (stratName+" ");
+				}
+			}
+			
+			//Returns a string with the payoff matrix of a player
+			private function payoffMatrixString(player:Player):String
+			{
+				var pl1StrVec:Vector.<Strategy> = _strMap[_matrix.firstPlayer];
+				var pl2StrVec:Vector.<Strategy> = _strMap[_matrix.firstPlayer.nextPlayer];
+				
+				var lines:Vector.<String> = new Vector.<String>();
+				for each(var st1:Strategy in pl1StrVec)
+				{
+					var columns:Vector.<String> = new Vector.<String>();
+
+					for each(var st2:Strategy in pl2StrVec)
+						columns.push(_payMap[player][Strategy.key([st1,st2])]);
+						
+					lines.push(columns.join(" "));
+				}
+				return lines.join("\n");
+			}
+				
+			
+				
+			/* <--- --- CLOSE HANDLERS --- ---> */	
+			// Prompt if the user wants to exit saving changes
+			private function promptExit():void {
+				PromptTwoButtons.show(resultFromExitPrompt, "Would you like to save the changes before closing?");
+			}
+			
+			private function resultFromExitPrompt():void {
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
+					saveChanges();
+				else if(PromptTwoButtons.buttonPressed == PromptTwoButtons.CANCEL)
+					exit();
+			}
+			
+			// Save the changes into the new matrix
+			private function saveChanges():void 
+			{
+				updateAlphabets();
+				
+				var firstPl:Player = _matrix.firstPlayer;
+				_matrix.clearMatrix();
+				_matrix.firstPlayer = firstPl;
+				
+				var rows:Vector.<Strategy> = new Vector.<Strategy>();
+				var cols:Vector.<Strategy> = new Vector.<Strategy>();
+
+				for each(var st:String in alpha1.split(" "))
+				{
+					if(st != null && st.length>0) {
+						var strat:Strategy = new Strategy(firstPl);
+						strat.name = st;
+						rows.push(strat);
+						_matrix.addStrategy(strat);
+					}
+				}
+				
+				for each(st in alpha2.split(" "))
+				{
+					if(st != null && st.length>0) {
+						strat = new Strategy(firstPl.nextPlayer);
+						strat.name = st;
+						cols.push(strat);
+						_matrix.addStrategy(strat);
+					}
+				}
+				
+				var lines1:Array = pl1PayMapStr.split("\n");
+				var lines2:Array = pl2PayMapStr.split("\n");
+
+				for each(strat in rows)
+				{
+					var columns1:Array = new Array();
+					var line:String = lines1.shift() as String;
+					if(line != null)
+						columns1 = line.split(" ");
+					
+					var columns2:Array = new Array();
+					line = lines2.shift() as String;
+					if(line != null)
+						columns2 = line.split(" ");
+					
+					for each(var strat2:Strategy in cols)
+					{
+						var payStr1:String;
+						var payStr2:String;
+						var outcome:Outcome = new Outcome();
+						
+						while(true) {
+							payStr1 = columns1.shift() as String;
+							if(payStr1 != null && Rational.parse(payStr1) != Rational.NaN){
+								outcome.setPay(firstPl, Rational.parse(payStr1));
+								break;
+							} else if(columns1.length==0){
+								outcome.setPay(firstPl, Rational.NaN);
+								break;
+							}
+						}
+						
+						while(true) {
+							payStr2 = columns2.shift() as String;
+							if(payStr2 != null && Rational.parse(payStr2) != Rational.NaN){
+								outcome.setPay(firstPl.nextPlayer, Rational.parse(payStr2));
+								break;
+							} else if(columns2.length==0) {
+								outcome.setPay(firstPl.nextPlayer, Rational.NaN);
+								break;
+							}
+						}
+						_matrix.addPayoff([strat, strat2], outcome, Rational.ONE);
+					}
+				}
+				
+				//invalidate display
+				if(_controller != null)
+					_controller.invalidate(false, true, true); 
+				else
+					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+				
+				exit();
+			}
+			
+			//Close the window
+			private function exit():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<s:HGroup width="100%" gap="0">
+			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+				<s:Label text="Player 1 Strategies"/>
+				<s:HGroup width="100%" verticalAlign="middle" toolTip="Number of strategies for this player">
+					<s:Label text="Num: "/>
+					<s:TextInput id="pl1NumStrBox" text="{pl1NumStr}" widthInChars="3" restrict="0-9" change="pl1NumStr = int(pl1NumStrBox.text); updateAlphabets()"/>
+					<mx:Spacer width="4"/>
+					<s:TextInput id="pl1StratInput" editable="false" widthInChars="22" text="{alpha1}" />
+				</s:HGroup>
+				<mx:Spacer height="20"/>
+				<s:Label text="Player 1 Payoffs"/>
+				<s:TextArea id="pl1PayMapStrBox" widthInChars="30" heightInLines="15" lineBreak="explicit" 
+							text="{pl1PayMapStr}" change="pl1PayMapStr = pl1PayMapStrBox.text"/>				
+				<s:HGroup width="100%" horizontalAlign="center">
+					<s:Button label="Reset" cornerRadius="0" click="populate(0);"/>
+				</s:HGroup>
+			</s:VGroup>
+			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+				<s:Label text="Player 1 Strategies"/>
+				<s:HGroup width="100%" verticalAlign="middle" toolTip="Number of strategies for this player">
+					<s:Label text="Num: " />
+					<s:TextInput id="pl2NumStrBox" text="{pl2NumStr}" widthInChars="3" restrict="0-9" change="pl2NumStr = int(pl2NumStrBox.text); updateAlphabets()"/>
+					<mx:Spacer width="4"/>
+					<s:TextInput id="pl2StratInput" editable="false" widthInChars="22" text="{alpha2}" />
+				</s:HGroup>
+				<mx:Spacer height="20"/>
+				<s:Label text="Player 2 Payoffs"/>
+				<s:TextArea id="pl2PayMapStrBox" widthInChars="30" heightInLines="15" lineBreak="explicit" 
+							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text"/>
+				<s:HGroup width="100%" horizontalAlign="center">
+					<s:Button label="Reset" cornerRadius="0" click="populate(1);"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:HGroup>
+		<mx:Spacer width="100%" height="20"/>
+		<s:HGroup width="100%" horizontalAlign="center" paddingBottom="5" paddingTop="5">
+			<s:Button label="Close and save changes" cornerRadius="0" width="200" click="saveChanges();"/>
+			<s:Button label="Close and discard changes" cornerRadius="0" width="200" click="exit()"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+</s:TitleWindow>

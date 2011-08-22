@@ -9,7 +9,7 @@
 	<fx:Script>
 		<![CDATA[
 			import lse.math.games.builder.fig.FigFontManager;
-			import lse.math.games.builder.presenter.TreeGridPresenter;
+			import lse.math.games.builder.presenter.Presenter;
 			
 			import mx.managers.PopUpManager;
 			
@@ -36,19 +36,20 @@
 			 * <li>Just Pop it up using PopUpManager and set its width and height to your preferred values. 
 			 * Also set its 'controller' property to a valid one for invalidating the display with changes</li>
 			 */			
-			
+			//TODO: Invalidate according to what each setting changes
+			//TODO: Try to re-do the class using XML files with the options
 			
 			
 			private var unsavedChanges:Boolean = false;
 			private var glbSettings:UserSettings = UserSettings.instance;
 			private var fileSettings:FileSettings = FileSettings.instance;
-			private var _controller:TreeGridPresenter;
+			private var _controller:Presenter;
 			
 			private var log:Log = Log.instance;
 			
 			
 			
-			public function set controller(value:TreeGridPresenter):void { _controller = value; }
+			public function set controller(value:Presenter):void { _controller = value; }
 			
 			//Sets a global setting
 			private function setGlobalSetting(key:String, value:Object):void
@@ -77,7 +78,7 @@
 				
 				//invalidate display
 				if(_controller != null)
-					_controller.invalidate(true, true, true); 
+					_controller.invalidate(false, true, true); 
 				else
 					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
 			}
@@ -113,7 +114,7 @@
 			<s:NavigatorContent width="100%" height="100%" label="General settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
 					<mx:Form width="100%" height="100%" >
-						<mx:FormItem label="Save settings locally">
+						<mx:FormItem label="Remember settings" toolTip="test">
 							<s:CheckBox id="STORE_SETTINGS_LOCALLY"
 										
 										creationComplete="STORE_SETTINGS_LOCALLY.selected = 
@@ -147,9 +148,16 @@
 										change="setGlobalSetting(SCodes.DISPLAY_OUTPUT_INTERNALLY,
 										DISPLAY_OUTPUT_INTERNALLY.selected);" />			
 						</mx:FormItem>
-						<mx:FormItem label="Minimum undoable actions">
+						
+						<mx:FormItem label="Display output pop-up:">
+							<mx:RadioButtonGroup id="outputDispGroup" enabled="true"  />
+							<mx:RadioButton id="popupFlash" label="In a flash window" group="{outputDispGroup}" value="flash"/>
+							<mx:RadioButton id="popupHTML" label="In a new browser window" group="{outputDispGroup}" value="HTML"/>
+						</mx:FormItem>
+						
+						<mx:FormItem label="Guaranteed undoable actions">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="MINIMUM_BUFFER_SIZE" toolTip="This is the minimum guarranteed actions that will be undoable."
+								<s:Spinner id="MINIMUM_BUFFER_SIZE" toolTip="This is the minimum of actions that will be undoable. If the program runs smoothly, the actual number of undoable actions might be bigger."
 										   minimum="1" maximum="40" snapInterval="1"
 										   
 										   creationComplete="MINIMUM_BUFFER_SIZE.value = glbSettings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int"
@@ -184,8 +192,8 @@
 												change="setFileSetting(SCodes.FILE_PLAYER_2_COLOR,event.target.selectedColor);"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Default font">
-							<s:ComboBox id="FILE_FONT" width="106" height="24" toolTip="Select the default Font" 
+						<mx:FormItem label="Default font" toolTip="Select the default Font" >
+							<s:ComboBox id="FILE_FONT" width="106" height="24" 
 										
 										fontFamily="{FILE_FONT.selectedItem as String}"
 										
@@ -206,10 +214,9 @@
 								</s:itemRenderer>
 							</s:ComboBox>
 						</mx:FormItem>
-						<mx:FormItem label="Stroke width">
+						<mx:FormItem label="Stroke width"  toolTip="Increase or decrease the current file's stroke width">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="FILE_STROKE_WIDTH" toolTip="Increase or decrease the current file's stroke width"
-										   minimum="1" maximum="6" snapInterval="1"
+								<s:Spinner id="FILE_STROKE_WIDTH" minimum="1" maximum="6" snapInterval="1"
 										   
 										   creationComplete="FILE_STROKE_WIDTH.value = fileSettings.getValue(SCodes.FILE_STROKE_WIDTH) as int"
 										   
@@ -219,10 +226,10 @@
 								<s:Label text="{FILE_STROKE_WIDTH.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
+						<mx:FormHeading label="Tree settings" toolTip="Increase or decrease the current tree's node diameter"/>
 						<mx:FormItem label="Node diameter">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="FILE_NODE_DIAMETER" toolTip="Increase or decrease the current tree's node diameter"
-										   minimum="1" maximum="20" snapInterval="2"
+								<s:Spinner id="FILE_NODE_DIAMETER" minimum="1" maximum="20" snapInterval="2"
 										   
 										   creationComplete="FILE_NODE_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_NODE_DIAMETER) as Number)"
 										   
@@ -232,10 +239,9 @@
 								<s:Label text="{FILE_NODE_DIAMETER.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Iset diameter">
+						<mx:FormItem label="Iset diameter" toolTip="Increase or decrease the current tree's iset diameter">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="FILE_ISET_DIAMETER" toolTip="Increase or decrease the current tree's iset diameter"
-										   minimum="5" maximum="40" snapInterval="3"
+								<s:Spinner id="FILE_ISET_DIAMETER" minimum="5" maximum="40" snapInterval="3"
 										   
 										   creationComplete="FILE_ISET_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_ISET_DIAMETER) as Number)"
 										   
@@ -245,10 +251,9 @@
 								<s:Label text="{FILE_ISET_DIAMETER.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Level distance">
+						<mx:FormItem label="Level distance" toolTip="Increase or decrease the current tree's distance between levels">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="FILE_LEVEL_DISTANCE" toolTip="Increase or decrease the current tree's distance between levels"
-										   minimum="35" maximum="120" snapInterval="5"
+								<s:Spinner id="FILE_LEVEL_DISTANCE" minimum="35" maximum="120" snapInterval="5"
 										   
 										   creationComplete="FILE_LEVEL_DISTANCE.value = (fileSettings.getValue(SCodes.FILE_LEVEL_DISTANCE) as int)"
 										   
@@ -256,6 +261,31 @@
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_LEVEL_DISTANCE.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormHeading label="Matrix settings" />
+						<mx:FormItem label="Cell vert. padding" toolTip="Increase or decrease the vertical padding inside cells of the matrix">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="FILE_CELL_PADDING_VERT" minimum="0" maximum="10" snapInterval="1"
+										   
+										   creationComplete="FILE_CELL_PADDING_VERT.value = (fileSettings.getValue(SCodes.FILE_CELL_PADDING_VERT) as Number)"
+										   
+										   change="setFileSetting(SCodes.FILE_CELL_PADDING_VERT, FILE_CELL_PADDING_VERT.value as Number)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{FILE_CELL_PADDING_VERT.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Cell hor. padding" toolTip="Increase or decrease the horizontal padding inside cells of the matrix">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="FILE_CELL_PADDING_HOR" minimum="0" maximum="10" snapInterval="1"
+										   
+										   creationComplete="FILE_CELL_PADDING_HOR.value = (fileSettings.getValue(SCodes.FILE_CELL_PADDING_HOR) as Number)"
+										   
+										   change="setFileSetting(SCodes.FILE_CELL_PADDING_HOR, FILE_CELL_PADDING_HOR.value as Number)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{FILE_CELL_PADDING_HOR.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
 					</mx:Form>
@@ -284,8 +314,8 @@
 												change="setGlobalSetting(SCodes.DEFAULT_PLAYER_2_COLOR,event.target.selectedColor);"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Default font">
-							<s:ComboBox id="DEFAULT_FONT" width="106" height="24" toolTip="Select the default Font" 
+						<mx:FormItem label="Default font" toolTip="Select the default Font" >
+							<s:ComboBox id="DEFAULT_FONT" width="106" height="24"
 											
 										fontFamily="{DEFAULT_FONT.selectedItem as String}"
 										
@@ -306,10 +336,9 @@
 								</s:itemRenderer>
 							</s:ComboBox>
 						</mx:FormItem>
-						<mx:FormItem label="Stroke width">
+						<mx:FormItem label="Stroke width" toolTip="Increase or decrease the default stroke width">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="DEFAULT_STROKE_WIDTH" toolTip="Increase or decrease the default stroke width"
-									   minimum="1" maximum="6" snapInterval="1"
+								<s:Spinner id="DEFAULT_STROKE_WIDTH" minimum="1" maximum="6" snapInterval="1"
 									   
 									   creationComplete="DEFAULT_STROKE_WIDTH.value = glbSettings.getValue(SCodes.DEFAULT_STROKE_WIDTH) as int"
 									   
@@ -319,10 +348,10 @@
 								<s:Label text="{DEFAULT_STROKE_WIDTH.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Node diameter">
+						<mx:FormHeading label="Tree settings"/>
+						<mx:FormItem label="Node diameter" toolTip="Increase or decrease the default node diameter">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="DEFAULT_NODE_DIAMETER" toolTip="Increase or decrease the default node diameter"
-										   minimum="1" maximum="20" snapInterval="2"
+								<s:Spinner id="DEFAULT_NODE_DIAMETER" minimum="1" maximum="20" snapInterval="2"
 										   
 										   creationComplete="DEFAULT_NODE_DIAMETER.value = (glbSettings.getValue(SCodes.DEFAULT_NODE_DIAMETER) as Number)"
 										   
@@ -332,10 +361,9 @@
 								<s:Label text="{DEFAULT_NODE_DIAMETER.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Iset diameter">
+						<mx:FormItem label="Iset diameter" toolTip="Increase or decrease the default iset diameter">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="DEFAULT_ISET_DIAMETER" toolTip="Increase or decrease the default iset diameter"
-										   minimum="5" maximum="40" snapInterval="3"
+								<s:Spinner id="DEFAULT_ISET_DIAMETER" minimum="5" maximum="40" snapInterval="3"
 										   
 										   creationComplete="DEFAULT_ISET_DIAMETER.value = (glbSettings.getValue(SCodes.DEFAULT_ISET_DIAMETER) as Number)"
 										   
@@ -345,10 +373,9 @@
 								<s:Label text="{DEFAULT_ISET_DIAMETER.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
-						<mx:FormItem label="Level distance">
+						<mx:FormItem label="Level distance" toolTip="Increase or decrease the default distance between levels">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="DEFAULT_LEVEL_DISTANCE" toolTip="Increase or decrease the default distance between levels"
-										   minimum="35" maximum="120" snapInterval="5"
+								<s:Spinner id="DEFAULT_LEVEL_DISTANCE" minimum="35" maximum="120" snapInterval="5"
 										   
 										   creationComplete="DEFAULT_LEVEL_DISTANCE.value = (glbSettings.getValue(SCodes.DEFAULT_LEVEL_DISTANCE) as int)"
 										   
@@ -356,6 +383,31 @@
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{DEFAULT_LEVEL_DISTANCE.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormHeading label="Matrix settings" />
+						<mx:FormItem label="Cell vert. padding" toolTip="Increase or decrease the vertical padding inside cells of the matrix">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="DEFAULT_CELL_PADDING_VERT" minimum="0" maximum="10" snapInterval="1"
+										   
+										   creationComplete="DEFAULT_CELL_PADDING_VERT.value = (glbSettings.getValue(SCodes.DEFAULT_CELL_PADDING_VERT) as Number)"
+										   
+										   change="setGlobalSetting(SCodes.DEFAULT_CELL_PADDING_VERT, DEFAULT_CELL_PADDING_VERT.value as Number)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{DEFAULT_CELL_PADDING_VERT.value}"/>
+							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Cell hor. padding" toolTip="Increase or decrease the horizontal padding inside cells of the matrix">
+							<s:HGroup verticalAlign="middle">
+								<s:Spinner id="DEFAULT_CELL_PADDING_HOR" minimum="0" maximum="10" snapInterval="1"
+										   
+										   creationComplete="DEFAULT_CELL_PADDING_HOR.value = (glbSettings.getValue(SCodes.DEFAULT_CELL_PADDING_HOR) as Number)"
+										   
+										   change="setGlobalSetting(SCodes.DEFAULT_CELL_PADDING_HOR, DEFAULT_CELL_PADDING_HOR.value as Number)"
+										   />
+								<mx:Spacer width="5" />
+								<s:Label text="{DEFAULT_CELL_PADDING_HOR.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
 					</mx:Form>

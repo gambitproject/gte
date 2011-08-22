@@ -9,7 +9,7 @@ package lse.math.games.builder.io
 	import flash.utils.ByteArray;
 	import flash.utils.setTimeout;
 	
-	import lse.math.games.builder.presenter.TreeGridPresenter;
+	import lse.math.games.builder.presenter.Presenter;
 	import lse.math.games.builder.settings.FileSettings;
 	import lse.math.games.builder.settings.UserSettings;
 	
@@ -32,14 +32,14 @@ package lse.math.games.builder.io
 		private static const FILE_OPEN_TYPES:Array = [new FileFilter("*.xml", "*.xml")];
 		private static const FILE_SAVE_TYPES:Array = [".xml", ".fig", ".png"];
 		//TODO: SETTING
-		private static const AUTOSAVE_INTERVAL:int = 300000; //Time in ms between each two autosaves
+		private static const AUTOSAVE_INTERVAL:int = 60000; //Time in ms between each two autosaves
 		
 		private var fr:FileReference = null;
 		private var _filename:String;
 		private var _unsavedChanges:Boolean = false;
 		private var _backupXML:XML = null;
 		
-		private var controller:TreeGridPresenter;
+		private var controller:Presenter;
 		private var settings:UserSettings = UserSettings.instance;
 		private var cookies:SharedObject;
 		
@@ -47,7 +47,7 @@ package lse.math.games.builder.io
 		
 		
 		
-		public function FileManager(_controller:TreeGridPresenter){
+		public function FileManager(_controller:Presenter){
 			controller = _controller;
 			filename = "Untitled";
 			setTimeout(autosave, AUTOSAVE_INTERVAL);
@@ -93,7 +93,7 @@ package lse.math.games.builder.io
 			}
 		}
 		
-		/* XML containing the last saved tree */
+		/* XML containing the last saved game */
 		private function set backupXML(value:XML):void {
 			_backupXML = value;
 			
@@ -105,9 +105,7 @@ package lse.math.games.builder.io
 				cookies.setProperty("", value);
 				unsavedChanges = false;
 			}
-		}
-		
-		
+		}	
 		
 		//Change the browser window's title to 'GTE - filename'
 		private function setBrowserWindowTitle():void {
@@ -116,7 +114,15 @@ package lse.math.games.builder.io
 			function changeDocTitle(value)
 			{
 				document.title = 'GTE - '+value;
-			} */	
+			} 
+			*/	
+		}
+		
+		/** Resets the backup xml and the unsavedChanges bool. Must be called when switching modes */
+		public function switchMode():void
+		{
+			_backupXML = null;
+			_unsavedChanges = true;
 		}
 		
 		/* < --- --- File Managing: clearing, saving, loading --- ---> */
@@ -125,7 +131,7 @@ package lse.math.games.builder.io
 		public function autosave():void {
 			//TODO: Check if autosave setting is on
 			if(_unsavedChanges)
-				backupXML = controller.saveCurrentTreeToXML();
+				backupXML = controller.saveCurrentGameToXML();
 			setTimeout(autosave, AUTOSAVE_INTERVAL);
 		}
 		
@@ -153,9 +159,11 @@ package lse.math.games.builder.io
 		private function loadAutoSavedFile():void {
 			if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
 			{
-				backupXML = cookies.data["autosave"] as XML;
-				//TODO #33 check the type of thing stored, call correspondant function
-				controller.loadFromXML(_backupXML);
+				backupXML = cookies.data[""] as XML;
+
+				controller.loadFromXML(_backupXML); 
+				
+				cookies.clear();
 			} else {
 				clear();
 			}
@@ -164,7 +172,7 @@ package lse.math.games.builder.io
 		/** Resets the filename, backup & cookies */
 		public function clear():void {
 			filename = "Untitled";
-			backupXML = null;
+			_backupXML = null;
 			FileSettings.instance.clear();
 			cookies = SharedObject.getLocal( "autosave", "/" );			
 			if(cookies!=null)

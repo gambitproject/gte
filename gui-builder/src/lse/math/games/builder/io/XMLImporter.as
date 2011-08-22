@@ -1,5 +1,6 @@
 package lse.math.games.builder.io
 {
+	import flash.sampler.getInvocationCount;
 	import flash.utils.Dictionary;
 	
 	import lse.math.games.builder.fig.FigFontManager;
@@ -7,12 +8,14 @@ package lse.math.games.builder.io
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Move;
 	import lse.math.games.builder.model.Node;
-	import lse.math.games.builder.model.NormalForm;
 	import lse.math.games.builder.model.Outcome;
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.model.Rational;
+	import lse.math.games.builder.model.StrategicForm;
+	import lse.math.games.builder.model.Strategy;
 	import lse.math.games.builder.settings.FileSettings;
 	import lse.math.games.builder.settings.SCodes;
+	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	import util.Log;
@@ -29,16 +32,15 @@ package lse.math.games.builder.io
 	 */
 	//TODO: Do something with gameDescription info
 	//TODO: In the future, load node and iset names & maybe? payoffs in non-outcomes
-	//TODO #33 loadMatrix
 	public class XMLImporter
 	{		
 		//Types of info contained:
 		/** The XML file is not of a known type */
-		public const UNKNOWN:int = -1; 
+		public static const UNKNOWN:int = -1; 
 		/** The XML file represents a tree in Extensive Form */
-		public const EF:int = 1;
+		public static const EF:int = 1;
 		/** The XML file represents a matrix in Strategic Form */
-		public const SF:int = 2;
+		public static const SF:int = 2;
 		
 		//File header properties
 		private var _version:Number; 
@@ -47,19 +49,23 @@ package lse.math.games.builder.io
 		private var _displayInfo:Boolean = false; //If the XML contains the <display> tag
 		private var _gameDescInfo:Boolean = false; //If the XML contains the <gameDescription> tag
 		
-		//Objects contained
+		//Tree loading vars
 		private var isets:Dictionary;
 		private var isetObjToId:Dictionary;
 		private var singletons:Vector.<Iset>;
 		private var moves:Dictionary;
-		private var players:Dictionary;
+		private var lastIsetIdx:int = 0;
 		
+		//Matrix loading vars
+		private var size:Object;
+		
+		//Mixed vars
 		private var xml:XML = null;
 		private var fileSettings:FileSettings;
 		private var tree:ExtensiveForm = null;
-		private var matrix:NormalForm = null;
+		private var matrix:StrategicForm = null;
 		private var log:Log = Log.instance;
-		private var lastIsetIdx:int = 0;
+		private var players:Dictionary;
 
 		
 		
@@ -68,7 +74,10 @@ package lse.math.games.builder.io
 		{
 			this.xml = xml;	
 			
-			analyseData();
+			if(xml != null)
+				analyseData();
+			else
+				log.add(Log.ERROR_THROW, "The xml file was empty or corrupted");
 		}
 		
 		/**
@@ -103,9 +112,6 @@ package lse.math.games.builder.io
 			if(firstChild.name() == "extensiveForm")
 			{
 				_version = 0;
-				log.add(Log.ERROR, "Warning: This file is of an old format. Although gte is still "+
-					"capable of opening it, it may not be supported in future versions, so please overwrite "+
-					"it now with an updated file by pressing the 'Save' button (Ctrl+S)");
 			}
 			else if(firstChild.name() == "gte")
 			{
@@ -164,8 +170,106 @@ package lse.math.games.builder.io
 			}
 		}
 				
+		
+		
+		/* <--- --- SETTINGS & PLAYERS LOADING --- --->*/
+		
+		//Parses all settings found under the <display> tags and loads them into the tree or matrix
+		//Mustn't be called if _displayInfo is false
+		private function loadSettings():void
+		{			
+			for each(var child:XML in xml.display.children())
+			{
+				if (child.name() == "color") {
+					var player:XMLList = child.@player;
+					if(player!=null)
+					{
+						if(player.toString()=="1")
+						{
+							fileSettings.setValue(SCodes.FILE_PLAYER_1_COLOR, getColorFromHexString(child.text()));
+						} else if(player.toString()=="2")
+							fileSettings.setValue(SCodes.FILE_PLAYER_2_COLOR, getColorFromHexString(child.text()));
+					}	
+				} else if (child.name() == "font") {
+					var fontFamily:String = child.text();
+					if(FigFontManager.isFontAvailable(fontFamily))
+						fileSettings.setValue(SCodes.FILE_FONT, fontFamily);
+				} else if (child.name() == "strokeWidth") {
+					var width:int = int(child.text());
+					if(width>=1)
+						fileSettings.setValue(SCodes.FILE_STROKE_WIDTH, width);
+				} else if (child.name() == "nodeDiameter") { 
+					var nDiam:Number = Number(child.text());
+					if(nDiam>0)
+						fileSettings.setValue(SCodes.FILE_NODE_DIAMETER, nDiam);
+				} else if (child.name() == "isetDiameter") { 
+					var iDiam:Number = Number(child.text());
+					if(iDiam>0)
+						fileSettings.setValue(SCodes.FILE_ISET_DIAMETER, iDiam);
+				} else if (child.name() == "levelDistance") {
+					var distance:int = int(child.text());
+					if(distance>=1)
+						fileSettings.setValue(SCodes.FILE_LEVEL_DISTANCE, distance);				
+				} else if (child.name() == "cellVertPadding") { 
+					var vertPad:Number = Number(child.text());
+					if(vertPad>0)
+						fileSettings.setValue(SCodes.FILE_CELL_PADDING_VERT, vertPad);
+				} else if (child.name() == "cellHorizPadding") { 
+					var horPad:Number = Number(child.text());
+					if(horPad>0)
+						fileSettings.setValue(SCodes.FILE_CELL_PADDING_HOR, horPad);
+				} else {
+					log.add(Log.ERROR_HIDDEN, "Ignoring unknown settings element: " + child);
+				}
+			}
+		}
+		
+		//Loads from the header the player information
+		private function loadPlayers():void
+		{
+			if(_numPlayers != 2) //TODO: 3PL
+				log.add(Log.ERROR_THROW, "Currently just games with 2 players are supported");
+			
+			if(_numPlayers == 0)
+				log.add(Log.ERROR, "Warning: The game contained no information about players. " +
+					"The loading can have errors");
+			else
+			{
+				for(var i:int = 0; i<_numPlayers; i++)
+				{
+					getPlayer(xml.players.player.(@playerId==""+(i+1))[0]);
+				}
+			}
+		}
+		
+		//Returns a player from a String ID
+		private function getPlayer(playerId:String):Player
+		{
+			if (playerId == Player.CHANCE_NAME) {
+				return Player.CHANCE;
+			}
+			
+			var player:Player = players[playerId];
+			if (player == null) {
+				if(tree!=null)
+					player = new Player(playerId, tree);
+				else if(matrix!=null)
+					player = new Player(playerId, matrix);
+				else
+					log.add(Log.ERROR_THROW, "No game data is defined");
+				
+				players[playerId] = player;
+			}
+			
+			return player;
+		}
+		
+		
+		
+		/* <--- --- TREE LOADING --- --->*/
+		
 		/** Loads into a extensive form tree the xml data */
-		public function loadTree(tree:ExtensiveForm):ExtensiveForm
+		public function loadTree(tree:ExtensiveForm):void
 		{
 			//Clear previous file settings (from another file, possibly)
 			fileSettings = FileSettings.instance;
@@ -176,14 +280,19 @@ package lse.math.games.builder.io
 			if(_type != EF)
 			{
 				log.add(Log.ERROR_THROW, "Tried to load a tree from a non-tree game file");
-				return null;
+				return;
 			}
 			else {		
-				if(_displayInfo) //Load settings, if any
-				{
-					loadSettingsOnTree(tree as TreeGrid);
-				}			
-								
+				//Load settings, if any
+				if(_displayInfo) 
+					loadSettings();		
+				
+				if(version == 0)
+					log.add(Log.ERROR, "Warning: This file is of an old format. Although gte is still "+
+						"capable of opening it, it may not be supported in future versions, so please overwrite "+
+						"it now with an updated file by pressing the 'Save' button (Ctrl+S)");
+					
+				//Init the tree
 				this.tree = tree;
 				tree.clearTree();
 				
@@ -193,7 +302,9 @@ package lse.math.games.builder.io
 				moves = new Dictionary();
 				players = new Dictionary();			
 				
-				loadPlayersOnTree(tree);
+				//Load the player data
+				if(_version != 0)
+					loadPlayers();
 				
 				//Depending on the version, the tree data will be in a different part
 				var childrenList:XMLList;
@@ -228,73 +339,8 @@ package lse.math.games.builder.io
 				}
 				
 				hookupAndVerifyMoves();
-				
-				//TODO: 3PL
-				while(tree.numPlayers<2)
-				{
-					tree.newPlayer(""+(tree.numPlayers+1));
-				}
-				
-				return tree;
 			}
 		}	
-		
-		//Parses all settings found under the <display> tags and loads them into the tree
-		//Mustn't be called if _displayInfo is false
-		private function loadSettingsOnTree(tree:TreeGrid):void
-		{			
-			for each(var child:XML in xml.display.children())
-			{
-				if (child.name() == "color") {
-					var player:XMLList = child.@player;
-					if(player!=null)
-					{
-						if(player.toString()=="1")
-						{
-							fileSettings.setValue(SCodes.FILE_PLAYER_1_COLOR, getColorFromHexString(child.text()));
-						} else if(player.toString()=="2")
-							fileSettings.setValue(SCodes.FILE_PLAYER_2_COLOR, getColorFromHexString(child.text()));
-					}	
-				} else if (child.name() == "font") {
-					var fontFamily:String = child.text();
-					if(FigFontManager.isFontAvailable(fontFamily))
-						fileSettings.setValue(SCodes.FILE_FONT, fontFamily);
-				} else if (child.name() == "strokeWidth") {
-					var width:int = int(child.text());
-					if(width>=1)
-						fileSettings.setValue(SCodes.FILE_STROKE_WIDTH, width);
-				} else if (child.name() == "nodeDiameter") { 
-					var nDiam:Number = Number(child.text());
-					if(nDiam>0)
-						fileSettings.setValue(SCodes.FILE_NODE_DIAMETER, nDiam);
-				} else if (child.name() == "isetDiameter") { 
-					var iDiam:Number = Number(child.text());
-					if(iDiam>0)
-						fileSettings.setValue(SCodes.FILE_ISET_DIAMETER, iDiam);
-				} else if (child.name() == "levelDistance") {
-					var distance:int = int(child.text());
-					if(distance>=1)
-						fileSettings.setValue(SCodes.FILE_LEVEL_DISTANCE, distance);				
-				} else {
-					log.add(Log.ERROR_HIDDEN, "Ignoring unknown settings element: " + child);
-				}
-			}
-		}
-		
-		//Loads from the header the player information
-		private function loadPlayersOnTree(tree:ExtensiveForm):void
-		{
-			if(_numPlayers == 0)
-				log.add(Log.ERROR, "Warning: The tree contained no information about players. " +
-					"The loading can have errors");
-			else
-			{
-				for(var i:int = 0; i<_numPlayers; i++)
-				{
-				 	getPlayer(xml.players.player.(@playerId==""+(i+1))[0]);
-				}
-			}
-		}
 				
 		/* Parses a node with its move and iset info, adds it to the tree, 
 		 * and acts recursively by processing its children nodes and outcomes
@@ -348,7 +394,14 @@ package lse.math.games.builder.io
 			if(elem.child("*").length() == 0)
 			{				
 				// set up the iset data
-				processIset(elem, wrapNode);				
+				processIset(elem, wrapNode);
+				
+				// If there is no iset data, read the node as an outcome with nan payoffs
+				if(wrapNode.iset.player == Player.CHANCE) {
+					var o:Outcome = wrapNode.makeTerminal();
+					for each(var pl:Player in players)
+						o.setPay(pl, Rational.NaN);
+				}
 			} else
 			{
 				var outcome:Outcome = wrapNode.makeTerminal();
@@ -362,11 +415,7 @@ package lse.math.games.builder.io
 						else
 							payoff = Rational.parse(child.@value);
 						
-						var player:Player = players[playerId];
-						if (player == null) {
-							player = new Player(playerId, tree);
-							players[playerId] = player;
-						}
+						var player:Player = getPlayer(playerId);
 						outcome.setPay(player, payoff);
 					} else {
 						log.add(Log.ERROR_HIDDEN, "Ignoring unknown element: " + child);
@@ -467,6 +516,215 @@ package lse.math.games.builder.io
 			}
 		}
 		
+		
+		
+		/* <--- --- MATRIX LOADING --- ---> */
+		
+		public function loadMatrix(matrix:StrategicForm):void
+		{
+			//Clear previous file settings (from another file, possibly)
+			fileSettings = FileSettings.instance;
+			fileSettings.clear();
+						
+			if(_type != SF)
+			{
+				log.add(Log.ERROR_THROW, "Tried to load a matrix from a non-matrix game file");
+				return;
+			}
+			else {		
+				//Load settings, if any
+				if(_displayInfo) 
+					loadSettings();	
+				
+				//Init the matrix
+				this.matrix = matrix;
+				matrix.clearMatrix();
+				matrix.isSecondary = false;
+				
+				//Load the player data
+				players = new Dictionary();			
+				loadPlayers();
+				
+				//Load size & strategies
+				processSize(xml.strategicForm.@size);
+				processStrategies(xml.strategicForm.strategy);
+				
+				//Load payoffs
+				processPayoffMatrixes(xml.strategicForm.payoffs)
+			}
+		}
+		
+		//Returns an array with the dimensions, in order, of all the players
+		private function processSize(elem:String):void
+		{			
+			var params:Array = elem.split(" ");
+			size = new Object();
+			var player:Player = matrix.firstPlayer;
+			var count:int = 0; //Count of number of dimensions
+			for each (var param:String in params)
+			{
+				if(param.length>0)
+					var dim:Number = parseInt(param);
+				if(!isNaN(dim) && dim>0)
+				{
+					size[player] = dim as int;
+					player = player.nextPlayer;
+					count++;
+				}
+			}
+			
+			if(count != matrix.numPlayers)
+				log.add(Log.ERROR_THROW, "The number of players and of dimensions of " +
+					"the game matrix do not match. It couldn't be loaded");
+		}
+		
+		//Loads the strategies from the <strategy> tags
+		private function processStrategies(strats:XMLList):void
+		{
+			for each(var pl:Player in players)
+			{
+				var str:String = strats.(@player==pl.name)[0];
+				var params:Array = str.split("\"");
+				
+				var count:int = 0;
+				var remainingStrats:int = 0;
+				//Load strategies defined in the file
+				for(var i:int = 1; i<params.length; i+=2) //The strats fall in odd spaces after the split
+				{
+					var stName:String = params[i];
+					if(stName.length == 0)
+						remainingStrats++;
+					else
+					{
+						var st:Strategy = new Strategy(pl);
+						st.name = stName;
+						matrix.addStrategy(st);
+					}
+					count++;
+				}
+				
+				remainingStrats += (size[pl] - count); //number of strategies that haven't got label
+				if(remainingStrats < 0)
+					log.add(Log.ERROR_THROW, "Player "+pl+"'s number of strategies and " +
+						"dimension do not match. The file couldn't be loaded.");
+				else if(remainingStrats > 0)
+				{
+					log.add(Log.ERROR_HIDDEN, "There where less labels for strategies on " +
+						"the file than what the dimensions specified. They will be auto-labelled.");
+					var labeller:AutoLabeller = new AutoLabeller();
+					labeller.uniqueLabelNum = remainingStrats;
+				}
+				
+				for (i=0; i<remainingStrats; i++)
+				{
+					st = new Strategy(pl);
+					st.name = labeller.getNextAutoLabel(pl, matrix);
+					matrix.addStrategy(st);
+				}				
+			}
+		}
+		
+		//Loads payoff matrixes from <payoffs> tags
+		private function processPayoffMatrixes(payoffs:XMLList):void
+		{
+			var map:Dictionary = matrix.payMatrixMap;
+			for each(var pl:Player in players)
+			{
+				//init the player's map
+				var plMap:Object = map[pl];
+				
+				if(plMap == null)
+				{
+					plMap = new Object();
+					map[pl] = plMap;
+				}
+					
+				//Load the text matrix
+				var str:String = payoffs.(@player==pl.name)[0];
+				var lines:Array = str.split("\n");
+				
+				var countLines:int = 0;
+				
+				//Loop through lines
+				for(var i:int = 0; i<lines.length; i++)
+				{
+					var strLine:String = lines[i];
+					if(strLine!=null && strLine.length>0)
+					{			
+						var line:Array = strLine.split(" ");
+						if(line.length > 0)
+						{							
+							var countColumns:int = 0;
+							//Loop through columns 
+							for(var j:int = 0; j<line.length; j++)
+							{
+								var strPayoff:String = line[j];
+								
+								if(strPayoff != null && strPayoff.length>0)
+								{
+									var pay:Rational = Rational.parse(strPayoff);
+									plMap[keyFromCoords(i,j)] = pay;
+									countColumns++;										
+								}
+							}
+							
+							countLines++;
+							
+							//Check that the number of lines read is correct
+							if(countColumns != size[matrix.firstPlayer] as int)
+								log.add(Log.ERROR_THROW, "An inconsistency was found when loading the file" +
+									"in player "+pl+"'s payoff matrix, line: "+countLines+". The number of columns" +
+									"found was: "+countColumns+" where it should have been: "+size[matrix.firstPlayer]); 
+						}
+					}
+				}
+				
+				//We check that the number of lines read is correct
+				var theoreticalSize:int = 1;
+				var dummyPl:Player = matrix.firstPlayer.nextPlayer;
+				while(dummyPl != null)
+				{
+					theoreticalSize*=size[dummyPl];
+					dummyPl = dummyPl.nextPlayer;
+				}
+					
+				if(countLines != theoreticalSize)
+					log.add(Log.ERROR_THROW, "An inconsistency was found when loading the file" +
+						"in player "+pl+"'s payoff matrix. The number of lines found was: " +
+						countLines+" where it should have been: "+theoreticalSize);
+			}
+		}
+		
+		//Returns the key to access a payoff in a matrix from a pair of coords
+		//'i' is the line number, 'j' the column, both starting from 0
+		private function keyFromCoords(i:int, j:int):String
+		{
+			var combo:Array = new Array();
+			
+			var pl:Player = matrix.firstPlayer;
+			combo.push(matrix.strategies(pl)[j]);
+			
+			pl = pl.nextPlayer
+			var cumulativeProd:int = 1; 
+			for(var k:int = 1; k<matrix.numPlayers; pl = pl.nextPlayer, k++)
+			{
+				var vecStr:Vector.<Strategy> = matrix.strategies(pl);
+				var numSt:int = vecStr.length; 
+				
+				var strNumber:int = (i / cumulativeProd) % numSt;
+								
+				combo.push(matrix.strategies(pl)[strNumber]);
+				
+				cumulativeProd *= numSt;
+			}
+			
+			return Strategy.key(combo);
+		}
+	
+		
+		
+		/* <--- --- OTHER FUNCTIONS --- --->*/
+		
 		//Returns in a uint a color from the following hex formats:
 		//#RRGGBB, 0xRRGGBB, RRGGBB
 		private function getColorFromHexString(hex:String):uint
@@ -478,21 +736,6 @@ package lse.math.games.builder.io
 				hex = "0x"+hex;
 			
 			return uint(hex);
-		}
-		
-		//Returns a player from a String ID
-		private function getPlayer(playerId:String):Player
-		{
-			if (playerId == Player.CHANCE_NAME) {
-				return Player.CHANCE;
-			}
-						
-			var player:Player = players[playerId];
-			if (player == null) {
-				player = new Player(playerId, tree);
-				players[playerId] = player;
-			}
-			return player;
 		}
 	}
 }

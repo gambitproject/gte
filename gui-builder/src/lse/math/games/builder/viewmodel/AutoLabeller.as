@@ -1,5 +1,7 @@
 package lse.math.games.builder.viewmodel
 {
+	import util.Log;
+
 	/**
 	 * Class that AutoLabels the tree nodes basing in a predefined alphabet, based in the deprecated AutoLabelAction
 	 * @author alfongj based on Mark Egesdal's work
@@ -14,8 +16,9 @@ package lse.math.games.builder.viewmodel
 //		private var alpha:Vector.<String> = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", " " };
 		private var count1:int;
 		private var count2:int;
-		private var uniqelabelnumber:int;
+		private var _uniqueLabelNum:int;
 		private var inUse:Vector.<String> = new Vector.<String>();		
+		private var log:Log = Log.instance;
 		
 		public function AutoLabeller()
 		{
@@ -48,6 +51,29 @@ package lse.math.games.builder.viewmodel
 			alpha.push(" ");
 		}
 		
+		/** Next label from an auto-label sequence */		
+		public function getNextAutoLabel(player:Player, game:Game):String
+		{
+			var label:String = alpha[count1] + (count2 != 26 ? alpha[count2] : "");
+			if (player != game.firstPlayer) {
+				label = label.toLowerCase();
+			}
+			
+			incrementCounts();
+			
+			return label;
+		}
+		
+		/** Number of unique labels needed */
+		public function set uniqueLabelNum(value:int):void
+		{
+			_uniqueLabelNum = value;
+			initCounts();
+		}
+		
+		
+		
+		/** Auto labels a tree */
 		public function doAction(grid:TreeGrid):void
 		{										
 			init(grid);
@@ -56,14 +82,42 @@ package lse.math.games.builder.viewmodel
 		
 		private function init(tree:ExtensiveForm):void
 		{
-			uniqelabelnumber = 0;
+			_uniqueLabelNum = 0;
 			number_of_uniqueLabelname(tree);
+			
+			initCounts();		
+		}
+		
+		//Reset the counters accordingly to the number of unique labels needed
+		private function initCounts():void
+		{
 			count1 = 0;
-			if(uniqelabelnumber < 26) {
+			if(_uniqueLabelNum < 26) {
 				count2 = 26;
 			} else {
 				count2 = 0;
-			}			
+			}	
+		}
+		
+		// Increment the counters
+		private function incrementCounts():void
+		{
+			if (count2 < 26) {
+				++count2;
+				if (count2 == 26) {
+					++count1;
+					count2 = 0;
+					if (count1 == 26) {
+						log.add(Log.ERROR_THROW, "Ran out of auto labels");
+					}
+				}
+			} else {				
+				++count1;
+				if (count1 == 26) {
+					count2 = 0;
+					count1 = 0;
+				}
+			}
 		}
 		
 		private function recLabel(x:Node, tree:ExtensiveForm):void
@@ -118,33 +172,6 @@ package lse.math.games.builder.viewmodel
 			}
 		}
 		
-		private function getNextAutoLabel(player:Player, tree:ExtensiveForm):String
-		{
-			var label:String = (alpha[count1] + (count2 != 26 ? alpha[count2] : ""));
-			if (player != tree.firstPlayer) {
-				label = label.toLowerCase();
-			}
-			
-			if (count2 < 26) {
-				++count2;
-				if (count2 == 26) {
-					++count1;
-					count2 = 0;
-					if (count1 == 26) {
-						throw new Error("Ran out of auto labels");
-					}
-				}
-			} else {				
-				++count1;
-				if (count1 == 26) {
-					count2 = 0;
-					count1 = 0;
-				}
-			}
-			
-			return label;
-		}
-		
 		//Stores number of autolabels
 		private function number_of_uniqueLabelname(tree:ExtensiveForm):void
 		{
@@ -155,7 +182,7 @@ package lse.math.games.builder.viewmodel
 						if (child.reachedby.hasLabel) { //not checking if child.reachedby is null, since that is an error we want to know about				
 							inUse.push(child.reachedby.label.toLowerCase());
 						} else {
-							++uniqelabelnumber;
+							++_uniqueLabelNum;
 						}
 					}
 				}

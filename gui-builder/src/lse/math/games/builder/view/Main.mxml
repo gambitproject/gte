@@ -3,23 +3,23 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns="lse.math.games.builder.view.*"
-			   backgroundColor="0xB7BABC" minWidth="692">
+			   backgroundColor="0xB7BABC" minWidth="692" xmlns:model="lse.math.games.builder.model.*">
 	
 	<fx:Script>
 		<![CDATA[		
-			import flash.utils.clearTimeout;
-			import flash.utils.getTimer;
-			import flash.utils.setTimeout;
-			
 			import lse.math.games.builder.io.FileManager;
+			import lse.math.games.builder.io.XMLExporter;
+			import lse.math.games.builder.model.Strategy;
 			import lse.math.games.builder.settings.SCodes;
 			import lse.math.games.builder.settings.Settings;
 			import lse.math.games.builder.settings.UserSettings;
+			import lse.math.games.builder.viewmodel.TreeGrid;
 			
 			import mx.controls.Alert;
 			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
 			import mx.managers.PopUpManager;
-			import mx.utils.OrderedObject;
 			import mx.utils.StringUtil;
 			
 			import util.EvCodes;
@@ -48,13 +48,44 @@
 			
 			
 			
-			/* <--- ---  TOOLBARS-RELATED FUNCTIONS --- ---> */
+			/* <--- --- MODE CHANGING FUNCTIONS --- ---> */
+			//Changes the controller mode 
+			private function changeMode(event:FlexEvent):void
+			{
+				if(modeBar.selectedIndex == 0) controller.toggleTreeMode(); 
+				else if(modeBar.selectedIndex == 1) controller.toggleMatrixMode();
+			}
 			
-			//Executes the clear() function from the TreeGridController, epending on the button pressed as a result of the prompt
+			//Registers a listener for changes on the mode, which will update the gui if it needs to be done
+			private function initModeChangeListener():void
+			{
+				eventManager.addEventListener(EvCodes.MODE_CHANGED, updateModeBar);
+				eventManager.addEventListener(EvCodes.MODE_CHANGED, updateSelectedTab);
+			}
+						
+			//Updates the modeBar with the current mode status
+			private function updateModeBar(evt:Event):void
+			{
+				if(controller.treeMode)
+					modeBar.selectedIndex = 0;
+				else if(controller.matrixMode)
+					modeBar.selectedIndex = 1;
+			}
+			
+			
+
+			/* <--- --- TOOLBARS-RELATED FUNCTIONS --- ---> */
+			
+			//Executes the clear() function from the controller, depending on the button pressed as a result of the prompt
 			private function clearDependingOnPromptResult():void
 			{
 				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
+				{
+					if(mouseScrollingEnabled)
+						disableMouseScrolling();
+					opModeBar2.selectedIndex = 0;
 					controller.clear();
+				}
 			}
 			
 			//Pops up the -internal or external- output window
@@ -66,10 +97,9 @@
 						"activate the 'Display output internally' setting in the Settings panel.");
 				}
 				else {
-					var o:OutputWindow = new OutputWindow();
-					PopUpManager.addPopUp(o, this, false);
-					o.setText(text);
-					PopUpManager.centerPopUp(o);
+					PopUpManager.addPopUp(intOutputWindow, this, false);
+					intOutputWindow.setText(text);
+					PopUpManager.centerPopUp(intOutputWindow);
 				}
 			}
 			
@@ -146,23 +176,25 @@
 			//Return the action corresponding to the button pressed in opModeBar2
 			private function getClickCallback(idx:int):Function 
 			{
-				//First disable pan tool if it is running
-				if(scrollbar.mouseScrollingEnabled)
-					scrollbar.disableMouseScrolling();
-				
-				switch (idx) {
-					case 0: return actions.addChild;
-					case 1: return actions.deleteNode;
-					case 2: return actions.cutIset;
-					case 3: return actions.dissolveIset;
-					case 4: return actions.mergeIsets;	
-					case 5: return actions.changePlayer;							
-					case 6: return actions.makeChance;	
-					case 7: scrollbar.enableMouseScrolling();
-						return actions.nullAction;
-					case 8: return actions.nullAction;
-				}
-				throw new Error("callback for index " + idx + " not found");
+				if(controller.treeMode)
+				{
+					//First disable pan tool if it is running
+					if(mouseScrollingEnabled)
+						disableMouseScrolling();
+					
+					switch (idx) {
+						case 0: return actions.addChildIset;
+						case 1: return actions.addChild;
+						case 2: return actions.deleteNode;
+						case 3: return actions.cutIset;
+						case 4: return actions.dissolveIset;
+						case 5: return actions.mergeIsets;	
+						case 6: return actions.changePlayer;							
+						case 7: return actions.makeChance;	
+						case 8: return actions.nullAction;
+					}
+					log.add(Log.ERROR_THROW, "callback for index " + idx + " not found");
+				} return null;
 			}
 			
 			// Changes orientation of the tree
@@ -184,18 +216,84 @@
 						break;
 				}
 			}
+					
+			//Pops up the matrix edition window
+			private function showMatrixEditor():void
+			{
+				var me:MatrixEditor = new MatrixEditor();
+				me.matrix = matrix;
+				me.controller = controller;
+				
+				PopUpManager.addPopUp(me, this, true);
+				PopUpManager.centerPopUp(me);
+			}	
 			
 			
 			
-			/* <--- --- CANVAS-RELATED FUNCTIONS --- ---> */
+			/* <--- --- TABS & CANVAS-RELATED FUNCTIONS --- ---> */
+			
+			private function updateSelectedTab(evt:Event):void
+			{
+				tabNavigator.selectedIndex = controller.currentState;
+			}
+			
+			//This function runs when tabs are changed
+			private function tabChange(event:IndexChangedEvent):void
+			{				
+				//Set canvas
+				controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; 
+				
+				//Set list of algorithms
+				algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; 
+				algoComboBox.selectedIndex = 0;			
+				
+				//De/Activate mousescrolling on the new tab according to the selected setting
+				if(event.target.selectedIndex == 0)	{
+					if(mouseScrollingEnabled) scrollbarEF.enableMouseScrolling();
+					else scrollbarEF.disableMouseScrolling();
+				} else if(event.target.selectedIndex == 1) {
+					if(mouseScrollingEnabled) scrollbarSF.enableMouseScrolling();
+					else scrollbarSF.disableMouseScrolling();
+				}
+			}
 			
 			// Handles click on the canvas
 			private function handleClickOnCanvas():void
 			{
-				if(opModeBar2.selectedIndex <= 7)
-					controller.doActionAt(canvas.mouseX, canvas.mouseY);
-				else
-					treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
+				if(!mouseScrollingEnabled){
+					//TODO #32 Handle click differently depending on the mode
+					if(opModeBar2.selectedIndex != 8)
+						controller.doActionAt(canvas.mouseX, canvas.mouseY);
+					else
+						treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
+				}
+			}
+			
+			[Bindable]
+			private var mouseScrollingEnabled:Boolean = false;
+			
+			//Enables scrolling by dragging the canvas, disabling all other click actions on it
+			private function enableMouseScrolling():void {
+				var tab:String = tabNavigator.selectedChild.label;
+				
+				if(tab == "Extensive Form")
+					scrollbarEF.enableMouseScrolling();
+				else if(tab == "Strategic Form")
+					scrollbarSF.enableMouseScrolling();
+				
+				mouseScrollingEnabled = true;
+			}
+			
+			//Disables scrolling by dragging the canvas, enabling all other click actions on it
+			private function disableMouseScrolling():void {
+				var tab:String = tabNavigator.selectedChild.label;
+				
+				if(tab == "Extensive Form")
+					scrollbarEF.disableMouseScrolling();
+				else if(tab == "Strategic Form")
+					scrollbarSF.disableMouseScrolling();
+				
+				mouseScrollingEnabled = false;
 			}
 			
 			
@@ -248,26 +346,14 @@
 			
 			
 			/* <--- --- KEYBOARD EVENT HANDLERS --- ---> */
-			private var opModeBar2lastSelectedIdx:int = 0;
 			
 			//Shortcuts when key is pressed
 			protected function sc_keyDownHandler(event:KeyboardEvent):void
-			{
-				var ctrl:Boolean = event.ctrlKey;
-				var tab:String = tabNavigator.selectedChild.label;
-				
+			{			
 				switch(event.keyCode)
 				{
 					case Keyboard.SPACE:
-						//TODO: DEBUG, it is not working properly
-						if(tab == "Extensive Form")
-						{
-							scrollbar.enableMouseScrolling();
-							opModeBar2lastSelectedIdx = opModeBar2.selectedIndex; 
-							opModeBar2.selectedIndex = 7;
-						}
-						else if(tab == "Strategic Form")
-							scrollbarNF.enableMouseScrolling();
+						enableMouseScrolling();
 						break;
 				}
 			}
@@ -277,27 +363,18 @@
 			{
 				var ctrl:Boolean = event.ctrlKey;
 				var shift:Boolean = event.shiftKey;
-				var tab:String = tabNavigator.selectedChild.label;
 				
 				switch(event.keyCode)
 				{
 					case Keyboard.SPACE:
-						if(tab == "Extensive Form" && opModeBar2lastSelectedIdx != 7)
-						{
-							//Although we've released spacebar, we need to check this
-							scrollbar.disableMouseScrolling();
-							opModeBar2.selectedIndex = opModeBar2lastSelectedIdx;
-						}
-						else if(tab == "Strategic Form")
-							scrollbarNF.disableMouseScrolling();
+						disableMouseScrolling();
 						break;
 					case 67: //'c'
 						if(ctrl) PromptTwoButtons.show(clearDependingOnPromptResult, "Are you really sure you want to clear the game?");
 						break;
 					case 76: //'l'
 						if(ctrl) controller.zoomAdjust();
-						else
-						{
+						else {
 							if(shift) controller.zoomIn();
 							else controller.zoomOut();
 						}
@@ -322,7 +399,7 @@
 						}
 						break;
 				}
-			}
+			}		
 		]]>
 	</fx:Script>
 	
@@ -349,7 +426,7 @@
 						fault="log.add(Log.ERROR, event.fault.faultCode + ':' + event.fault.faultString + ':' + event.fault.faultDetail)"
 						result="showOutput(event.result as String);"
 						/>
-		<TreeGrid id="grid" xmlns="lse.math.games.builder.viewmodel.*" />
+		<TreeGrid id="grid" xmlns="lse.math.games.builder.viewmodel.*" matrix="{matrix}" />
 		<PainterChain id="treePainter" xmlns="lse.math.games.builder.view.*">
 			<links>
 				<fx:Vector type="lse.math.games.builder.view.IPainter">
@@ -358,20 +435,22 @@
 				</fx:Vector>
 			</links>
 		</PainterChain>
+		<model:StrategicForm id="matrix" grid="{grid}"/>
+		<MatrixPainter id="matrixPainter" xmlns="lse.math.games.builder.viewmodel.*" matrix="{matrix}" />
 		<TreeGridActionFactory id="actions" xmlns="lse.math.games.builder.viewmodel.*" />		
-		<MatrixPainter id="matrixPainter" xmlns="lse.math.games.builder.viewmodel.*" grid="{grid}" />
-		<TreeGridPresenter id="controller" xmlns="lse.math.games.builder.presenter.*" grid="{grid}" getDataUpdateAction="actions.outcomeDataUpdate" />
+		<Presenter id="controller" xmlns="lse.math.games.builder.presenter.*" grid="{grid}" matrix="{matrix}" getDataUpdateAction="actions.outcomeDataUpdate" />
+		<OutputWindow id="intOutputWindow" xmlns="lse.math.games.builder.view.*" skinClass="lse.math.games.builder.view.OutputWindowSkin" />
 	</fx:Declarations>
 	
 	<s:Group left="0" right="0" top="0" bottom="0" >
 		
 		<!-- TOP CONTROL BAR -->		
-		<s:HGroup left="0" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
+		<s:HGroup left="{expanded ? 3 : 0}" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
 			
 			<mx:Spacer width="23" />
 			<mx:TextInput id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
@@ -379,71 +458,76 @@
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
+			<mx:ToggleButtonBar id="modeBar" buttonHeight="24" valueCommit="changeMode(event)" selectedIndex="0" creationComplete="initModeChangeListener()">
+				<mx:dataProvider>	
+					<mx:ArrayCollection>
+						<mx:source>
+							<fx:Object toolTip="Switch to editable Extensive Form Mode" label="EF Edit"/>
+							<fx:Object toolTip="Switch to editable Strategic Form Mode" label="SF Edit"/>
+						</mx:source>
+					</mx:ArrayCollection>
+				</mx:dataProvider>
+			</mx:ToggleButtonBar>
+			<mx:Spacer width="23"/>
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
 			<mx:Spacer width="4"/>
-			<s:ComboBox id="algoComboBox" width="106" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
+			<s:ComboBox id="algoComboBox" width="111" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
 					<mx:ArrayCollection id="algos" source="{xfalgos}" />					
 				</s:dataProvider>
 				<s:itemRenderer>
 					<fx:Component>
 						<s:ItemRenderer>							
-							<s:Label left="5" height="22" width="85" maxDisplayedLines="1" verticalAlign="middle" toolTip="{data.toolTip}" text="{data.label}" />
+							<s:Label left="5" height="22" width="92" maxDisplayedLines="1" verticalAlign="middle" toolTip="{data.toolTip}" text="{data.label}" />
 						</s:ItemRenderer>						
 					</fx:Component>					
 				</s:itemRenderer> 
 			</s:ComboBox>
 			<mx:Spacer width="23"/>
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" click="controller.undo()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" click="controller.redo()" />				
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" 
+					   click="controller.undo()" />
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" 
+					   click="controller.redo()" />				
 			<mx:Spacer width="23"/>			
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" click="controller.doAction(actions.randomPayoffs)" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/sum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;" />
-			<mx:Button id="recallButton" cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" click="controller.doAction(actions.perfectRecall)" />
-			<mx:Spacer width="20" />		
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" click="controller.zoomIn()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" click="controller.zoomOut()" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom.png')" toolTip="Adjust Zoom [Ctrl+l]" click="controller.zoomAdjust()" />			
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
+					   click="controller.doAction(actions.randomPayoffs)" />
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/sum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
+					   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;" />
+			<mx:Spacer width="23" />		
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" 
+					   click="controller.zoomIn()" />
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" 
+					   click="controller.zoomOut()" />
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom.png')" toolTip="Adjust Zoom [Ctrl+l]" 
+					   click="controller.zoomAdjust()" />				
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarSF.mouseScrollingEnabled ? 'ON' : 'OFF'} [Hold SpaceBar]" 
+					   toggle="true" selected="{mouseScrollingEnabled}" change="if(mouseScrollingEnabled) disableMouseScrolling(); else enableMouseScrolling()" />
 			<mx:Spacer width="23" />
-			<mx:Button cornerRadius="0" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" click="showSettings()"/>			
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" 
+					   click="showSettings()"/>			
 		</s:HGroup>
 		
-		<s:Button id="expandButton" right="{expanded ? 3 : 0}" top="3" height="24" cornerRadius="0" chromeColor="#d6d6d6" 
+		<s:Button id="expandButton" right="{expanded ? 3 : 0}" top="3" height="24" styleName="myButton" chromeColor="#d6d6d6" 
 				  label="{expanded ? 'Contract' : 'Expand'}"
 				  click="switchExpandStatus()"
 				  add="updateExpandStatus()" />
 		
 		<!-- TABS -->
-		<s:BorderContainer top="30" bottom="18" left="0" right="185" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
-			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" change="controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; algoComboBox.selectedIndex = 0;">
+		<s:BorderContainer top="30" bottom="18" left="0" right="{leaves.visible ? 185 : 0}" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" 
+							 change="tabChange(event)">
 				<s:NavigatorContent label="Extensive Form">
-					<MouseScroller id="scrollbar" width="100%" height="100%">
+					<MouseScroller id="scrollbarEF" width="100%" height="100%">
 						<s:Group id="viewport" width="100%" height="100%">
 							<Canvas id="canvas" width="100%" height="100%" click="handleClickOnCanvas()" painter="{treePainter}" preinitialize="controller.canvas = canvas;" />
 						</s:Group>
 					</MouseScroller>
 					
-					<s:Label id="info" top="5" right="{scrollbar.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvas.width)} x {int(canvas.height)} ({int(treePainter.scale * 100)}%)" />
+					<s:Label top="5" left="5"  fontFamily="Helvetica" color="0x808080" text="VIEW ONLY" toolTip="Toggle EF Edit mode for editing the tree" 
+							 visible="{modeBar.selectedIndex!=0}"/>
+					<s:Label id="info" top="5" right="{scrollbarEF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvas.width)} x {int(canvas.height)} ({int(treePainter.scale * 100)}%)" />
 					
-					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
-						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
-							<mx:dataProvider>					
-								<mx:ArrayCollection>
-									<mx:source>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/add.png')" toolTip="Add Child" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/delete.png')" toolTip="Delete Node" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/cut_red.png')" toolTip="Cut Iset" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link_break.png')" toolTip="Dissolve Iset" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link.png')" toolTip="Merge Isets" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_go.png')" toolTip="Change Player" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_delete.png')" toolTip="Make Chance" />
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool [SpaceBar]" />
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/cursor.png')" toolTip="Selection Tool" /> 
-									</mx:source>
-								</mx:ArrayCollection>
-							</mx:dataProvider>
-						</mx:ToggleButtonBar>
-						<mx:Spacer width="20" />
+					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="orientationBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="changeOrientation(orientationBar.selectedIndex)">
 							<mx:dataProvider>	
 								<mx:ArrayCollection>
@@ -456,20 +540,46 @@
 								</mx:ArrayCollection>
 							</mx:dataProvider>
 						</mx:ToggleButtonBar>
+						<mx:Spacer width="23" />
+						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" 
+											lastButtonStyleName="myButton" selectedIndex="0" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" 
+											valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);"
+											visible="{modeBar.selectedIndex==0}">
+							<mx:dataProvider>					
+								<mx:ArrayCollection>
+									<mx:source>
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/add_iset.png')" toolTip="Add Children in Iset" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/add.png')" toolTip="Add Children" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/delete.png')" toolTip="Delete Node" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/cut_red.png')" toolTip="Cut Iset" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link_break.png')" toolTip="Dissolve Iset" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link.png')" toolTip="Merge Isets" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_go.png')" toolTip="Change Player" /> 
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_delete.png')" toolTip="Make Chance" />
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/text_replace.png')" toolTip="Edit Labels" /> 
+									</mx:source>
+								</mx:ArrayCollection>
+							</mx:dataProvider>
+						</mx:ToggleButtonBar>
+						<mx:Spacer width="23" />
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" 
+								   click="controller.doAction(actions.perfectRecall)" visible="{modeBar.selectedIndex==0}" />
 					</s:HGroup>					
 					
 				</s:NavigatorContent>
 				<s:NavigatorContent label="Strategic Form">
-					<MouseScroller id="scrollbarNF" width="100%" height="100%">
+					<MouseScroller id="scrollbarSF" width="100%" height="100%">
 						<s:Group id="viewportNF" width="100%" height="100%">
 							<Canvas id="canvasNF" width="100%" height="100%" painter="{matrixPainter}" />
 						</s:Group>
 					</MouseScroller>
 					
-					<s:Label id="infoNF" top="5" right="{scrollbarNF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
+					<s:Label top="5" left="5"  fontFamily="Helvetica" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
+							 visible="{modeBar.selectedIndex!=1}"/>
+					<s:Label id="infoNF" top="5" right="{scrollbarSF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
 					
-					<s:HGroup gap="-1" left="283" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
-						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isNormalReduced = (event.target.selectedIndex == 0);">
+					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
+						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isStrategicReduced = (event.target.selectedIndex == 0);">
 							<mx:dataProvider>					
 								<mx:ArrayCollection>
 									<mx:source>
@@ -479,17 +589,19 @@
 								</mx:ArrayCollection>
 							</mx:dataProvider>
 						</mx:ToggleButtonBar>
-						<mx:Button cornerRadius="0" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/table_edit.png')" toolTip="Edit matrixes" />
-						<mx:Spacer width="23"/>
-						<mx:Button cornerRadius="0" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarNF.mouseScrollingEnabled ? 'ON' : 'OFF'}" toggle="true" selected="{scrollbarNF.mouseScrollingEnabled}" change="if(scrollbarNF.mouseScrollingEnabled) scrollbarNF.disableMouseScrolling(); else scrollbarNF.enableMouseScrolling()" />
-
+						<mx:Spacer width="23" />
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/table_edit.png')" toolTip="Edit matrixes"
+								   click="showMatrixEditor()" visible="{modeBar.selectedIndex==1}"/>
 					</s:HGroup>
 				</s:NavigatorContent>					
 			</mx:TabNavigator>
 		</s:BorderContainer>
 		
 		<!-- SEQUENCE TABLE -->
-		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="18" top="30" right="0" width="180" editable="true" borderColor="0x808080" draggableColumns="false" sortableColumns="false" change="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" focusOut="controller.selectedNode = -1" focusIn="controller.selectedNode = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
+		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="18" top="30" right="0" width="180" borderColor="0x808080"
+					 editable="{modeBar.selectedIndex==0}" visible="{modeBar.selectedIndex==0}" draggableColumns="false" sortableColumns="false" 
+					 change="controller.selectedOutcome = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" 
+					 focusOut="controller.selectedOutcome = -1" focusIn="controller.selectedOutcome = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
 			<mx:columns>
 				<mx:DataGridColumn headerText="Sequence" dataField="leaf" width="110" editable="true"/>				
 				<mx:DataGridColumn headerText="{controller.player1Name}" dataField="pay1" width="33" editable="true" />
@@ -499,7 +611,7 @@
 		
 		<!-- BOTTOM LOG LINE -->
 		<s:BorderContainer id="logLineContainer" left="1" right="1" bottom="1" height="16" borderColor="0x808080">
-			<s:Label id="logLine" height="100%" width="100%"  backgroundColor="#d6d6d6"
+			<s:Label id="logLine" height="100%" width="100%"  backgroundColor="0xd6d6d6"
 				 color="#000000" creationComplete="initLogLineListener();"
 				 fontFamily="Verdana" fontSize="10" paddingLeft="5" 
 				 paddingRight="5" paddingTop="2" textAlign="left" verticalAlign="middle"/>

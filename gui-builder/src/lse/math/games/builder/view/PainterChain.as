@@ -5,7 +5,7 @@ package lse.math.games.builder.view
 	
 	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.presenter.IAction;
-	import lse.math.games.builder.presenter.TreeGridPresenter;
+	import lse.math.games.builder.presenter.Presenter;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	import lse.math.games.builder.viewmodel.action.LabelChangeAction;
 	import lse.math.games.builder.viewmodel.action.PayChangeAction;
@@ -114,35 +114,42 @@ package lse.math.games.builder.view
 		}
 		
 		private var _selectedLabelKey:String;
-		private var _controller:TreeGridPresenter;
+		private var _controller:Presenter;
 		
 		/** Launches a prompt to edit a selected label. In future versions its functionality might be widened to nodes and other things */
-		public function selectAndEdit(controller:TreeGridPresenter, x:Number, y:Number):void
+		public function selectAndEdit(controller:Presenter, x:Number, y:Number):void
 		{
-			_controller = controller;
-			_selectedLabelKey = null;
-			for (var labelKey:String in labels)
+			if(controller.treeMode)
 			{
-				var label:TextLine = labels[labelKey];
-				if(label.x<=x && label.x+label.width>=x &&
-					label.y>=y && label.y-label.height<=y)
+				_controller = controller;
+				_selectedLabelKey = null;
+				for (var labelKey:String in labels)
 				{
-					if(labelKey.indexOf("iset_")==0)
+					var label:TextLine = labels[labelKey];
+					if(label.x<=x && label.x+label.width>=x &&
+						label.y>=y && label.y-label.height<=y)
 					{
-						log.add(Log.HINT, "Iset editing is not supported yet");
-					} else if(labelKey.indexOf("move_")==0)
-					{						
-						PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new name for the move");
-						_selectedLabelKey = labelKey;
-						break;
-					}
-					else if(labelKey.indexOf("outcome_")==0)
-					{
-						PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new value for the payoff");
-						_selectedLabelKey = labelKey;
-						break;
+						if(labelKey.indexOf("iset_")==0)
+						{
+							log.add(Log.HINT, "Player name editing is not supported yet");
+						} else if(labelKey.indexOf("move_")==0)
+						{						
+							PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new name for the move");
+							_selectedLabelKey = labelKey;
+							break;
+						}
+						else if(labelKey.indexOf("outcome_")==0)
+						{
+							PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new value for the payoff");
+							_selectedLabelKey = labelKey;
+							break;
+						}
 					}
 				}
+			} else
+			{
+				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
+				//TODO #32
 			}
 		}
 		
