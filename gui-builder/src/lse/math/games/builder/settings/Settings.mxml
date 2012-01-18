@@ -36,7 +36,6 @@
 			 * <li>Just Pop it up using PopUpManager and set its width and height to your preferred values. 
 			 * Also set its 'controller' property to a valid one for invalidating the display with changes</li>
 			 */			
-			//TODO: Invalidate according to what each setting changes
 			//TODO: Try to re-do the class using XML files with the options
 			
 			
@@ -51,8 +50,18 @@
 			
 			public function set controller(value:Presenter):void { _controller = value; }
 			
-			//Sets a global setting
-			private function setGlobalSetting(key:String, value:Object):void
+			// Invalidates the display and size in the controller. Should be called on settings 
+			// which should have an immediate graphic feedback
+			private function invalidate():void
+			{
+				if(_controller != null)
+					_controller.invalidate(false, true, true); 
+				else
+					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+			}
+			
+			//Sets a global setting (invalidating teh display if 'inv' is true
+			private function setGlobalSetting(key:String, value:Object, inv:Boolean=false):void
 			{				
 				if(!unsavedChanges)
 				{
@@ -65,34 +74,35 @@
 				glbSettings.setValue(key, value);
 				
 				//invalidate display
-				if(_controller != null)
-					_controller.invalidate(true, true, true); 
-				else
-					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+				if(inv)
+					invalidate();
 			}
 			
 			//Sets a file setting
-			private function setFileSetting(key:String, value:Object):void
+			private function setFileSetting(key:String, value:Object, inv:Boolean = false):void
 			{				
 				fileSettings.setValue(key, value);
 				
 				//invalidate display
-				if(_controller != null)
-					_controller.invalidate(false, true, true); 
-				else
-					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+				if(inv) 
+					invalidate();
 			}
 			
-			//Sets the file settings as default and closes
-			private function setFileSettingsAsDefaultAndExit():void
+			//Sets the file settings as default
+			private function setFileSettingsAsDefault():void
 			{
 				fileSettings.setAsDefault();
-				if(_controller != null)
-					_controller.invalidate(true, true, true); 
-				else
-					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+				invalidate();
 				
 				unsavedChanges = true;
+			}
+			
+			//Resets the current file settings from the defaults
+			private function resetFileSettingsFromDefaults():void
+			{
+				fileSettings.clear();
+				invalidate();
+				
 				exit();
 			}
 			
@@ -137,24 +147,16 @@
 										}"
 										/>
 						</mx:FormItem>		
-						<mx:FormItem label="Display output internally">
-							<s:CheckBox id="DISPLAY_OUTPUT_INTERNALLY" 
-										toolTip="If toggled, the output from 'Run' will be displayed in an internal 
-										flash window, instead of an external popup."
-										
-										creationComplete="DISPLAY_OUTPUT_INTERNALLY.selected =
-										glbSettings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean;"
-										
-										change="setGlobalSetting(SCodes.DISPLAY_OUTPUT_INTERNALLY,
-										DISPLAY_OUTPUT_INTERNALLY.selected);" />			
-						</mx:FormItem>
-						
 						<mx:FormItem label="Display output pop-up:">
-							<mx:RadioButtonGroup id="outputDispGroup" enabled="true"  />
-							<mx:RadioButton id="popupFlash" label="In a flash window" group="{outputDispGroup}" value="flash"/>
-							<mx:RadioButton id="popupHTML" label="In a new browser window" group="{outputDispGroup}" value="HTML"/>
+							<mx:RadioButtonGroup id="outputDispGroup" enabled="true" 
+																								 
+												 itemClick="setGlobalSetting(SCodes.DISPLAY_OUTPUT_INTERNALLY, (outputDispGroup.selectedValue == 'flash'))" />
+							<mx:RadioButton label="In a flash window" group="{outputDispGroup}" value="flash" />
+							<mx:RadioButton label="In a new browser window" group="{outputDispGroup}" value="HTML"
+											
+											creationComplete="outputDispGroup.selectedValue = (glbSettings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean)?'flash':'HTML'"/>
 						</mx:FormItem>
-						
+						<mx:FormHeading label="Memory" />
 						<mx:FormItem label="Guaranteed undoable actions">
 							<s:HGroup verticalAlign="middle">
 								<s:Spinner id="MINIMUM_BUFFER_SIZE" toolTip="This is the minimum of actions that will be undoable. If the program runs smoothly, the actual number of undoable actions might be bigger."
@@ -167,6 +169,25 @@
 								<mx:Spacer width="5" />
 								<s:Label text="{MINIMUM_BUFFER_SIZE.value}"/>
 							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Autosave">
+							<s:HGroup>
+								<s:CheckBox id="AUTOSAVE_ENABLED" 
+											toolTip="If enabled, the game will be autosaved for recovery in case there is an unexpected closure of the program."
+											
+											creationComplete="AUTOSAVE_ENABLED.selected =
+											glbSettings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;"
+											
+											change="setGlobalSetting(SCodes.AUTOSAVE_ENABLED, AUTOSAVE_ENABLED.selected); 
+											AUTOSAVE_INTERVAL.enabled = AUTOSAVE_ENABLED.selected;" />
+								<s:TextInput id="AUTOSAVE_INTERVAL" widthInChars="2" restrict="0-9" textAlign="right"									 
+											 toolTip="Time in seconds after which the game will autosave"
+											 											 
+											 creationComplete="AUTOSAVE_INTERVAL.enabled = glbSettings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;
+											 AUTOSAVE_INTERVAL.text = ''+(glbSettings.getValue(SCodes.AUTOSAVE_INTERVAL) as int);"
+											 
+											 change="setGlobalSetting(SCodes.AUTOSAVE_INTERVAL, int(AUTOSAVE_INTERVAL.text));" />
+							</s:HGroup>	
 						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
@@ -183,13 +204,13 @@
 												creationComplete="FILE_PLAYER_1_COLOR.selectedColor = 
 												fileSettings.getValue(SCodes.FILE_PLAYER_1_COLOR) as uint;" 
 												
-												change="setFileSetting(SCodes.FILE_PLAYER_1_COLOR,event.target.selectedColor);"/>
+												change="setFileSetting(SCodes.FILE_PLAYER_1_COLOR, event.target.selectedColor, true);"/>
 								<mx:ColorPicker id="FILE_PLAYER_2_COLOR" toolTip="Player 2's Color" 
 												
 												creationComplete="FILE_PLAYER_2_COLOR.selectedColor = 
 												fileSettings.getValue(SCodes.FILE_PLAYER_2_COLOR) as uint;"
 												
-												change="setFileSetting(SCodes.FILE_PLAYER_2_COLOR,event.target.selectedColor);"/>
+												change="setFileSetting(SCodes.FILE_PLAYER_2_COLOR, event.target.selectedColor, true);"/>
 							</s:HGroup>
 						</mx:FormItem>
 						<mx:FormItem label="Default font" toolTip="Select the default Font" >
@@ -199,7 +220,7 @@
 										
 										creationComplete="FILE_FONT.selectedItem = fileSettings.getValue(SCodes.FILE_FONT) as String"
 										
-										change="setFileSetting(SCodes.FILE_FONT, FILE_FONT.selectedItem);">
+										change="setFileSetting(SCodes.FILE_FONT, FILE_FONT.selectedItem, true);">
 								<s:dataProvider>
 									<mx:ArrayCollection source="{FigFontManager.getAvailableFontFamilies()}">
 										<mx:sort><mx:Sort /></mx:sort>
@@ -220,7 +241,7 @@
 										   
 										   creationComplete="FILE_STROKE_WIDTH.value = fileSettings.getValue(SCodes.FILE_STROKE_WIDTH) as int"
 										   
-										   change="setFileSetting(SCodes.FILE_STROKE_WIDTH, FILE_STROKE_WIDTH.value as int)"
+										   change="setFileSetting(SCodes.FILE_STROKE_WIDTH, FILE_STROKE_WIDTH.value as int, true)"
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_STROKE_WIDTH.value}"/>
@@ -233,7 +254,7 @@
 										   
 										   creationComplete="FILE_NODE_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_NODE_DIAMETER) as Number)"
 										   
-										   change="setFileSetting(SCodes.FILE_NODE_DIAMETER, FILE_NODE_DIAMETER.value)"
+										   change="setFileSetting(SCodes.FILE_NODE_DIAMETER, FILE_NODE_DIAMETER.value, true)"
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_NODE_DIAMETER.value}"/>
@@ -245,7 +266,7 @@
 										   
 										   creationComplete="FILE_ISET_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_ISET_DIAMETER) as Number)"
 										   
-										   change="setFileSetting(SCodes.FILE_ISET_DIAMETER, FILE_ISET_DIAMETER.value)"
+										   change="setFileSetting(SCodes.FILE_ISET_DIAMETER, FILE_ISET_DIAMETER.value, true)"
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_ISET_DIAMETER.value}"/>
@@ -257,7 +278,7 @@
 										   
 										   creationComplete="FILE_LEVEL_DISTANCE.value = (fileSettings.getValue(SCodes.FILE_LEVEL_DISTANCE) as int)"
 										   
-										   change="setFileSetting(SCodes.FILE_LEVEL_DISTANCE, FILE_LEVEL_DISTANCE.value as int)"
+										   change="setFileSetting(SCodes.FILE_LEVEL_DISTANCE, FILE_LEVEL_DISTANCE.value as int, true)"
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_LEVEL_DISTANCE.value}"/>
@@ -270,7 +291,7 @@
 										   
 										   creationComplete="FILE_CELL_PADDING_VERT.value = (fileSettings.getValue(SCodes.FILE_CELL_PADDING_VERT) as Number)"
 										   
-										   change="setFileSetting(SCodes.FILE_CELL_PADDING_VERT, FILE_CELL_PADDING_VERT.value as Number)"
+										   change="setFileSetting(SCodes.FILE_CELL_PADDING_VERT, FILE_CELL_PADDING_VERT.value as Number, true)"
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_CELL_PADDING_VERT.value}"/>
@@ -282,19 +303,22 @@
 										   
 										   creationComplete="FILE_CELL_PADDING_HOR.value = (fileSettings.getValue(SCodes.FILE_CELL_PADDING_HOR) as Number)"
 										   
-										   change="setFileSetting(SCodes.FILE_CELL_PADDING_HOR, FILE_CELL_PADDING_HOR.value as Number)"
+										   change="setFileSetting(SCodes.FILE_CELL_PADDING_HOR, FILE_CELL_PADDING_HOR.value as Number, true)"
 										   />
 								<mx:Spacer width="5" />
 								<s:Label text="{FILE_CELL_PADDING_HOR.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
 					</mx:Form>
-					<s:Button bottom="0" label="Set these as the default settings and close" cornerRadius="0" 
-							  click="setFileSettingsAsDefaultAndExit()" />
+					<s:Button bottom="25" label="Use these as the default settings" cornerRadius="0" 
+							  click="setFileSettingsAsDefault()" />
+					<s:Button bottom="0" label="Reset these to the default settings" cornerRadius="0" 
+							  click="resetFileSettingsFromDefaults()" />
 				</s:Group>
 			</s:NavigatorContent>
 			
 			<!-- Default graphic settings tab -->
+			<!--
 			<s:NavigatorContent width="100%" height="100%" label="Default graphic settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
 					<mx:Form width="100%" height="100%" >
@@ -412,8 +436,9 @@
 						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
-			</s:NavigatorContent>				
-		</mx:TabNavigator>
-		
+			</s:NavigatorContent>	
+			
+			-->
 
+		</mx:TabNavigator>
 </s:TitleWindow>

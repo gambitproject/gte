@@ -11,6 +11,7 @@ package lse.math.games.builder.io
 	
 	import lse.math.games.builder.presenter.Presenter;
 	import lse.math.games.builder.settings.FileSettings;
+	import lse.math.games.builder.settings.SCodes;
 	import lse.math.games.builder.settings.UserSettings;
 	
 	import util.Log;
@@ -31,8 +32,6 @@ package lse.math.games.builder.io
 	{
 		private static const FILE_OPEN_TYPES:Array = [new FileFilter("*.xml", "*.xml")];
 		private static const FILE_SAVE_TYPES:Array = [".xml", ".fig", ".png"];
-		//TODO: SETTING
-		private static const AUTOSAVE_INTERVAL:int = 60000; //Time in ms between each two autosaves
 		
 		private var fr:FileReference = null;
 		private var _filename:String;
@@ -50,7 +49,7 @@ package lse.math.games.builder.io
 		public function FileManager(_controller:Presenter){
 			controller = _controller;
 			filename = "Untitled";
-			setTimeout(autosave, AUTOSAVE_INTERVAL);
+			setTimeout(autosave, autosaveInterval);
 			
 			//Look if there is an autosave, and load it if so
 			cookies = SharedObject.getLocal( "autosave", "/" );
@@ -74,6 +73,17 @@ package lse.math.games.builder.io
 			else {
 				log.add(Log.ERROR_HIDDEN, "ExternalInterface is not available");
 			}
+		}
+		
+		// Returns, in miliseconds, the time that should be left between two autosaves
+		private function get autosaveInterval():int { 
+			var interv:int = 1000*(settings.getValue(SCodes.AUTOSAVE_INTERVAL) as int)
+			return interv>0 ? interv : 60000; 
+		}
+		
+		// If the autosave setting is enabled
+		private function get autosaveEnabled():Boolean {
+			return settings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;
 		}
 		
 		/** Name of the file */
@@ -129,10 +139,10 @@ package lse.math.games.builder.io
 		
 		/** Creates a new copy of the current tree and stores it as a SharedObject if possible */
 		public function autosave():void {
-			//TODO: Check if autosave setting is on
-			if(_unsavedChanges)
+			if(autosaveEnabled && _unsavedChanges)
 				backupXML = controller.saveCurrentGameToXML();
-			setTimeout(autosave, AUTOSAVE_INTERVAL);
+
+			setTimeout(autosave, autosaveInterval);
 		}
 		
 		/* 
@@ -299,7 +309,6 @@ package lse.math.games.builder.io
 		/* <--- --- Select Event Handlers --- ---> */
 		
 		//called when the file has completed loading
-		//TODO: error handling of XML parsing?
 		private function onLoadComplete(e:Event):void
 		{			
 			//read the bytes of the file as a string

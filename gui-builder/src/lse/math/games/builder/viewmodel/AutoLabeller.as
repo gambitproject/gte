@@ -10,51 +10,56 @@ package lse.math.games.builder.viewmodel
 	{
 		import lse.math.games.builder.model.*;
 		
-		//TODO: Implement different alphabets
+
 		
-		private var alpha:Vector.<String> = new Vector.<String>();	
-//		private var alpha:Vector.<String> = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", " " };
+		private var _alpha:Vector.<String> = new Vector.<String>();	
 		private var count1:int;
 		private var count2:int;
 		private var _uniqueLabelNum:int;
 		private var inUse:Vector.<String> = new Vector.<String>();		
 		private var log:Log = Log.instance;
 		
-		public function AutoLabeller()
+		
+		
+		public function AutoLabeller(alpha:Vector.<String> =  null)
 		{
-			alpha.push("A");
-			alpha.push("B");
-			alpha.push("C");
-			alpha.push("D");
-			alpha.push("E");
-			alpha.push("F");
-			alpha.push("G");
-			alpha.push("H");
-			alpha.push("I");
-			alpha.push("J");
-			alpha.push("K");
-			alpha.push("L");
-			alpha.push("M");
-			alpha.push("N");
-			alpha.push("O");
-			alpha.push("P");
-			alpha.push("Q");
-			alpha.push("R");
-			alpha.push("S");
-			alpha.push("T");
-			alpha.push("U");
-			alpha.push("V");
-			alpha.push("W");
-			alpha.push("X");
-			alpha.push("Y");
-			alpha.push("Z");
-			alpha.push(" ");
+			if(alpha != null) {
+				for each(var label:String in alpha)
+					_alpha.push(label);
+			} else {
+				_alpha.push("A");
+				_alpha.push("B");
+				_alpha.push("C");
+				_alpha.push("D");
+				_alpha.push("E");
+				_alpha.push("F");
+				_alpha.push("G");
+				_alpha.push("H");
+				_alpha.push("I");
+				_alpha.push("J");
+				_alpha.push("K");
+				_alpha.push("L");
+				_alpha.push("M");
+				_alpha.push("N");
+				_alpha.push("O");
+				_alpha.push("P");
+				_alpha.push("Q");
+				_alpha.push("R");
+				_alpha.push("S");
+				_alpha.push("T");
+				_alpha.push("U");
+				_alpha.push("V");
+				_alpha.push("W");
+				_alpha.push("X");
+				_alpha.push("Y");
+				_alpha.push("Z");
+			}
 		}
 		
 		/** Next label from an auto-label sequence */		
 		public function getNextAutoLabel(player:Player, game:Game):String
 		{
-			var label:String = alpha[count1] + (count2 != 26 ? alpha[count2] : "");
+			var label:String = _alpha[count1] + (count2 != _alpha.length ? _alpha[count2] : "");
 			if (player != game.firstPlayer) {
 				label = label.toLowerCase();
 			}
@@ -73,27 +78,12 @@ package lse.math.games.builder.viewmodel
 		
 		
 		
-		/** Auto labels a tree */
-		public function doAction(grid:TreeGrid):void
-		{										
-			init(grid);
-			recLabel(grid.root, grid);
-		}
-		
-		private function init(tree:ExtensiveForm):void
-		{
-			_uniqueLabelNum = 0;
-			number_of_uniqueLabelname(tree);
-			
-			initCounts();		
-		}
-		
 		//Reset the counters accordingly to the number of unique labels needed
 		private function initCounts():void
 		{
 			count1 = 0;
-			if(_uniqueLabelNum < 26) {
-				count2 = 26;
+			if(_uniqueLabelNum < _alpha.length) {
+				count2 = _alpha.length;
 			} else {
 				count2 = 0;
 			}	
@@ -102,25 +92,42 @@ package lse.math.games.builder.viewmodel
 		// Increment the counters
 		private function incrementCounts():void
 		{
-			if (count2 < 26) {
+			if (count2 < _alpha.length) {
 				++count2;
-				if (count2 == 26) {
+				if (count2 == _alpha.length) {
 					++count1;
 					count2 = 0;
-					if (count1 == 26) {
+					if (count1 == _alpha.length) {
 						log.add(Log.ERROR_THROW, "Ran out of auto labels");
 					}
 				}
 			} else {				
 				++count1;
-				if (count1 == 26) {
+				if (count1 == _alpha.length) {
 					count2 = 0;
 					count1 = 0;
 				}
 			}
 		}
 		
-		private function recLabel(x:Node, tree:ExtensiveForm):void
+		/* <--- --- TREE AUTO LABELLING --- ---> */
+		
+		/** Auto labels a tree */
+		public function autoLabelTree(grid:TreeGrid):void
+		{										
+			initFromTree(grid);
+			recLabelTree(grid.root, grid);
+		}
+		
+		private function initFromTree(tree:ExtensiveForm):void
+		{
+			_uniqueLabelNum = 0;
+			number_of_uniqueLabelname(tree);
+			
+			initCounts();		
+		}
+		
+		private function recLabelTree(x:Node, tree:ExtensiveForm):void
 		{			
 			if (x.parent != null && !x.reachedby.hasLabel)    // if father exists and I am not assigned, then label
 			{	
@@ -167,7 +174,7 @@ package lse.math.games.builder.viewmodel
 			
 			var y:Node = x.firstChild;
 			while (y != null) {
-				recLabel(y, tree);
+				recLabelTree(y, tree);
 				y = y.sibling;
 			}
 		}

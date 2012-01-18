@@ -31,6 +31,20 @@ package lse.math.games.builder.settings
 		 */
 		public static const MINIMUM_BUFFER_SIZE:String = "MINIMUM_BUFFER_SIZE";
 		
+		/**
+		 * <li><b>true:</b> The game will autosave, for recovery in case the browser was 
+		 * closed unexpectedly, in the interval determined by AUTOSAVE_INTERVAL</li>
+		 * <li><b>false:</b> The game will not be autosaved</li>
+		 * <p><b>Default:</b> true
+		 */
+		public static const AUTOSAVE_ENABLED:String = "AUTOSAVE_ENABLED";
+		
+		/**
+		 * int containing the number of seconds between two consecutive autosavings of the game
+		 * <p><b>Default:</b> 60
+		 */
+		public static const AUTOSAVE_INTERVAL:String = "AUTOSAVE_INTERVAL";
+		
 		
 		
 		/* <--- DEFAULT GRAPHIC SETTINGS (applied to trees with no graphic information) ---> */
@@ -142,6 +156,8 @@ package lse.math.games.builder.settings
 			settings.setValue(STORE_SETTINGS_LOCALLY, false);
 			settings.setValue(DISPLAY_OUTPUT_INTERNALLY, false);
 			settings.setValue(MINIMUM_BUFFER_SIZE, 10);
+			settings.setValue(AUTOSAVE_ENABLED, true);
+			settings.setValue(AUTOSAVE_INTERVAL, 60);
 			//GRAPHIC SETTINGS
 			settings.setValue(DEFAULT_PLAYER_1_COLOR, 0xFF0000);
 			settings.setValue(DEFAULT_PLAYER_2_COLOR, 0x0000FF);

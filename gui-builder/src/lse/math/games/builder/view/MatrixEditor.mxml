@@ -87,17 +87,29 @@
 				}
 			}
 			
-			//Update the alphabets with 
+			//Update the alphabets from the text boxes and autolabelling the rest
 			private function updateAlphabets():void {
-				var strVec1:Vector.<Strategy> = _strMap[_matrix.firstPlayer];
-				var strVec2:Vector.<Strategy> = _strMap[_matrix.firstPlayer.nextPlayer];
 				var inUse:Vector.<String> = new Vector.<String>();
 
-				for each(var st:Strategy in strVec1) inUse.push(st.toString());
-				for each(st in strVec2) inUse.push(st.toString().toLowerCase());
+				var strVec1:Vector.<String> = new Vector.<String>();
+				var strVec2:Vector.<String> = new Vector.<String>();
+				
+				for each(var st:String in pl1StratInput.text.split(" ")) {
+					if(st != null && st.length>0) {
+						inUse.push(st.toString().toLowerCase());
+						strVec1.push(st);
+					}
+				}
+				for each(st in pl2StratInput.text.split(" ")) {
+					if(st != null && st.length>0) {
+						inUse.push(st.toString().toLowerCase());
+						strVec2.push(st);
+					}
+				}
 				
 				var al:AutoLabeller = new AutoLabeller();
-				al.uniqueLabelNum = (pl1NumStr+pl2NumStr-strVec1.length-strVec2.length) > 0 ? pl1NumStr+pl2NumStr-strVec1.length-strVec2.length : 0;
+				al.uniqueLabelNum = (pl1NumStr+pl2NumStr-strVec1.length-strVec2.length) > 0 ? 
+					pl1NumStr+pl2NumStr-strVec1.length-strVec2.length : 0;
 				
 				alpha1 = "";
 				for(var i:int = 0; i<pl1NumStr; i++)
@@ -268,9 +280,11 @@
 				<s:Label text="Player 1 Strategies"/>
 				<s:HGroup width="100%" verticalAlign="middle" toolTip="Number of strategies for this player">
 					<s:Label text="Num: "/>
-					<s:TextInput id="pl1NumStrBox" text="{pl1NumStr}" widthInChars="3" restrict="0-9" change="pl1NumStr = int(pl1NumStrBox.text); updateAlphabets()"/>
+					<s:TextInput id="pl1NumStrBox" text="{pl1NumStr}" widthInChars="3" restrict="0-9"
+								 keyUp="if(event.keyCode==Keyboard.ENTER) pl1StratInput.setFocus()"
+								 valueCommit="pl1NumStr = int(pl1NumStrBox.text); updateAlphabets()"/>
 					<mx:Spacer width="4"/>
-					<s:TextInput id="pl1StratInput" editable="false" widthInChars="22" text="{alpha1}" />
+					<s:TextInput id="pl1StratInput" editable="true" widthInChars="22" text="{alpha1}" />
 				</s:HGroup>
 				<mx:Spacer height="20"/>
 				<s:Label text="Player 1 Payoffs"/>
@@ -284,9 +298,11 @@
 				<s:Label text="Player 1 Strategies"/>
 				<s:HGroup width="100%" verticalAlign="middle" toolTip="Number of strategies for this player">
 					<s:Label text="Num: " />
-					<s:TextInput id="pl2NumStrBox" text="{pl2NumStr}" widthInChars="3" restrict="0-9" change="pl2NumStr = int(pl2NumStrBox.text); updateAlphabets()"/>
+					<s:TextInput id="pl2NumStrBox" text="{pl2NumStr}" widthInChars="3" restrict="0-9"
+								 keyUp="if(event.keyCode==Keyboard.ENTER) pl2StratInput.setFocus()"
+								 valueCommit="pl2NumStr = int(pl2NumStrBox.text); updateAlphabets()"/>
 					<mx:Spacer width="4"/>
-					<s:TextInput id="pl2StratInput" editable="false" widthInChars="22" text="{alpha2}" />
+					<s:TextInput id="pl2StratInput" editable="true" widthInChars="22" text="{alpha2}" />
 				</s:HGroup>
 				<mx:Spacer height="20"/>
 				<s:Label text="Player 2 Payoffs"/>

@@ -42,7 +42,7 @@ package lse.math.games.builder.viewmodel.action
 				node.remove();
 				
 				var labeler:AutoLabeller = new AutoLabeller;
-				labeler.doAction(grid);
+				labeler.autoLabelTree(grid);
 			} else
 				log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "DeleteAction");
 			

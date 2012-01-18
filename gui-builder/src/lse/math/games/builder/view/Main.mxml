@@ -532,8 +532,8 @@
 							<mx:dataProvider>	
 								<mx:ArrayCollection>
 									<mx:source>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_up.png')" toolTip="Orientation: Root on top"/>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_down.png')" toolTip="Orientation: Root on bottom"/>
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_up.png')" toolTip="Orientation: Root at top"/>
+										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_down.png')" toolTip="Orientation: Root at bottom"/>
 										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_left.png')" toolTip="Orientation: Root at left"/>
 										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_right.png')" toolTip="Orientation: Root at right"/>
 									</mx:source>

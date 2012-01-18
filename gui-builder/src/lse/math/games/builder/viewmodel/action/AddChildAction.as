@@ -63,7 +63,7 @@ package lse.math.games.builder.viewmodel.action
 				log.add(Log.ERROR, "Couldn't find any iset with idx "+_isetId, "AddChildAction");
 			
 			var labeler:AutoLabeller = new AutoLabeller;
-			labeler.doAction(grid);
+			labeler.autoLabelTree(grid);
 			
 			grid.orderIds();
 			
