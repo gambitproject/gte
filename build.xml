@@ -2,6 +2,8 @@
 <!--
 	Build file for Game Theory Explorer
 	@author Mark Egesdal
+	Adapted by Rahul Savani 
+	to replace dependency on Google App Engine with Jetty
 --> 
 <project name="GameTheoryExplorer" basedir="." default="main"> 
 	
@@ -186,9 +188,8 @@
 				<fileset dir="${war.dir}/WEB-INF/lib">
 					<include name="*.jar"/>
 				</fileset>
-				<fileset dir="${GAE_HOME}/lib">
-					<include name="shared/**/*.jar"/>
-					<include name="user/**/*.jar"/>
+				<fileset dir="${JETTY_HOME}/lib">
+					<include name="*.jar"/>
 				</fileset>
 			</classpath>
 			

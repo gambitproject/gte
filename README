@@ -25,14 +25,32 @@ I. PREREQUISITES
 	3b.2 tar -zxvf flashplayerdebugger.tar.gz
 	3b.3 ln -s ./flashplayerdebugger ./gflashplayer
 	3b.4 Add directory from [3b.1] to PATH
+	
+	NOTE: under Arch Linux this didn't work and an additional install
+	of the flashplugin via pacman was required.
 
-4. Install the Google AppEngine SDK (for Java)
-	4.1 Download archive - http://code.google.com/appengine/downloads.html
-	4.2 Add bin directory to PATH (see [3])	
+=========================================================================
+We no longer use the Google AppEngine. Instead we use Jetty. 
+OLD: 4. Install the Google AppEngine SDK (for Java)
+OLD: 4.1 Download archive - http://code.google.com/appengine/downloads.html
+OLD: 4.2 Add bin directory to PATH (see [3])	
+=========================================================================
+
+4. Install Jetty
+   ===WINDOWS===
+   TBC
+   ===LINUX===
+   JETTY_VERSION=7.6.1.v20120215
+   wget http://download.eclipse.org/jetty/$JETTY_VERSION/dist/jetty-distribution-$JETTY_VERSION.tar.gz
+   tar xfz jetty-distribution-$JETTY_VERSION.tar.gz
+
 
 5. Update build.properties file for your environment
 	5.1 Update FLEX_HOME with root directory of Flex SDK (not bin)
-	5.2 Update GAE_HOME with root directory of Google AppEngine SDK (not bin)
+	=========================================================================
+	OLD: 5.2 Update GAE_HOME with root directory of Google AppEngine SDK (not bin)
+	=========================================================================
+    5.2 Update JETTY_HOME to full path of Jetty (jetty-distribution-$JETTY_VERSION)
     5.3 (Windows only) Make sure to switch all path separators from "\" to "/"
 
 II. BUILD
@@ -42,17 +60,33 @@ $ cd <project root directory> (location of this README)
 $ ant
 You should see the build.xml script being executed.
 
+=========================================================================
+OLD: III. DEV SERVER
+OLD: After building:
+OLD: $ cd build
+OLD: $ dev_appserver.sh gte
+OLD: The server should now be running at http://localhost:8080/
+=========================================================================
 
 III. DEV SERVER
 
-After building:
-$ cd build
-$ dev_appserver.sh gte
-The server should now be running at http://localhost:8080/
+III.a. Copy application to Jetty's default location
+	($JETTY_HOME is defined in Step 4)
+
+$ cp -r <project root directory>/build/gte $JETTY_HOME/webapps
+
+III.b. Start Jetty with 
+
+$ cd $JETTY_HOME
+$ java -jar start.jar
+
+The server should now be running at http://localhost:8080/gte
 
 
-IV. DEPLOYMENT
 
-From build dir:
-$ appcfg.sh gte
-(currently requires megesdal's credentials... send email to megesdal@gmail.com to request a deployment)
+=========================================================================
+OLD: IV. DEPLOYMENT
+OLD: From build dir:
+OLD: $ appcfg.sh gte
+OLD: (currently requires megesdal's credentials... 
+OLD: send email to megesdal@gmail.com to request a deployment)

@@ -14,9 +14,9 @@
         <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
         var xiSwfUrlStr = "playerProductInstall.swf";
 		var flashvars = {
-			menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=/matrix/",
-		  	msolve: "label=Lemke NF Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=/matrix/",   
-	        xsolve: "label=Lemke SF Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=/tree/",			
+			menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=/gte/matrix/",
+		  	msolve: "label=Lemke NF Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=/gte/matrix/",   
+	        xsolve: "label=Lemke SF Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=/gte/tree/",			
 	    };
 	    <% if (request.getParameter("s") != null) { %>
 	    flashvars.seed = "<%= request.getParameter("s") %>";
