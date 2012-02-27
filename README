@@ -8,9 +8,8 @@ I. PREREQUISITES
 	===LINUX===
 	$ sudo apt-get install sun-java6-jdk
         ===OS X===
-        OS X 10.6 (Snow Leopard) ships with a Java SDK suitable for gte.  
-        Confirm you have the latest version by running
-        "Software update..." from the Apple menu.
+        OS X 10.6 and 10.7 with a Java SDK suitable for gte.  
+        Confirm you have the latest version by running "Software update..." from the Apple menu.
 	
 2. Install Apache Ant
 	===WINDOWS===
@@ -20,13 +19,13 @@ I. PREREQUISITES
 	===LINUX===
 	$ sudo apt-get install ant
         ===OS X===
-        OS X 10.6 (Snow Leopard) ships with ant (in /usr/bin/ant).
+        OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant).
 	
 3. Install Adobe Flex SDK (NOT Open Source Flex SDK) 
 	3.1 Download archive - http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4	
 	3.2 Add bin directory to PATH (.bashrc in Linux, System->Advanced->Environment Variables in Windows)	
 
-3b. Install "gflashplayer" (Linux only)
+3b. Install "gflashplayer"
         ===WINDOWS===
         No action required.
         ===LINUX===
@@ -37,7 +36,6 @@ I. PREREQUISITES
 	
 	NOTE: under Arch Linux this didn't work and an additional install
 	of the flashplugin via pacman was required.
-        
         ===OS X===
         In ${FLEX_HOME}/runtimes/player/10.1/mac there is a DMG file,
         "Install Adobe Flash Player Debugger 10.1.dmg".
