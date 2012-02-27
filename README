@@ -7,6 +7,9 @@ I. PREREQUISITES
 	1.3 Add JAVA_HOME environment variable (makes sure it points to the SDK, not JRE)
 	===LINUX===
 	$ sudo apt-get install sun-java6-jdk
+        ===OS X===
+        OS X 10.6 and 10.7 with a Java SDK suitable for gte.  
+        Confirm you have the latest version by running "Software update..." from the Apple menu.
 	
 2. Install Apache Ant
 	===WINDOWS===
@@ -15,19 +18,36 @@ I. PREREQUISITES
 	2.3 Add ANT_HOME environment variable (might not be necessary)
 	===LINUX===
 	$ sudo apt-get install ant
+        ===OS X===
+        OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant).
 	
 3. Install Adobe Flex SDK (NOT Open Source Flex SDK) 
 	3.1 Download archive - http://opensource.adobe.com/wiki/display/flexsdk/Download+Flex+4	
 	3.2 Add bin directory to PATH (.bashrc in Linux, System->Advanced->Environment Variables in Windows)	
 
-3b. Install "gflashplayer" (Linux only)
-	3b.1 cd {FLEX_HOME}/runtimes/player/10.1/lnx
+3b. Install "gflashplayer"
+        ===WINDOWS===
+        No action required.
+        ===LINUX===
+	3b.1 cd ${FLEX_HOME}/runtimes/player/10.1/lnx
 	3b.2 tar -zxvf flashplayerdebugger.tar.gz
 	3b.3 ln -s ./flashplayerdebugger ./gflashplayer
 	3b.4 Add directory from [3b.1] to PATH
 	
 	NOTE: under Arch Linux this didn't work and an additional install
 	of the flashplugin via pacman was required.
+        ===OS X===
+        In ${FLEX_HOME}/runtimes/player/10.1/mac there is a DMG file,
+        "Install Adobe Flash Player Debugger 10.1.dmg".
+        Double-click in Finder to mount the disk image, which contains
+        an installer, "Install Adobe Flash Player Debugger".  Double-click
+        the installer to run.
+ 
+        If you have Adobe Flash Player newer than 10.1 installed, the
+        installer will complain and terminate.  In this instance, the
+        Flash Player Debugger.app is also present in the folder.
+        Double-click to unzip, and drag the application the the
+        Applications folder (or wherever you want to put it).
 
 =========================================================================
 We no longer use the Google AppEngine. Instead we use Jetty. 
