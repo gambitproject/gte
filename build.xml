@@ -72,7 +72,9 @@
             actionscript-file-encoding="UTF-8"
             keep-generated-actionscript="false"
 			link-report="${gui.build.dir}/MxmlcReport.xml"
-            incremental="true"> 
+            incremental="true"
+			fork="true" 
+			maxmemory="1024m"> 
 						
             <load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/> 
   
