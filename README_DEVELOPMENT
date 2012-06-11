@@ -1,4 +1,4 @@
-How to setup the development environment
+=How to setup the development environment=
 
 The projects consists of two parts: The server site based on java and the client side based on ActionScript.
 The client side represents the user-frontend written in ActionScript/Flash and handles all drawing and input activities.
