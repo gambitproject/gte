@@ -10,6 +10,7 @@
 	<!-- setup a prefix for all environment variables -->
 	<property file="build.properties" />	
 	
+	
 	<property name="gui.proj.dir" value="gui-builder"/>
 	<property name="gui.test.proj.dir" value="gui-builder/test"/>
 	<property name="lib.proj.dir" value="lib-algo"/>
