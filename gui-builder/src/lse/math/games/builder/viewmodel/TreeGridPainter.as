@@ -14,10 +14,17 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Outcome;
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.model.Rational;
+	import lse.math.games.builder.presenter.Presenter;
+	import lse.math.games.builder.settings.SCodes;
+	import lse.math.games.builder.settings.UserSettings;
 	import lse.math.games.builder.view.AbstractPainter;
 	import lse.math.games.builder.view.IGraphics;
 	
 	import mx.controls.Alert;
+	
+	import util.Log;
+	import lse.math.games.builder.view.Canvas;
+	import flash.display.DisplayObjectContainer;
 	
 	/**	 
 	 * Painter in charge of the background and the full tree (including labels), except from Isets
@@ -41,6 +48,12 @@ package lse.math.games.builder.viewmodel
 		private var _minBreadth:Number;
 		
 		private var _grid:TreeGrid;
+		private var _controller:Presenter;
+		
+		private var log:Log = Log.instance;
+		private var glbSettings:UserSettings = UserSettings.instance;
+		
+		private var AutoAdjustFlip:Boolean =false;
 		
 		public function TreeGridPainter() 
 		{
@@ -58,7 +71,12 @@ package lse.math.games.builder.viewmodel
 		public function set grid(value:TreeGrid):void {
 			_grid = value;
 		}
-		
+
+		public function set controller(c:Presenter):void {
+			_controller = c;
+		}
+
+	
 		override public function get drawWidth():Number {
 			return ((_grid.rotate == 0 || _grid.rotate == 2) ? _minBreadth : _minDepth) + this.scale * TreeGrid.MIN_MARGIN_LEFT + this.scale * TreeGrid.MIN_MARGIN_RIGHT;
 		}
@@ -88,6 +106,17 @@ package lse.math.games.builder.viewmodel
 				_grid.populateFromMatrix();
 			
 			paintGrid(g, width, height, _grid);
+		
+			
+			if ((glbSettings.getValue(SCodes.TREE_AUTO_ADJUST) as Boolean) && (AutoAdjustFlip==false) && _controller.isLastActionZoom==false) {
+				AutoAdjustFlip=true;
+				_controller.zoomAdjust();
+				paintGrid(g, width, height, _grid);
+				AutoAdjustFlip=false;
+			}
+	
+
+			 
 		}
 		
 		override public function assignLabels():void
@@ -205,7 +234,7 @@ package lse.math.games.builder.viewmodel
 			if(father != null && n.reachedby != null) {
 				var color:uint = selected ? 0xFFD700 : father.iset.player == Player.CHANCE ? 0x000000 : father.iset.player == grid.firstPlayer ? grid.player1Color : grid.player2Color;
 				var text:String = n.reachedby.label;			
-				//var text:String = n.number.toString();		//for debugging
+				//var text1:String = n.number.toString();		//for debugging
 				var key:String = getMoveLabelKey(n);
 				registerLabel(key, text, color, grid.fontFamily, styleNode);
 			}
