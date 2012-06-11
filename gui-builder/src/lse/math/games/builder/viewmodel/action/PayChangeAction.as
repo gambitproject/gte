@@ -9,7 +9,7 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	import util.Log;
-	
+	import lse.math.games.builder.viewmodel.AutoLabeller;
 	
 	/**	
 	 * Changes the payoffs of a terminal node
@@ -43,6 +43,7 @@ package lse.math.games.builder.viewmodel.action
 			var prevTime:int = getTimer();
 			
 			var node:Node = grid.getNodeById(_nodeId);
+		
 			if (node != null && node.isLeaf) 
 			{	
 				var outcome:Outcome = (node.outcome == null ? node.makeTerminal() : node.outcome);	
@@ -54,6 +55,9 @@ package lse.math.games.builder.viewmodel.action
 				log.add(Log.ERROR, "Couldn't find any suitable node with idx "+_nodeId, "PayChangeAction");
 			
 			_timeElapsed = getTimer() - prevTime;
+	
+			//Fix the bug, that the correct drawing of player numbers is not performed after random payoffs
+			grid.orderIds();
 		}
 		
 		public function get changesData():Boolean {
