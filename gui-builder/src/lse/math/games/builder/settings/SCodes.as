@@ -133,7 +133,11 @@ package lse.math.games.builder.settings
 		/** Number representing the horizontal padding in cells */
 		public static const FILE_CELL_PADDING_HOR:String = "FILE_CELL_PADDING_HOR";
 		
+		/** String represents the delimeter of cells in the matrix editor */
+		public static const EDITOR_MATRIX_DELIMETER:String = "EDITOR_MATRIX_DELIMETER";	
 		
+		/** Boolean represents true/false if autoadjust is enabled */
+		public static const TREE_AUTO_ADJUST:String = "TREE_AUTO_ADJUST";	
 		
 		/* <--- OTHER SETTINGS (Not shown under the Settings panel) ---> */
 		
@@ -168,6 +172,8 @@ package lse.math.games.builder.settings
 			settings.setValue(DEFAULT_LEVEL_DISTANCE, 75);
 			settings.setValue(DEFAULT_CELL_PADDING_VERT, new Number(5));
 			settings.setValue(DEFAULT_CELL_PADDING_HOR, new Number(5));
+			settings.setValue(EDITOR_MATRIX_DELIMETER, " ");
+			settings.setValue(TREE_AUTO_ADJUST, true);
 			//OTHER SETTINGS
 			settings.setValue(EXPANDED, false);
 		}
