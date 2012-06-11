@@ -44,18 +44,47 @@
 			private var fileManager:FileManager; 
 			
 			private var eventManager:EventManager = EventManager.instance;
-			private var settings:UserSettings = UserSettings.instance;			
+			private var settings:UserSettings = UserSettings.instance;		
+			
+			//editMode=0 => EF is editable
+			//editMode=1 => SF is editable
+			//editMode replaced the togglebar component modeBar which handeled the switch between SF and EF 
+			[Bindable]
+			private var editMode:int=0;
+			
+			[Embed(source='../../../../../../assets/icons/zerosum.png')]
+			[Bindable]
+			public var zeroSumIcon:Class; 
+			
+			[Embed(source='../../../../../../assets/icons/nzerosum.png')]
+			[Bindable]
+			public var nzeroSumIcon:Class;
+
 			
 			
 			
 			/* <--- --- MODE CHANGING FUNCTIONS --- ---> */
 			//Changes the controller mode 
-			private function changeMode(event:FlexEvent):void
+			private function changeEditMode(inmode:int):void
 			{
-				if(modeBar.selectedIndex == 0) controller.toggleTreeMode(); 
-				else if(modeBar.selectedIndex == 1) controller.toggleMatrixMode();
+				if (inmode==0) {
+					editMode=0;
+					controller.toggleTreeMode(); 
+				}
+				if (inmode==1) {
+					PromptTwoButtons.show(resultFromSwitchStrategic, "If you edit the game in strategic form the game tree form will be reinitialized from the matrix. Do you want to continue?");					
+				}
 			}
 			
+			
+			private function resultFromSwitchStrategic():void {
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
+					editMode=1;
+					controller.toggleMatrixMode(); 
+				}
+			}
+			
+				
 			//Registers a listener for changes on the mode, which will update the gui if it needs to be done
 			private function initModeChangeListener():void
 			{
@@ -67,9 +96,9 @@
 			private function updateModeBar(evt:Event):void
 			{
 				if(controller.treeMode)
-					modeBar.selectedIndex = 0;
+					editMode = 0;
 				else if(controller.matrixMode)
-					modeBar.selectedIndex = 1;
+					editMode = 1;
 			}
 			
 			
@@ -226,6 +255,9 @@
 				
 				PopUpManager.addPopUp(me, this, true);
 				PopUpManager.centerPopUp(me);
+								
+				me.setMode(grid.isZeroSum);
+				
 			}	
 			
 			
@@ -262,10 +294,20 @@
 			{
 				if(!mouseScrollingEnabled){
 					//TODO #32 Handle click differently depending on the mode
-					if(opModeBar2.selectedIndex != 8)
-						controller.doActionAt(canvas.mouseX, canvas.mouseY);
-					else
+					if(opModeBar2.selectedIndex != 8) {
+						//Check mode
+						if (!controller.matrixMode){
+							controller.doActionAt(canvas.mouseX, canvas.mouseY);
+							
+						}
+					}
+					else {
+						//Check mode
+						if (!controller.treeMode){
 						treePainter.selectAndEdit(controller, canvas.mouseX, canvas.mouseY);
+						}
+					}
+						
 				}
 			}
 			
@@ -356,6 +398,7 @@
 						enableMouseScrolling();
 						break;
 				}
+				
 			}
 			
 			//Shortcuts when key is released
@@ -399,7 +442,16 @@
 						}
 						break;
 				}
-			}		
+			}
+			
+			
+			private function toggleZeroSum():void {
+				if (controller.isZeroSum) 
+					toggleZeroSumButton.setStyle("icon",zeroSumIcon);
+				else
+					toggleZeroSumButton.setStyle("icon",nzeroSumIcon);
+				
+			}
 		]]>
 	</fx:Script>
 	
@@ -430,7 +482,7 @@
 		<PainterChain id="treePainter" xmlns="lse.math.games.builder.view.*">
 			<links>
 				<fx:Vector type="lse.math.games.builder.view.IPainter">
-					<TreeGridPainter xmlns="lse.math.games.builder.viewmodel.*" grid="{grid}" />
+					<TreeGridPainter xmlns="lse.math.games.builder.viewmodel.*" grid="{grid}" controller="{controller}"/>
 					<TreeGridSetPainter xmlns="lse.math.games.builder.viewmodel.*" grid="{grid}" />
 				</fx:Vector>
 			</links>
@@ -458,17 +510,7 @@
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="23"/>
-			<mx:ToggleButtonBar id="modeBar" buttonHeight="24" valueCommit="changeMode(event)" selectedIndex="0" creationComplete="initModeChangeListener()">
-				<mx:dataProvider>	
-					<mx:ArrayCollection>
-						<mx:source>
-							<fx:Object toolTip="Switch to editable Extensive Form Mode" label="EF Edit"/>
-							<fx:Object toolTip="Switch to editable Strategic Form Mode" label="SF Edit"/>
-						</mx:source>
-					</mx:ArrayCollection>
-				</mx:dataProvider>
-			</mx:ToggleButtonBar>
-			<mx:Spacer width="23"/>
+
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
 			<mx:Spacer width="4"/>
 			<s:ComboBox id="algoComboBox" width="111" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
@@ -491,8 +533,8 @@
 			<mx:Spacer width="23"/>			
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
 					   click="controller.doAction(actions.randomPayoffs)" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/sum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
-					   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;" />
+			<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
+					   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();" />
 			<mx:Spacer width="23" />		
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" 
 					   click="controller.zoomIn()" />
@@ -523,8 +565,10 @@
 						</s:Group>
 					</MouseScroller>
 					
-					<s:Label top="5" left="5"  fontFamily="Helvetica" color="0x808080" text="VIEW ONLY" toolTip="Toggle EF Edit mode for editing the tree" 
-							 visible="{modeBar.selectedIndex!=0}"/>
+					<s:Label top="5" left="15"  fontFamily="Helvetica" color="0x808080" text="VIEW ONLY" toolTip="Toggle EF Edit mode for editing the tree" 
+							 visible="{editMode!=0}"/>
+					<s:Button top="20" left="5"  fontFamily="Helvetica" label="Click to edit" 
+							  visible="{editMode!=0}" click="changeEditMode(0);"/>
 					<s:Label id="info" top="5" right="{scrollbarEF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvas.width)} x {int(canvas.height)} ({int(treePainter.scale * 100)}%)" />
 					
 					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
@@ -544,7 +588,7 @@
 						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" 
 											lastButtonStyleName="myButton" selectedIndex="0" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" 
 											valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);"
-											visible="{modeBar.selectedIndex==0}">
+											visible="{editMode==0}">
 							<mx:dataProvider>					
 								<mx:ArrayCollection>
 									<mx:source>
@@ -563,7 +607,7 @@
 						</mx:ToggleButtonBar>
 						<mx:Spacer width="23" />
 						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" 
-								   click="controller.doAction(actions.perfectRecall)" visible="{modeBar.selectedIndex==0}" />
+								   click="controller.doAction(actions.perfectRecall)" visible="{editMode==0}" />
 					</s:HGroup>					
 					
 				</s:NavigatorContent>
@@ -574,8 +618,10 @@
 						</s:Group>
 					</MouseScroller>
 					
-					<s:Label top="5" left="5"  fontFamily="Helvetica" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
-							 visible="{modeBar.selectedIndex!=1}"/>
+					<s:Label top="5" left="125"  fontFamily="Helvetica" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
+							 visible="{editMode!=1}"/>
+					<s:Button top="20" left="120"  fontFamily="Helvetica" label="Click to edit" 
+							 visible="{editMode!=1}" click="changeEditMode(1);"/>
 					<s:Label id="infoNF" top="5" right="{scrollbarSF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
 					
 					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
@@ -591,7 +637,7 @@
 						</mx:ToggleButtonBar>
 						<mx:Spacer width="23" />
 						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/table_edit.png')" toolTip="Edit matrixes"
-								   click="showMatrixEditor()" visible="{modeBar.selectedIndex==1}"/>
+								   click="showMatrixEditor()" visible="{editMode==1}"/>
 					</s:HGroup>
 				</s:NavigatorContent>					
 			</mx:TabNavigator>
@@ -599,7 +645,7 @@
 		
 		<!-- SEQUENCE TABLE -->
 		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="18" top="30" right="0" width="180" borderColor="0x808080"
-					 editable="{modeBar.selectedIndex==0}" visible="{modeBar.selectedIndex==0}" draggableColumns="false" sortableColumns="false" 
+					 editable="{editMode==0}" visible="{editMode==0}" draggableColumns="false" sortableColumns="false" 
 					 change="controller.selectedOutcome = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" 
 					 focusOut="controller.selectedOutcome = -1" focusIn="controller.selectedOutcome = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
 			<mx:columns>
