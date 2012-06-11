@@ -189,6 +189,24 @@
 											 change="setGlobalSetting(SCodes.AUTOSAVE_INTERVAL, int(AUTOSAVE_INTERVAL.text));" />
 							</s:HGroup>	
 						</mx:FormItem>
+						<mx:FormItem label="Auto Adjust">
+									<s:CheckBox id="AUTOADJUST_ENABLED" 
+											toolTip="if enabled, the tree size will be adjusted fit into the screen optimally."
+											
+											creationComplete="AUTOADJUST_ENABLED.selected =
+											glbSettings.getValue(SCodes.TREE_AUTO_ADJUST) as Boolean;"
+											
+											change="setGlobalSetting(SCodes.TREE_AUTO_ADJUST, AUTOADJUST_ENABLED.selected);" />
+						</mx:FormItem>
+						<mx:FormItem label="Matrix Delimeter">
+							<s:TextInput id="MATRIX_DELIMETER" 
+										toolTip="Sets the Matrix Delimeter."
+										
+										creationComplete="MATRIX_DELIMETER.text =
+										glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;"
+										
+										change="setGlobalSetting(SCodes.EDITOR_MATRIX_DELIMETER, MATRIX_DELIMETER.text);" />
+						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
 			</s:NavigatorContent>	
