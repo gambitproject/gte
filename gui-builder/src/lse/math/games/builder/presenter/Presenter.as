@@ -54,7 +54,12 @@ package lse.math.games.builder.presenter
 		private var _isStrategicReduced:Boolean = true;
 
 		/* <--- --- TREE ONLY VARS --- ---> */
-		private var _getDataUpdateAction:Function = null;		
+		private var _getDataUpdateAction:Function = null;	
+
+		/* This variable signals if the last action was zooming eihter by 
+           by mouse wheel or buttons. If the last action was zooming than the auto adjust
+           feature is disabled for that move */
+		private var _lastActionZoom:Boolean =false;
 		
 
 		
@@ -66,6 +71,11 @@ package lse.math.games.builder.presenter
 
 			_fileManager = new FileManager(this);
 			_actionHandler  = new ActionHandler(_fileManager);
+		}
+		
+		/** Determine if the last Action was Zooming */
+		public function get isLastActionZoom():Boolean {
+			return _lastActionZoom;
 		}
 		
 		/** Quick way to view if the presenter is in Tree (Extensive Form) mode */
@@ -308,6 +318,8 @@ package lse.math.games.builder.presenter
 		/** Sets zoom to 100% */
 		private function resetZoom():void
 		{
+			//set zooming flag
+			_lastActionZoom=true;
 			_canvas.painter.scale = 1.0;
 			grid.scale = 1.0;
 			invalidate(false, true, true);
@@ -316,6 +328,8 @@ package lse.math.games.builder.presenter
 		/** Zooms in by increasing the scale in 1.1 */
 		public function zoomIn():void
 		{
+			//set zooming flag
+			_lastActionZoom=true;
 			var oldScale:Number = _canvas.painter.scale;
 			var newScale:Number = oldScale * 1.1;
 			if (oldScale < 1 && newScale > 1) {
@@ -330,12 +344,13 @@ package lse.math.games.builder.presenter
 		/** Zooms out by dividing the scale in 1.1 */
 		public function zoomOut():void
 		{
+			//set zooming flag
+			_lastActionZoom=true;
 			var oldScale:Number = _canvas.painter.scale;
 			var newScale:Number = oldScale / 1.1;
 			if (oldScale > 1 && newScale < 1) {
 				newScale = 1.0;
 			}
-			
 			_canvas.painter.scale = newScale;
 			grid.scale = newScale;
 			invalidate(false, true, true);
@@ -344,6 +359,8 @@ package lse.math.games.builder.presenter
 		/** Adjusts zoom to show the tree optimally */
 		public function zoomAdjust():void
 		{
+			//set zooming flag
+			_lastActionZoom=true;
 			var scroller:DisplayObjectContainer = _canvas.parent;
 			
 			var width:Number = _canvas.painter.drawWidth;
@@ -373,16 +390,18 @@ package lse.math.games.builder.presenter
 			grid.scale = newScale;
 			invalidate(false, true, true);
 		}
-		
-		
-		
-		
-		
+
+
+
+
+
 		/* <--- --- FILE MANAGING --- --->*/
 		
 		/** Resets everything */
 		public function clear():void
 		{
+			//set zooming flag
+			_lastActionZoom=true;
 			resetZoom();
 			
 			if(treeMode)
@@ -589,12 +608,14 @@ package lse.math.games.builder.presenter
 		 *  Then it executes the action and invalidates whatever is necessary.
 		 */
 		public function doAction(getAction:Function):void
-		{        
+		{     
+			//reset zooming flag
+			_lastActionZoom=false;
 			if(treeMode) {
 				var action:IAction = getAction(grid);
 				if (action != null) {
 					_actionHandler.processAction(action, grid);						
-					invalidate(action.changesData, action.changesSize, action.changesDisplay);		
+					invalidate(action.changesData, action.changesSize, action.changesDisplay);
 				}
 			} else if(matrixMode) {
 				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
@@ -608,6 +629,8 @@ package lse.math.games.builder.presenter
 		 */
 		public function doActionAt(x:Number, y:Number):void
 		{
+			//reset zooming flag
+			_lastActionZoom=false;
 			if(treeMode) {
 				if(getClickAction!= null)
 				{
