@@ -94,10 +94,26 @@ package lse.math.games.builder.viewmodel
 		
 		
 		
+		
+		
 		override public function measureCanvas():void
 		{		
 			colWidth = getColWidth();
 			rowHeight = getRowHeight();
+			
+			//Set width and height of each cell in the strategic form matrix to be equal			
+			if (colWidth>rowHeight)
+				rowHeight=colWidth;
+			else if (colWidth<rowHeight)
+				colWidth=rowHeight;
+			//By default the remaining width and height of each cell from the point of view of the
+			//label of each player is double. Assume the payoff label for play 1 has a width of
+			//30. Than the total length of the cell is 60. Now it is adjustedt by 2/3 and is only 45.
+			//For large number like 123123 the width of the cell dows not fit optical to the height of the row
+			
+			colWidth=int(colWidth/3*2);
+			rowHeight=int(rowHeight/3*2);
+			
 			
 			var angle:Number = Math.atan(rowHeight / colWidth);
 			var cornerDiagonal:Number = getCornerDiagonal(angle);
