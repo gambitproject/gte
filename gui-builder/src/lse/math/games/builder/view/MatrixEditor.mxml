@@ -20,8 +20,8 @@
 			import mx.utils.StringUtil;
 			
 			import util.Log;
-			import util.PromptTwoButtons;
 			import util.PromptThreeButtons;
+			import util.PromptTwoButtons;
 			
 			
 			private var _matrix:StrategicForm;
@@ -55,6 +55,9 @@
 			[Bindable]
 			private var p2editable:Boolean=false;
 			
+			[Bindable]
+			private var p2cbg:uint=0xffffff;
+			
 			private var glbSettings:UserSettings = UserSettings.instance;
 			private var dataChanged:Boolean = false;
 			
@@ -72,7 +75,7 @@
 				populate(0);
 				populate(1);
 				onlyAlignStrategy()
-				p2editable=false;
+				setP2editable(false);
 				
 				
 			}
@@ -490,14 +493,28 @@
 			private function changeEvt(event:Event):void {
 				var instyle:String =event.currentTarget.selectedItem.data;
 				if ((instyle=="ZG") || (instyle=="SG")) {
-					p2editable=false;
-					
+					setP2editable(false);
+
 				} else {
-					p2editable=true;
+					setP2editable(true);
 				}
 				
 				alignStrategy();
 				
+			}
+			
+			private function setP2editable(editable:Boolean):void {
+				if (editable==true){
+					p2editable=true;
+					p2cbg=0xffffff;
+					
+				
+				} else {
+					p2editable=false;
+					p2cbg=0xcccccc;
+					
+				}
+			
 			}
 			 
 		]]>
@@ -559,7 +576,7 @@
 				</s:HGroup>
 				<mx:Spacer height="20"/>
 				<s:TextArea editable="{p2editable}" id="pl2PayMapStrBox" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
-							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;"/>
+							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 				<s:HGroup width="100%" horizontalAlign="center">
 				<mx:Spacer height="20"/>
 				<s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);" />
