@@ -17,6 +17,7 @@
 			menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=/gte/matrix/",
 		  	msolve: "label=Lemke NF Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=/gte/matrix/",   
 	        xsolve: "label=Lemke SF Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=/gte/tree/",			
+	        lrsC: "label=Lrs C algo;toolTip=Lrs C Algo;type=nf;url=/gte/lrsc/",
 	    };
 	    <% if (request.getParameter("s") != null) { %>
 	    flashvars.seed = "<%= request.getParameter("s") %>";
