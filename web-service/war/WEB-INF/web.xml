@@ -13,11 +13,21 @@
 		<servlet-name>Tree</servlet-name>
 		<servlet-class>lse.math.games.web.TreeServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>LrsC</servlet-name>
+		<servlet-class>lse.math.games.web.LrsCServlet</servlet-class>
+	</servlet>	
+	
+	<servlet-mapping>
+		<servlet-name>LrsC</servlet-name>
+		<url-pattern>/lrsc/servlet</url-pattern>
+	</servlet-mapping>
 	
 	<servlet-mapping>
 		<servlet-name>Bimatrix</servlet-name>
 		<url-pattern>/matrix/servlet</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>	
+	
 	<servlet-mapping>
 		<servlet-name>Tree</servlet-name>
 		<url-pattern>/tree/servlet</url-pattern>
