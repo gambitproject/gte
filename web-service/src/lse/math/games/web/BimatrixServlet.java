@@ -1,6 +1,11 @@
 package lse.math.games.web;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 import java.util.Arrays;
@@ -60,12 +65,16 @@ public class BimatrixServlet extends AbstractRESTServlet
 	{			
 		response.setContentType("text/plain");
 		log.info("Processing new request");
-
+	
+		
 		Bimatrix game = null;
 		Rational[] xPriors = null;
 		Rational[] yPriors = null;
 		Long seed = null;
 		Equilibria eqs = null;
+		
+	
+		
 		try {
 			Rational[][] a = parseMultiRowRatParam(request, "a");
 			Rational[][] b = parseMultiRowRatParam(request, "b");
@@ -117,6 +126,7 @@ public class BimatrixServlet extends AbstractRESTServlet
 			{
 				game = new Bimatrix(new String[]{"A" , "B"}, a, b, rowNames, colNames);
 				log.info(game.toString());
+			
 
 				if (algo != null && algo.equals("menum")) {				
 					log.info("lrs enumerate");
@@ -168,6 +178,7 @@ public class BimatrixServlet extends AbstractRESTServlet
 		if (game != null) {
 			response.getWriter().println("NormalForm " + game.nrows() + " " + game.ncols());
 			response.getWriter().println(game.toString());
+
 		}
 		if (xPriors != null && yPriors != null) {
 			printPriors(xPriors, yPriors, seed, game, response.getWriter());
