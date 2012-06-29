@@ -1,0 +1,308 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.76 [en] (X11; U; Linux 2.2.12 i386) [Netscape]">
+   <title>User's Guide for lrs</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EF" vlink="#55188A" alink="#FF0000">
+
+<ul>
+<h1>
+&nbsp;lrslib programmer's guide&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Version 4.1</h1>
+</ul>
+&nbsp;June 20, 2001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Copyright(C) 2001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://cgm.cs.mcgill.ca/~avis/C/lrs.html">
+lrs home page</a>
+<br>&nbsp; David Avis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+avis@cs.mcgill.ca&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://cgm.cs.mcgill.ca/~avis">
+http://cgm.cs.mcgill.ca/~avis</a>
+<br>&nbsp;
+<li>
+<a href="#Introduction">Introduction</a></li>
+
+<li>
+<a href="#Installation Section">Installation</a></li>
+
+<li>
+<a href="#Demos">Demos</a></li>
+
+<li>
+<a href="http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html">User's
+Manual</a></li>
+
+<li>
+<a href="#Acknowledgements">Acknowledgements and References</a></li>
+
+<h3>
+
+<hr WIDTH="100%"><a NAME="Introduction"></a>Introduction</h3>
+lrslib consists of the following main components
+<p><font color="#990000">Libraries:</font>
+<p>&nbsp;&nbsp;&nbsp; lrslib:&nbsp; A callable library of functions implementing
+lrs and redund
+<br>&nbsp;&nbsp;&nbsp; lrsmp: An extended precision arithmetic package
+for lrslib
+<br>&nbsp;&nbsp;&nbsp; lrslong: A fixed precision integer package for lrslib
+<br>&nbsp;&nbsp;&nbsp; lrsgmp: An interface for lrslib to the<a href="http://www.swox.com/gmp">
+GNU MP</a> arithmetic package.
+<p><font color="#990000">Main Drivers:</font>
+<br>&nbsp;&nbsp;&nbsp; lrs.c:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Transform H-representation to V-representation or vice versa
+<br>&nbsp;&nbsp;&nbsp; redund.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Remove redundancies from H or V-representation
+<p><font color="#990000">Demo drivers:</font>
+<br>&nbsp;&nbsp;&nbsp; vedemo.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Generate vertices of a set of hypercubes
+<br>&nbsp;&nbsp;&nbsp; chdemo.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Generate facets from a set of generated cyclic polytopes
+<br>&nbsp;&nbsp;&nbsp; lpdemo.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Solve a series of lp problems on generated cubes
+<p><font color="#990000">Utilities:</font>
+<br>&nbsp;&nbsp;&nbsp; buffer.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Remove duplicates output (parallel geometric rays in unbounded non-pointed
+polyhedra)
+<p>The demo drivers use an "<i>lp-solve</i>" like procedures to construct
+the input matrix (and objective function if needed). These programs should
+be easily modifiable to solve similar problems for other polyhedra. Normally
+all that is necessary is for the user to modify the procedure used to generate
+the polyhedron: <i>makecube</i> in the case of <i>vedemo</i> and <i>makecyclic</i>
+in the case of <i>chdemo</i>.
+<p>For the moment, the only documentation I can offer for the main drivers
+and library procedures are the comments in the individual programs. Consult
+the User's manual for usage instructions.
+<p>These programs can be distributed freely under the GNU GENERAL PUBLIC
+LICENSE. Please read the file COPYING carefully before using.&nbsp; Please
+inform the author of any interesting applications for which <i>lrs</i>
+was helpful.
+<h3>
+
+<hr WIDTH="100%"><a NAME="Installation Section"></a>Installation</h3>
+From <a href="http://cgm.cs.mcgill.ca/~avis/C/lrs.html">lrs home page</a>,&nbsp;
+click on&nbsp; "Download" and retrieve the file lrslib-041.tar.gz
+<br>&nbsp;&nbsp;&nbsp; Unpack with:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; % gunzip lrslib-041.tar.gz
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; % tar xvf lrslib-041.tar
+<p>&nbsp;&nbsp;&nbsp; Go to the new directory
+<br>&nbsp;&nbsp;&nbsp; % cd lrslib-041
+<br>&nbsp;
+<h4>
+Installation with built in arithmetic libraries.</h4>
+&nbsp;&nbsp;&nbsp;&nbsp; make binaries by typing
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; % make all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(most 32 bit unix machines)
+<br>&nbsp;&nbsp;&nbsp; or
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; % make all64&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(64 bit integer machines such as DEC Alpha)
+<br>&nbsp;&nbsp;&nbsp; or
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; % make nosigs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+( 32 bit machines without signals/timing routines)
+<p>&nbsp;&nbsp;&nbsp; Test the program by typing:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+lrs&nbsp; cube.ine
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+redund cubetop.ine
+<p><b>Install demos.</b>
+<p><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b>%make demo
+<p>&nbsp;&nbsp;&nbsp;&nbsp; Test the programs by typing:&nbsp;&nbsp; vedemo,
+chdemo, lpdemo or lpdemo1
+<h4>
+Installation with GNU MP library</h4>
+To use the GNU MP library, it is necessary to first install it and record
+its location. The
+<br>default makefile assumes: /usr/local/include and /usr/local/lib for
+headers and binaries
+<br>respectively. Edit the gmp: section of "makefile" appropriately.
+<p>&nbsp;&nbsp;&nbsp; make binaries by typing
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; % make gmp
+<p>&nbsp;&nbsp;&nbsp; Test the programs by typing:&nbsp;&nbsp;&nbsp; glrs
+cube.ine
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+gredund cube.ine
+<h3>
+
+<hr WIDTH="100%"></h3>
+
+<h3>
+<a NAME="Demos"></a>Demos</h3>
+Demo drivers that are designed for user modification are included with
+this release:
+<p>vedemo.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+vertex enumeration
+<br>chdemo.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+facet enumeration
+<br>lpdemo.c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+linear programming
+<hr WIDTH="100%">
+<p><b>Main components of all demos</b>
+<p>The main components of each demo are similar, and concern problem set
+up, memory allocation and memory cleanup:
+<p><font color="#990000">&nbsp;long</font>&nbsp; <font color="#990000">lrs_init
+(char *name);&nbsp;&nbsp;&nbsp;&nbsp; /* initialize lrslib and arithmetic
+package for prog "name" */</font>
+<blockquote>&nbsp;
+<br><font color="#000000">This procedure is called once at the beginning
+of the driver, and does basic setup functions. "name" will be output with
+some information about version numer or lrslib and which arithmetic package
+is used. FALSE is returned in case of failure.</font></blockquote>
+
+<p><br><font color="#990000">lrs_dat&nbsp; *lrs_alloc_dat (char *name);&nbsp;&nbsp;&nbsp;
+/* allocate for lrs_dat structure "name"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*/</font>
+<br>&nbsp;
+<blockquote><font color="#000000">This procedure produces a structure of
+type lrs_dat (usually saved in variable Q) which has basically static information
+about the problem. This includes a large number of flags and a few arrays
+for indices. All flags are set at default values (see lrslib.h) but can
+be overridden after the function has been called. A NULL pointer is returned
+in case of failure. It is called once for each problem to be solved.</font></blockquote>
+
+<p><br><font color="#990000">lrs_dic&nbsp; *lrs_alloc_dic (lrs_dat * Q);&nbsp;&nbsp;
+/* allocate for lrs_dic structure corr. to Q&nbsp;&nbsp; */</font>
+<br>&nbsp;
+<blockquote><font color="#000000">This procedure produces a structure of
+type lrs_dic (usually saved in variable P) which has basically dynamic&nbsp;
+information about the problem. This includes mainly the dictionary matrix,
+basic and cobasic indices and their row and column locations. For vertex
+or facet enumeration additional&nbsp; lrs_dic structures are created automatically
+and cached, to speed up backtracking. A NULL pointer is returned in case
+of failure.</font></blockquote>
+
+<p><br><font color="#990000">void lrs_free_dic ( lrs_dic *P, lrs_dat *Q);</font>
+<blockquote><font color="#000000">Free the space allocated for lrs_dic
+structures. This includes all cached structures. This procedure must be
+called before lrs_free_dat. It should be called before starting a new problem.</font></blockquote>
+
+<p><br><font color="#990000">void lrs_free_dat ( lrs_dat *Q);</font>
+<blockquote><font color="#000000">Free the space allocated for lrs_dat
+structure. It should be called before starting a new problem.</font></blockquote>
+<font color="#990000">void lrs_close (char *name);&nbsp;&nbsp;&nbsp; /*
+close lrs lib program "name"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+*/</font>
+<blockquote><font color="#000000">Final clean up. This is called once at
+the end of the run.</font>
+<hr WIDTH="100%"></blockquote>
+<b><font color="#000000">Building the data matrix</font></b>
+<p><font color="#000000">For an H-representation, the data for the problem
+b+Ax >= 0 is entered row by row. This is illustrated in program </font><font color="#990000">makecube(lrs_dic
+P, lrs_dat Q) </font><font color="#000000">(in vedemo.c).The procedure
+for entering a row of data is:</font>
+<p><font color="#990000">void lrs_set_row(lrs_dic *P, lrs_dat *Q, long
+row, long num[], long den[], long ineq);</font>
+<br>&nbsp;
+<blockquote><font color="#000000">Here </font><font color="#990000">row</font><font color="#000000">
+is the row number of the current row in the matrix, a long integer from
+1 to </font><font color="#990000">Q->m</font><font color="#000000">. The
+long arrays </font><font color="#990000">num[] </font><font color="#000000">and
+</font><font color="#990000">den[]</font><font color="#000000">
+contain the numerator and denominator coeficients, and have length </font><font color="#990000">Q->n</font><font color="#000000">.&nbsp;
+The long integer </font><font color="#990000">ineq</font><font color="#000000">
+is replaced by either </font><font color="#990000">GE</font><font color="#000000">&nbsp;
+(TRUE) or </font><font color="#990000">EQ</font><font color="#000000">
+(FALSE) to represent an inequality or equation respectively.</font></blockquote>
+<font color="#000000">A V-representation is built in a similar way, as
+illustrated in </font><font color="#990000">makecyclic(lrs_dic P, lrs_dat
+Q)&nbsp; </font><font color="#000000">(in chdemo.c). This also makes use
+of lrs_set_row. For a vertex, </font><font color="#990000">num[0]=1L</font><font color="#000000">,
+and for an extreme ray or linearity </font><font color="#990000">num[0]=0L</font><font color="#000000">.
+(In both cases </font><font color="#990000">den[0]=1L</font><font color="#000000">).
+</font><font color="#990000">ineq</font><font color="#000000">
+is TRUE for a vertex or extreme ray, and FALSE for a linearity.</font>
+<p><font color="#000000">If an objective function is required (eg., linear
+programming) it can be set up using:</font>
+<p><font color="#990000">void lrs_set_obj(lrs_dic *P, lrs_dat *Q, long
+num[], long den[], long max);</font>
+<blockquote><font color="#000000">The long arrays </font><font color="#990000">num,
+den</font><font color="#000000"> hold the objective function coeficients.
+num[0] is a constant term. The long integer </font><font color="#990000">max</font><font color="#000000">
+has values </font><font color="#990000">MAXIMIZE</font><font color="#000000">(TRUE)
+or </font><font color="#990000">MINIMIZE(</font><font color="#000000">FALSE).</font></blockquote>
+<font color="#000000">There are two additional procedures that perform
+the same functions, but where the coefficients are given in lrs_mp format:</font>
+<p><font color="#990000">void lrs_set_row_mp(lrs_dic *P, lrs_dat *Q, long
+row, lrs_mp_vector num, lrs_mp_vector den, long ineq);</font>
+<p><font color="#990000">void lrs_set_obj_mp(lrs_dic *P, lrs_dat *Q, lrs_mp_vector
+num, lrs_mp_vector den, long max);</font>
+<blockquote>
+<hr WIDTH="100%"></blockquote>
+
+<p><br><b><font color="#000000">Reverse search: vedemo and chdemo</font></b>
+<p><font color="#000000">After constructing the input data, reverse search
+is used to generate all vertices/rays(vedemo) or facets(chdemo). Unless
+the tree search will be customized in some way, there is no need to change
+this part of the demo programs. To</font>
+<br><font color="#000000">begin a starting basis is found using:</font>
+<p><font color="#990000">long lrs_getfirstbasis (lrs_dic ** P,&nbsp; lrs_dat
+* Q, lrs_mp_matrix * Lin, long no_output);</font>
+<blockquote><font color="#000000">If there are redundant columns in the
+input data, a linearity space is computed and stored in matrix Lin. The
+procedure returns</font></blockquote>
+<font color="#990000">long lrs_getnextbasis (lrs_dic **P, lrs_dat * Q,
+long prune);</font>
+<blockquote><font color="#000000">This procedure returns FALSE when there
+are no more bases to find. The variable prune can be set to TRUE to cause
+the reverse search to prune the tree at the current vertex, ie. to backtrack
+rather than going deeper in the tree.</font>
+<hr WIDTH="100%"></blockquote>
+<b><font color="#000000">Output extraction</font></b>
+<p><font color="#000000">A dictionary potentially represents one vertex
+and several extreme rays (vertex enumeration) or several facets (facet
+enumeration). Due to degeneracy, the same vertex/ray/facet may be generated
+several times. The procedure</font>
+<p><font color="#990000">long lrs_getsolution (lrs_dic * P, lrs_dat * Q,
+lrs_mp_vector output, long col);</font>
+<p><font color="#000000">checks each column col of the dictionary to see
+if it contains some output, and if so returns TRUE with </font><font color="#990000">output[]
+</font><font color="#000000">containing
+the respective integer coefficients. To avoid duplication, only the lexicographically
+minimum representation of a given output is extracted by lrs_getsolution.
+The output coefficients need to be divided by </font><font color="#990000">P->det</font><font color="#000000">
+to get the correct rational output. This is done by the&nbsp; procedure</font>
+<p><font color="#990000">void lrs_printoutput (lrs_dat * Q, lrs_mp_vector
+output);</font>
+<blockquote>
+<hr WIDTH="100%"></blockquote>
+<b><font color="#000000">Linear Programming</font></b>
+<p><font color="#000000">The program lpdemo.c solves a set of linear programs
+on hypercubes, using makecube to construct the constraint matrices. Once
+the dictionary has been generated, a single call to</font>
+<p><font color="#990000">long lrs_solvelp (lrs_dic * P, lrs_dat * Q, long
+maximize);</font>
+<p><font color="#000000">solves the linear program.</font>
+<br>
+<hr WIDTH="100%">
+<h3>
+<a NAME="Acknowledgements"></a>Acknowledgements and References</h3>
+I would like to thank many people for helping with this implementation
+project. Komei Fukuda encouraged me from the start, collaborated in designing
+the file formats, and provided many suggestions for improving the code.
+David Bremner implemented memory allocation, caching and signals. Jerry
+Quinn coded the integer divide routine. Bug reports were provided by many
+users, for which I thank them. In particular Gerardo Garbulsky's extensive
+use of earlier versions suggested many refinements, Ambros Marzetta demonstrated
+the importance of caching and Andreas Enge helped debug the volume computation.
+Oleg Pikhurko convinced me of the need for the lp-solve like procedures
+described in the Demos section.
+<p>D. Avis,&nbsp; "lrs: A Revised Implementation of the Reverse Search
+Vertex Enumeration Algorithm," In: Polytopes - Combinatorics and Computation,
+G. Kalai &amp; G. Ziegler eds., Birkhauser-Verlag, DMV Seminar Band 29,
+pp. 177-198 (2000).
+<br><a href="http://cgm.cs.mcgill.ca/~avis/doc/avis/Av98a.ps">http://cgm.cs.mcgill.ca/~avis/doc/avis/Av98a.ps</a>
+<p>D. Avis, "Computational Experience with the Reverse Search Vertex Enumeration
+Algorithm," Optimization Methods and Software,&nbsp; Vol. 10, pp.107-124
+(1998)
+<br><a href="http://cgm.cs.mcgill.ca/~avis/doc/avis/Av98b.ps">http://cgm.cs.mcgill.ca/~avis/doc/avis/Av98b.ps</a>
+<p>D. Avis, D. Bremner, and R. Seidel, "How Good are Convex Hull Algorithms?,"
+Computational Geometry: Theory and Applications, Vol 7,pp.265-301(1997).
+<a href="http://cgm.cs.mcgill.ca/~avis/doc/avis/ABS96a.ps">http://cgm.cs.mcgill.ca/~avis/doc/avis/ABS96a.ps</a>
+<p>D. Avis and L. Devroye, "Estimating the Number of Vertices of a Polyhedron,"
+pp. 179-190 in Snapshots of Computational and Discrete Geometry, ed. D.
+Avis and P. Bose, School of Computer Science, McGill University (1994).
+<a href="http://cgm.cs.mcgill.ca/~avis/doc/avis/AD94a.ps">http://cgm.cs.mcgill.ca/~avis/doc/avis/AD94a.ps</a>
+<p>D. Avis and K. Fukuda, "A Pivoting Algorithm for Convex Hulls and Vertex
+Enumeration of Arrangements and Polyhedra," Discrete and Computational
+Geometry, Vol. 8, pp. 295-313 (1992).&nbsp; <a href="http://cgm.cs.mcgill.ca/~avis/doc/avis/AF92b.ps">http://cgm.cs.mcgill.ca/~avis/doc/avis/AF92b.ps</a>
+<p>D. Bremner, K. Fukuda and A. Marzetta, Primal-Dual Methods for Vertex
+and Facet Enumeration, 13th ACM
+<br>Symposium on Computational Geometry SCG 1997, 49-56.
+</body>
+</html>

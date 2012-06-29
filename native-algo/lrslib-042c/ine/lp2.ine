@@ -1,0 +1,15 @@
+H-representation
+begin
+7 3 integer
+4 -1 -3
+5 -5 -1
+2 -3 -2
+1 1 3
+2 2 -1
+0 1 0
+0 0 1
+end
+startingcobasis 2 5
+lponly
+maximize 0 1 1
+verbose

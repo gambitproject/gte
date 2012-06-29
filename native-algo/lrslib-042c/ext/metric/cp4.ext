@@ -1,0 +1,14 @@
+cp4.ext
+V-representation
+begin
+8 7 integer 
+1 0 0 0 0 0 0
+1 0 1 1 1 1 0 
+1 0 0 1 0 1 1 
+1 1 0 0 1 1 0 
+1 1 1 1 0 0 0 
+1 0 1 0 1 0 1 
+1 1 1 0 0 1 1 
+1 1 0 1 1 0 1 
+end
+startingcobasis 2 3 4 5 6 7 8

@@ -1,0 +1,205 @@
+README file for lrslib : reverse search vertex enumeration program/CH package
+-----------------------------------------------------------------------------
+Documentation is currently being maintained at the URL:
+
+http://cgm.cs.mcgill.ca/~avis/lrs.html
+-----------------------------------------------------------------------------
+2010.5.7  incidence no longer resets printcobasis frequency to zero. 
+          If the printcobasis n option is used, the frequency will be n.
+          Otherwise the default n=0 is used, and cobasis is printed only for lexmin bases.
+-----------------------------------------------------------------------------
+
+2010.4.26 bug when incidence and nonnegative options used together reported by 
+          Jochen Koenemannkfix was fixed. 
+          Bug in fourier reported by Laszlo David for input which is not full
+          dimensional. I am temporarily removing fourier from distribution.
+-----------------------------------------------------------------------------
+2009.12.2 bug fix for redund caused problems in nash, reported by James Heather.
+          Hopefully this new version solves both issues.
+-----------------------------------------------------------------------------
+2009.9.10  bug in redund reported by Alden Walker, when linearities are redundant, has been fixed.
+           It is now under test, so please report any bugs!
+           this bug also can cause printcobasis option to be incorrect for lrs under this condition. 
+           Problems still seem to arise in fourier from time to time, so please report any anomalities.
+-----------------------------------------------------------------------------
+2009.2.5    bug in fourier when using linearity option pointed out by Conor Meagher.  Option disabled.
+            2nash driver uses two processors to run nash with input files in both orders.
+            terminates when first process terminates. Thanks again to Conor for this.
+-----------------------------------------------------------------------------
+2007.6.6    printcobasis output line modified to give also in_det
+            det= the determinant of the current basis, which is always integer.
+            in_det= the determinant of the input rows corresponding to the current basis. lrs rescales input rows if they are rational or have a common divisor, so in these cases det and in_det are different.
+For V-representation, the volume will be the sum of the in_det of
+each basis, divided by the dimension (n-1)!
+-------------------------------------------------------------------
+2006.10.31   Modified code for restartpivots, to allow DB to do something.
+             Estimator now provides estimate of running time=time*bases/tree nodes
+             Triangulation printed if getvolume and verbose options used
+-----------------------------------------------------------------------------
+
+2006.10.11   Bug fix for nash, and inclusion of polytope version
+-----------------------------------------------------------------------------
+
+             available by using setupnash2
+-----------------------------------------------------------------------------
+2006.3.1 incidence option now can be used compatibly with printcobasis n 
+-----------------------------------------------------------------------------
+2006.2.14
+Version 4.2b
+
+Bug fixed related to memory allocation for linearity reported by David Haws.
+If you use the linearity option, you should upgrade to this version.
+
+In the case of inconsistent linearities, the first inconsistent linearity
+is now reported before termination.
+
+----------------------------------------------------------------------------
+2005.11.20
+Version 4.2a
+
+Bug fixed relating to miscaled lp dual variables output when lponly set
+
+maxoutput n   Option limits output lines to n: either rays+vertices, or facets
+
+----------------------------------------------------------------------------
+
+2005.6.1
+Version 4.2 with two new drivers:
+
+nash.c  which computes all Nash equilibria of a two person non-cooperative game,
+        and uses setupnash.c to create the input files.
+
+fourier.c  which does Fourier elimination on an H-representation to project it to
+           a lower dimensional space. Contributed by Tallman Nkgau.
+
+Other changes: lrs with the lponly option now provides dual variables for the 
+        optimum solution.
+
+Bug fix to mpdouble (reported by several users.)
+
+_____________________________________________________________________________
+
+2004.9.23
+Version 4.2 updated with a patch from Bremner that has something to do with C++.
+
+2003.10.24
+
+Version 4.2 which appears here is a prerelease version, is not fully tested,
+and will be modified frequently. However you are more than welcome to try
+it - please report any bugs! Merci beaucoup.
+
+2002.10.28
+
+lrslib v.4.2        minor modifications to v.4.1
+
+This is a pre-release for test purposes. Please report bugs!
+Nonnegative option was fixed to allow input where origin is not necessarily
+a vertex.
+A memory leak was fixed.
+A quiet mode is added - compile with LRS_QUIET set.
+
+------------------------------------------------------------------------------
+2001.6.20
+
+lrslib v.4.1
+
+lpsolve like procedures to build input data added. Demo programs are:
+
+vedemo.c    vertex enumeration
+chdemo.c    facet enumeration
+lpdemo.c    linear programs
+
+They can be build using: make demo
+
+Proper garbage collection implemented to clean up after each problem has been
+solved. See
+
+http://cgm.cs.mcgill.ca/~avis/C/lrslib/lrslib.html 
+
+for documentation.
+
+-------------------------------------------------------------------------------
+2000.6.14
+
+Various binaries are available in the directory binaries.
+
+Currently available:
+
+binaries/debian        Debian Linux      
+binaries/sun           Sun Ultra Sparc
+binaries/win98         Windows 95/98
+
+------------------------------------------------------------------------------
+2000.6.14
+
+lrslib v.4.0 which
+supercedes all previous versions of the programs lrs and redund.
+New Features:
+------------
+
+1. Library version allows customization of the search function, access to the
+output as it is produced, and access to lrs from other programs.
+
+2. Problems need no longer be in full dimension. This allows the
+input of equations, partial enumeration on facets, ridges etc.
+
+3. Choice of arithmetic packages. Currently available are:
+
+   lrsmp     Extended precision arithmetic used in previous releases
+  
+   lrslong   Fixed length long integer arithmetic. No overflow checking
+             but 5-10 times faster.
+
+   lrsgmp    Requires preinstallation of GNU GMP package, available at
+             http://www.swox.com/gmp/
+
+  The standard "make all" gives lrs/redund with lrsmp, and lrs1/redund1 with lrslong. 
+ 
+4. redund was completely rewritten and is faster than before. The previous
+   version did not remove redundancy in the starting basis and should be
+   discarded. 
+
+
+Installation:
+------------
+
+1. From website go to "Download" and retrieve the file lrslib-040.tar.gz
+
+2. Unpack with:
+
+   % gunzip lrslib-040.tar.gz
+   % tar xvf lrslib-040.tar
+
+3. Go to the new directory
+
+   % cd lrslib-040
+
+4. make binaries by typing
+   
+   % make all               (most 32 bit unix machines)
+
+or
+
+  % make all64              (64 bit integer machines such as DEC Alpha)
+
+If the make fails, it is usually due to timing and/or interrupt handling
+routines. In this case try:
+
+  % make nosigs
+
+5. If successful you should get binaries: lrs redund lrs1 redund1
+
+6. Test the program lrs by typing:
+
+   lrs cube.ine
+
+and you should get output resembling the file cube.ext
+
+7. You will find additional test files in the directories: ine and ext
+
+8. For GNU gmp library, edit the makefile to set the INCLUDE and LIB paths for
+   the location of the gmp libarary, and type:
+
+   %make gmp
+
+   You should get binaries glrs and gredund
