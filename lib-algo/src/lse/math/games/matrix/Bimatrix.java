@@ -10,6 +10,8 @@ public class Bimatrix {
 	private String[] rowNames;
 	private String[] colNames;
 	
+	final static String lineSeparator = System.getProperty("line.separator");
+	
 	public Bimatrix(String[] names, Rational[][] a, Rational[][] b, String[] rowStrats, String[] colStrats)
 	{
 		this.names = names;
@@ -54,6 +56,8 @@ public class Bimatrix {
 		return colpp.toString();
 	}
 	
+	
+	
 	private void addMatrix(int idx, ColumnTextWriter colpp) {	
 		colpp.writeCol(name(idx));
 		colpp.alignLeft();
@@ -72,4 +76,30 @@ public class Bimatrix {
 			colpp.endRow();	
 		}
 	}
+	
+	
+	public String printFormat()
+	{
+		String s="";
+		s+=a.length + " "+a[0].length+lineSeparator;
+		s+=lineSeparator;
+		for (int i=0;i<a.length;i++){
+			for (int j=0;j<a[i].length;j++){
+				s+=" "+a[i][j];
+			}
+			s+=lineSeparator;
+		}
+		
+		s+=lineSeparator;
+		s+=lineSeparator;
+		for (int i=0;i<b.length;i++){
+			for (int j=0;j<b[i].length;j++){
+				s+=" "+b[i][j];
+			}
+			s+=lineSeparator;
+		}
+		
+		return s;
+	}
+	
 }
