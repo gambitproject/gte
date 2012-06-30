@@ -14,6 +14,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.view.AbstractPainter;
 	import lse.math.games.builder.view.IGraphics;
 	
+	import util.Log;
 	import mx.controls.Alert;
 	
 	/**
@@ -42,6 +43,8 @@ package lse.math.games.builder.viewmodel
 		private var _matrix:StrategicForm = null; 
 		
 		private var fileSettings:FileSettings = FileSettings.instance;
+		
+		private var log:Log = Log.instance;
 		
 		public function MatrixPainter() 
 		{
@@ -100,6 +103,8 @@ package lse.math.games.builder.viewmodel
 		{		
 			colWidth = getColWidth();
 			rowHeight = getRowHeight();
+			log.add(Log.ERROR_HIDDEN, String(colWidth), "Settings");
+			log.add(Log.ERROR_HIDDEN, String(rowHeight), "Settings");
 			
 			//Set width and height of each cell in the strategic form matrix to be equal			
 			if (colWidth>rowHeight)
@@ -109,7 +114,7 @@ package lse.math.games.builder.viewmodel
 			//By default the remaining width and height of each cell from the point of view of the
 			//label of each player is double. Assume the payoff label for play 1 has a width of
 			//30. Than the total length of the cell is 60. Now it is adjustedt by 2/3 and is only 45.
-			//For large number like 123123 the width of the cell dows not fit optical to the height of the row
+			//For large number like 123123 the width of the cell does not fit optical to the height of the row
 			
 			colWidth=int(colWidth/3*2);
 			rowHeight=int(rowHeight/3*2);
@@ -283,11 +288,12 @@ package lse.math.games.builder.viewmodel
 			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);
 			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
 			
+			//Updated the width scale from 2 to 2.5 to have more space between the player payoffs
 			for (var j:int = 0; j < cols.length; ++j) {
 				if (this.labels["c" + j] != undefined) {
 					var colLabel:TextLine = this.labels["c" + j];
-					if (colLabel.width + horPadding * 2 * scale > width) {
-						width = colLabel.width + horPadding * 2 * scale;
+					if (colLabel.width + horPadding * 2.5 * scale > width) {
+						width = colLabel.width + horPadding * 2.5 * scale;
 					}
 				}
 			}
@@ -300,8 +306,8 @@ package lse.math.games.builder.viewmodel
 						var pairKey:String = Strategy.key([row, col]);
 						var outcomeLabel:TextLine = this.labels[pl.name + "_" + pairKey];
 						
-						if (outcomeLabel.width * 2 + this.scale * horPadding * 3 > width) {
-							width = outcomeLabel.width*2 + this.scale * horPadding * 3;
+						if (outcomeLabel.width * 2.5 + this.scale * horPadding * 3 > width) {
+							width = outcomeLabel.width*2.5 + this.scale * horPadding * 3;
 						}
 					}
 				}
@@ -315,11 +321,13 @@ package lse.math.games.builder.viewmodel
 			var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);
 			var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
 			
+			//Updated the height scale from 2 to 2.5 to have more space between the player payoffs
+			
 			for (var i:int = 0; i < rows.length; ++i) {
 				if (this.labels["r" + i] != undefined) {
 					var rowLabel:TextLine = this.labels["r" + i];
-					if (rowLabel.height + this.scale * vertPadding * 2 > height) {
-						height = rowLabel.height + this.scale * vertPadding * 2;
+					if (rowLabel.height + this.scale * vertPadding * 2.5 > height) {
+						height = rowLabel.height + this.scale * vertPadding * 2.5;
 					}
 				}
 			}
@@ -333,8 +341,8 @@ package lse.math.games.builder.viewmodel
 						var pairKey:String = Strategy.key([row, col]);
 						var outcomeLabel:TextLine = this.labels[pl.name + "_" + pairKey];
 						
-						if (outcomeLabel.height * 2 + this.scale * vertPadding * 3 > height) {
-							height = outcomeLabel.height * 2 + this.scale * vertPadding * 3;
+						if (outcomeLabel.height * 2.5 + this.scale * vertPadding * 3 > height) {
+							height = outcomeLabel.height * 2.5 + this.scale * vertPadding * 3;
 						}
 					}					
 				}
