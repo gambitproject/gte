@@ -4,9 +4,12 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:local="."
 			   title="Matrix editor"
-			   close="promptExit()">
+			   close="promptExit()"
+			   creationComplete="init()" >
 	<fx:Script>
 		<![CDATA[
+			import flash.ui.Keyboard;
+			
 			import lse.math.games.builder.model.Outcome;
 			import lse.math.games.builder.model.Player;
 			import lse.math.games.builder.model.Rational;
@@ -14,6 +17,7 @@
 			import lse.math.games.builder.model.Strategy;
 			import lse.math.games.builder.presenter.Presenter;
 			import lse.math.games.builder.viewmodel.AutoLabeller;
+			
 			
 			import mx.controls.Alert;
 			import mx.managers.PopUpManager;
@@ -60,6 +64,8 @@
 			
 			private var glbSettings:UserSettings = UserSettings.instance;
 			private var dataChanged:Boolean = false;
+			private var instyle:String="ZG";
+			
 			
 			
 			/** Matrix which is being edited */
@@ -75,10 +81,17 @@
 				populate(0);
 				populate(1);
 				onlyAlignStrategy()
-				setP2editable(false);
+				
 				
 				
 			}
+			
+			private function init():void {
+				pl1PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP1Payoff);
+				pl2PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP2Payoff);
+				setP2editable(false);
+			}
+			
 			
 			/** Presenter to which changes should be invalidated */
 			public function set controller(value:Presenter):void {
@@ -88,7 +101,7 @@
 
 			public function setMode(isZero:Boolean):void {
 				if (!isZero) {
-					inputStyle.selectedIndex=2;
+					instyle="2G";
 					p2editable=true;
 				}
 			}
@@ -346,8 +359,7 @@
 				}
 			}
 			
-			private function fillWithZeros(pm:Array):void{
-				
+			private function fillWithZeros(pm:Array,sym:Boolean):void{
 				for (var i:int=0;i<pm.length;i++){
 					var l:int=pm[i].length;
 					if (l<maxColumns) {
@@ -356,6 +368,33 @@
 						}
 					}
 				}
+			
+				//if game is symmetric rows and columns must have the same dimensions
+				//Fill with zeros if not
+				if (sym) {
+					if (pm.length<maxColumns) {
+						while (pm.length<maxColumns) {
+							pm.push(new Array())
+							for (var k:int=0;k<maxColumns;k++) {
+								pm[pm.length-1].push("0");
+							}
+						}
+						
+					} 
+					
+					if (pm.length>maxColumns){
+						for (var i:int=0;i<pm.length;i++){
+							var l:int=pm[i].length;
+							if (l<pm.length) {
+								for (var k:int=0;k<pm.length-l;k++) {
+									pm[i].push("0");
+								}
+							}
+						}
+					}
+					maxColumns=pm.length;
+				}
+				
 
 			}
 			
@@ -433,11 +472,11 @@
 				payoffMatrix2=new Array();
 				
 				convertToMatrix(pl1PayMapStr,payoffMatrix1);
-				fillWithZeros(payoffMatrix1);
+				fillWithZeros(payoffMatrix1,false);
 				pl1PayMapStr=buildMatrixString(payoffMatrix1)
 				
 				convertToMatrix(pl2PayMapStr,payoffMatrix2);
-				fillWithZeros(payoffMatrix2);
+				fillWithZeros(payoffMatrix2,false);
 				pl2PayMapStr=buildMatrixString(payoffMatrix2)
 				
 			}
@@ -445,15 +484,13 @@
 			private function alignStrategy():void 
 			{
 				
-				var instyle:String = inputStyle.selectedItem.data;
-				
 				payoffMatrix1=new Array();
 				payoffMatrix2=new Array();
 
 				
 				if (instyle=="ZG") {
 					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1);
+					fillWithZeros(payoffMatrix1,false);
 					makeNegative(payoffMatrix1,payoffMatrix2);
 					pl1PayMapStr=buildMatrixString(payoffMatrix1)
 					pl2PayMapStr=buildMatrixString(payoffMatrix2)
@@ -461,19 +498,19 @@
 					
 				} else if (instyle=="SG") {
 					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1);
+					fillWithZeros(payoffMatrix1,true);
 					makeTranspo(payoffMatrix1,payoffMatrix2);
 					pl1PayMapStr=buildMatrixString(payoffMatrix1)
 					pl2PayMapStr=buildMatrixString(payoffMatrix2)
 					
 				} else {
 					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1);
+					fillWithZeros(payoffMatrix1,false);
 					pl1PayMapStr=buildMatrixString(payoffMatrix1)
 						
 						
 					convertToMatrix(pl2PayMapStr,payoffMatrix2);
-					fillWithZeros(payoffMatrix2);
+					fillWithZeros(payoffMatrix2,false);
 					pl2PayMapStr=buildMatrixString(payoffMatrix2)
 					
 					
@@ -489,12 +526,25 @@
 				updateAlphabets()
 				
 			}
-			
+
+			//Old function - only for DDLB of game types)
 			private function changeEvt(event:Event):void {
-				var instyle:String =event.currentTarget.selectedItem.data;
+				//var instyle:String =event.currentTarget.selectedItem.data;
 				if ((instyle=="ZG") || (instyle=="SG")) {
 					setP2editable(false);
 
+				} else {
+					setP2editable(true);
+				}
+				
+				alignStrategy();
+			}
+			
+			private function changeEvtRadioButton(arg : String):void {
+				instyle=arg;
+				if ((instyle=="ZG") || (instyle=="SG")) {
+					setP2editable(false);
+					
 				} else {
 					setP2editable(true);
 				}
@@ -507,8 +557,6 @@
 				if (editable==true){
 					p2editable=true;
 					p2cbg=0xffffff;
-					
-				
 				} else {
 					p2editable=false;
 					p2cbg=0xcccccc;
@@ -516,6 +564,28 @@
 				}
 			
 			}
+			
+			private function keyPressedP1Payoff(event:KeyboardEvent):void{
+				
+				if ((instyle!="SG") && (event.keyCode==13)){
+					//It does not make sense to autoalign in a symmetric game during typing
+					alignStrategy();
+					pl1PayMapStrBox.text=pl1PayMapStrBox.text+"\n";
+					pl1PayMapStrBox.selectRange(pl1PayMapStrBox.text.length,pl1PayMapStrBox.text.length);
+				}
+			}
+			
+			private function keyPressedP2Payoff(event:KeyboardEvent):void{
+				
+				if ((instyle!="SG") && (event.keyCode==13)){
+					//It does not make sense to autoalign in a symmetric game during typing
+					alignStrategy();
+					pl2PayMapStrBox.text=pl2PayMapStrBox.text+"\n";
+					pl2PayMapStrBox.selectRange(pl2PayMapStrBox.text.length,pl2PayMapStrBox.text.length);
+				}
+			}
+
+			
 			 
 		]]>
 	</fx:Script>
@@ -537,49 +607,55 @@
 	</fx:Style>
 
 	<s:VGroup width="819" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<s:HGroup width="100%" >
+			<s:Label y="0" width="90" height="20" text="Type of game: " verticalAlign="middle"/>
+			<s:RadioButton groupName="rbg" id="rgb_ZG" label="Zerosum game (A,-A)"  selected="true" click="changeEvtRadioButton('ZG');dataChanged=true;" />
+			<s:RadioButton groupName="rbg" id="rgb_SG" label="Symmetric game (A,AT)" click="changeEvtRadioButton('SG');dataChanged=true;" />
+			<s:RadioButton groupName="rbg" id="rgb_2G" label="General game (A,B)"   click="changeEvtRadioButton('2G');dataChanged=true;" />
+			
+		</s:HGroup>
 		<s:HGroup width="100%" gap="0">
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-				<s:Label text="Player 1 PayOff Matrix"/>
-				<s:Label height="20" color="#2323E6" text="1. Step: Define the typ of the game"
-						 verticalAlign="middle"/>
-				<s:HGroup width="100%" verticalAlign="middle" toolTip="Number of strategies for this player">
-					<s:Label y="0" width="90" height="20" text="Input style:" verticalAlign="middle"/>
+				<!--
+				<s:HGroup width="100%" verticalAlign="middle">
+					
+					<s:Label y="0" width="90" height="20" text="Type of game:" verticalAlign="middle"/>
 					<mx:ComboBox id="inputStyle" width="100%" change="changeEvt(event);dataChanged=true;" textAlign="left" >
 							<mx:ArrayCollection>
-								<fx:Object label="Zero-Sum Game" data="ZG"/>
-								<fx:Object label="Symmetric Game" data="SG"/>
-								<fx:Object label="Seperate matrix for every player" data="2G"/>
+								<fx:Object label="Zerosum game (A,-A)" data="ZG"/>
+								<fx:Object label="Symmetric game (A,AT)" data="SG"/>
+								<fx:Object label="General game (A,B)" data="2G"/>
 							</mx:ArrayCollection>
 					</mx:ComboBox>
 				</s:HGroup>
-				<s:HGroup>
-					<s:Label height="20" text="Strategy names: " verticalAlign="middle"/>
-					<s:TextInput id="pl1StratInput" width="300" editable="true" widthInChars="22" text="{alpha1}" change="dataChanged=true;" />
+				-->
+				<s:HGroup  width="100%" verticalAlign="middle">
+					<s:Label height="20" width="90" text="Strategy names: " verticalAlign="middle"/>
+					<s:TextInput id="pl1StratInput" width="100%" editable="true" widthInChars="22" text="{alpha1}" change="dataChanged=true;" />
 				</s:HGroup>	
-				<s:Label height="20" color="#2323E6" text="2. Step: Type in the payoff matrix"
+				<s:Label height="20" color="#2323E6" text="Player 1 PayOff Matrix"
 						 verticalAlign="middle"/>
-				<s:TextArea id="pl1PayMapStrBox" width="400" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
+				<s:TextArea id="pl1PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
 							text="{pl1PayMapStr}" change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;"/>
-				<s:Label height="20" color="#2323E6" text="3. Step: Update your input to align and compute payoffs for player 2"
-						 verticalAlign="middle"/>
 				<s:HGroup width="100%" horizontalAlign="center">
 					<s:Button label="Reset" cornerRadius="0" click="populate(0);"/>
-					<s:Button label="Update" cornerRadius="0" click="alignStrategy();"/>
+					<s:Button label="Align and Update" cornerRadius="0" click="alignStrategy();"/>
 				</s:HGroup>
 			</s:VGroup>
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-				<s:Label text="Player 2 PayOff Matrix"/>
-				<mx:Spacer height="45"/>
-				<s:HGroup>
-					<s:Label height="20" text="Strategy names:" verticalAlign="middle"/>
-					<s:TextInput editable="{p2editable}" width="300" id="pl2StratInput" widthInChars="22" text="{alpha2}" change="dataChanged=true;" />
+				<!--
+					<mx:Spacer height="20"/>
+				-->
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label height="20" width="90" text="Strategy names:" verticalAlign="middle"/>
+					<s:TextInput editable="{p2editable}" width="100%" id="pl2StratInput" widthInChars="22" text="{alpha2}" change="dataChanged=true;" />
 				</s:HGroup>
-				<mx:Spacer height="20"/>
-				<s:TextArea editable="{p2editable}" id="pl2PayMapStrBox" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
+				<s:Label height="20" color="#2323E6" text="Player 2 PayOff Matrix"
+						 verticalAlign="middle"/>
+				<s:TextArea editable="{p2editable}" id="pl2PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
 							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 				<s:HGroup width="100%" horizontalAlign="center">
-				<mx:Spacer height="20"/>
-				<s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);" />
+					<s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);" />
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>
@@ -588,6 +664,7 @@
 			<s:Button label="Close and save changes" cornerRadius="0" width="200" click="saveChanges();"/>
 			<s:Button label="Close and discard changes" cornerRadius="0" width="200" click="exit()"/>
 		</s:HGroup>
+
 		
 	</s:VGroup>
 	
