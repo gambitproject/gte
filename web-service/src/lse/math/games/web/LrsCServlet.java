@@ -33,13 +33,25 @@ public class LrsCServlet extends AbstractRESTServlet
 {    
 	private static final Logger log = Logger.getLogger(LrsCServlet.class.getName());
 	private SettingLoader settings;
-		
+	private String os;
+	private String program1="";
+	private String program2="";
 	
 	public void init(ServletConfig config) 
 	throws ServletException
 	{
 		super.init(config);           
 		settings=SettingLoader.getInstance();
+		os=System.getProperty("os.name");
+		
+		if (os.startsWith("Windows")){
+			program1="prepare_nash.exe";
+			program2="nash.exe";
+		} else {
+			program1="prepare_nash";
+			program2="nash";
+		}
+		
 	}
 
 	/**
@@ -131,7 +143,7 @@ public class LrsCServlet extends AbstractRESTServlet
 					Process p=null;
 
 					//Call external program
-					String[] cmdArray1 = new String[]{settings.getProperty("path.algo.lrs")+"prepare_nash.exe", 
+					String[] cmdArray1 = new String[]{settings.getProperty("path.algo.lrs")+program1, 
 							f[0].getCanonicalPath(),
 							f[1].getCanonicalPath(),
 							f[2].getCanonicalPath()};
@@ -140,7 +152,7 @@ public class LrsCServlet extends AbstractRESTServlet
 					
 					
 					//Call external program
-					String[] cmdArray2 = new String[]{settings.getProperty("path.algo.lrs")+"nash.exe", 
+					String[] cmdArray2 = new String[]{settings.getProperty("path.algo.lrs")+program2, 
 							f[1].getCanonicalPath(),
 							f[2].getCanonicalPath()};
 					p = rt.exec(cmdArray2);
