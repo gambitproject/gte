@@ -35,6 +35,8 @@
 	<property name="gui.test.build.dir" value="${build.dir}/${gui.proj.dir}-test"/>	
 	<property name="war.dir" value="${build.dir}/${war.name}"/>
 	
+
+	
 	<condition property="isUnix">
    		<os family="unix" />
   	</condition>
@@ -291,17 +293,24 @@
 		
 		<delete dir="${JETTY_HOME}/${lib.proj.native}"/> 
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native}"/>
-		<copy todir="${JETTY_HOME}/${lib.proj.native}">
-			<fileset dir="${lib.proj.native}"> 
-				<include name="nash.exe" />
-				<include name="nash" />
-				<include name="prepare_nash.exe" />
-				<include name="prepare_nash" />
-			</fileset>
-			
-		</copy>
+		<mkdir dir="${JETTY_HOME}/${lib.proj.native.algo}"/>
+		
+		<antcall target="-copyUnixFiles" />
+  		<antcall target="-copyWindowsFiles" />
+		
 		
 		<jetty-start/>	
 	</target>	
+    
+    <target name="-copyWindowsFiles" if="isWindows">
+  		<echo>Windows</echo>
+  		<copy file="${lib.proj.native.algo}/nash.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+  		<copy file="${lib.proj.native.algo}/prepare_nash.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+	</target>
+ 
+	<target name="-copyUnixFiles" if="isUnix">
+  		<copy file="${lib.proj.native.algo}/nash"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+		<copy file="${lib.proj.native.algo}/prepare_nash"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+ 	</target> 
     
 </project>
