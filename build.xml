@@ -311,6 +311,9 @@
 	<target name="-copyUnixFiles" if="isUnix">
   		<copy file="${lib.proj.native.algo}/nash"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
 		<copy file="${lib.proj.native.algo}/prepare_nash"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/nash" perm="700"/>
+		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/prepare_nash" perm="700"/>
+		
  	</target> 
     
 </project>
