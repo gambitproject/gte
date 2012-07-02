@@ -1,0 +1,28 @@
+# Servlet  - Howto#
+The easiest way to write your own Servlet is to make a copy of the existing LrsCServlet (`web-service/src/lse/math/games/web/LrsCServlet`): 
+
+1. In Eclipse make a copy of `web-service/src/lse/math/games/web/LrsCServlet`
+2. Rename the file to `web-service/src/lse/math/games/web/MyServlet`. Press F5 if Eclipse does not update the treeview.
+3. Open the source file and change the class name to **MyServlet**.
+4. Change `private static final Logger log = Logger.getLogger(LrsCServlet.class.getName());` to `private static final Logger log = Logger.getLogger(MyServlet.class.getName());`
+5. Open `web-service/war/builder/index.jsp`
+6. Add to the array flashvars the line `myS: "label=My Servlet;toolTip=My test Servlet;type=nf;url=/gte/myServletDir/",`
+7. **type=nf** means that the Servlet is only visible in the ddlb if you switch to the strategic form. **type=xf** means that the servlet is only visible if you switch to extensive form.
+8. Make a copy for the directory (including subdirs) `web-service/war/lrsc` and rename it to `web-service/war/myServletDir`
+9. Open `web-service/war/WEB-INF/web.xml` and add a new servlet definition
+`	<servlet><servlet-name>MyServlet</servlet-name>
+		<servlet-class>lse.math.games.web.MyServlet</servlet-class>
+	</servlet>`	
+10. Add the servlet Mapping to `<servlet-mapping><servlet-name>MyServlet</servlet-name>	<url-pattern>/myServletDir/servlet</url-pattern></servlet-mapping>`
+11. Call the ANT target **compileComplete**.
+ 
+
+## Call external code ##
+
+External code in the LrsCServlet is done via System calls. The native binaries should be placed under **native-algo** in a subdirectory of your choice. The ANT target **package** takes care of copying the files to the correct directory (TODO: copy subdirs - currently take a look at the end of the **package** target and see how this is done with nash.exe).
+
+The LrsCServlet is self-axplanatory in terms of making system calls, creating temp files and read from std-in. The class **game** takes care of the two matrices of player one and two. 
+
+
+
+
