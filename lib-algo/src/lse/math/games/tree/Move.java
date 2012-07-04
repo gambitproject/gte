@@ -35,7 +35,8 @@ public class Move {
     private String _label;
     
     public void setLabel(String value) { _label = value; }
-
+    public String getLabel() { return _label; }
+    
     public int uid() { return _uid; }
     
     public Iset iset() {
