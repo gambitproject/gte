@@ -1,14 +1,20 @@
 # Servlet  - Howto#
-The easiest way to write your own Servlet is to make a copy of the existing LrsCServlet (`web-service/src/lse/math/games/web/LrsCServlet`): 
 
-1. In Eclipse make a copy of `web-service/src/lse/math/games/web/LrsCServlet`
+Accessing native code can be implemented in two ways:
+
+* Create a new Servlet
+* Use the NativeServlet Interface
+
+## Create a new Servlet ##
+The easiest way to create your own servlet is to make a copy of the existing LrsCServlet (`web-service/src/lse/math/games/web/LrsCServlet`): 
+
+1. In Eclipse make a copy of `web-service/src/lse/math/games/web/NativeServlet`
 2. Rename the file to `web-service/src/lse/math/games/web/MyServlet`. Press F5 if Eclipse does not update the treeview.
 3. Open the source file and change the class name to **MyServlet**.
-4. Change `private static final Logger log = Logger.getLogger(LrsCServlet.class.getName());` to `private static final Logger log = Logger.getLogger(MyServlet.class.getName());`
-5. Open `web-service/war/builder/index.jsp`
-6. Add to the array flashvars the line `myS: "label=My Servlet;toolTip=My test Servlet;type=nf;url=/gte/myServletDir/",`
-7. **type=nf** means that the Servlet is only visible in the ddlb if you switch to the strategic form. **type=xf** means that the servlet is only visible if you switch to extensive form.
-8. Make a copy for the directory (including subdirs) `web-service/war/lrsc` and rename it to `web-service/war/myServletDir`
+4. Change `private static final Logger log = Logger.getLogger(NativeServlet.class.getName());` to `private static final Logger log = Logger.getLogger(MyServlet.class.getName());`
+5. Open `web-service/war/builder/webservices.xml`
+6. Make a copy of a `<Servlet>...</Servlet>` section.
+7. Make a copy for the directory (including subdirs) `web-service/war/native` and rename it to `web-service/war/myServletDir`
 9. Open `web-service/war/WEB-INF/web.xml` and add a new servlet definition
 `	<servlet><servlet-name>MyServlet</servlet-name>
 		<servlet-class>lse.math.games.web.MyServlet</servlet-class>
@@ -16,13 +22,25 @@ The easiest way to write your own Servlet is to make a copy of the existing LrsC
 10. Add the servlet Mapping to `<servlet-mapping><servlet-name>MyServlet</servlet-name>	<url-pattern>/myServletDir/servlet</url-pattern></servlet-mapping>`
 11. Call the ANT target **compileComplete**.
  
+## Use the NativeServlet Interface
 
-## Call external code ##
+1. Open `web-service/war/builder/webservices.xml`
+2. Make a copy of a `<Servlet Name="NativeServlet">...</Servlet>` section.
+3. Adjust the elements `<Directory>, <BinaryWindows> and <BinaryLinux>` to your needs.
+4. Adjust the ANT target **package** to copy your native code files to the appropriate directories (see existing code).
+5. Call the ANT target **compileComplete**.
 
-External code in the LrsCServlet is done via System calls. The native binaries should be placed under **native-algo** in a subdirectory of your choice. The ANT target **package** takes care of copying the files to the correct directory (TODO: copy subdirs - currently take a look at the end of the **package** target and see how this is done with nash.exe).
+The GTE will read the webservices.xml and execute the binary specified by  `<Directory>, <BinaryWindows> and <BinaryLinux>`. GTE will pass three parameters to the program containing three filenames. The first filename links to a file containing the game matrix of both players. The second and third filenames are empty tempfiles. All files are deleted after the program terminates. The external program should write its result to std-out, because GTE reads std-out to display the result in a popup window.
 
-The LrsCServlet is self-axplanatory in terms of making system calls, creating temp files and read from std-in. The class **game** takes care of the two matrices of player one and two. 
+Try NativeServlet which uses **test.bat** or **test.sh** to get a feeling how it works.
 
+##Webservice.xml##
 
-
-
+* `<Servlet Name="NativeServlet">`: Specify the text to be displayed in the ddlb (DropDownListbox) of the GTE
+* `<Active>`: For later use - not yet used
+* `<Tooltip>`: Tooltip for the servlet listed in the ddlb.
+* `<Url>`:Url of the servlet (Do not change if you use NativeServlet)
+* `<Type>`: **nf**= access the servlet using normal/strategic form. **xf**=access the servlet using tree format.
+* `<Directory>`: Directory to specify where binaries are placed
+* `<BinaryWindows>`: The binary to be called using Windows
+* `<BinaryLinux>`: The binary to be called using Linux
