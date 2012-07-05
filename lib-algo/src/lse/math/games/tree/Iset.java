@@ -7,7 +7,7 @@ public class Iset
 	private Node _lastNode;
 	private int _uid;
 	
-    Iset(int uid, Player player)
+    public Iset(int uid, Player player)
     {
     	_uid = uid;
         _player = player;
@@ -36,7 +36,7 @@ public class Iset
     	return _firstNode;
     }
     
-    void setNext(Iset h) {
+    public void setNext(Iset h) {
     	_next = h;
     }
 

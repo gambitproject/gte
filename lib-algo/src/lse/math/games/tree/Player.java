@@ -8,7 +8,7 @@ public class Player {
 	
 	private String _playerId;
 	
-	Player(String playerId) {
+	public Player(String playerId) {
 		_playerId = playerId;
 	}
 	

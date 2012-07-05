@@ -57,7 +57,7 @@ public class Rational
 	    this(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
 	}
 
-	private void addEq(Rational toAdd)
+	public void addEq(Rational toAdd)
     {
     	if (den.equals(toAdd.den)) {
     		num = num.add(toAdd.num);

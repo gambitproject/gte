@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
 import lse.math.games.lcp.LCP;
+import lse.math.games.reduced.ReducedForm;
 
 public class SequenceForm 
 {	

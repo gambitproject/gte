@@ -11,7 +11,7 @@ public class Move {
     	_uid = uid;
     } 
     
-    Move(int uid, Rational prob)
+    public Move(int uid, Rational prob)
     {
     	this(uid);
     	this.prob = prob;
