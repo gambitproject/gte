@@ -29,28 +29,19 @@ import lse.math.games.io.ColumnTextWriter;
  * @author Martin Prause
  */
 @SuppressWarnings("serial")
-public class LrsCServlet extends AbstractRESTServlet 
+public class NativeServlet extends AbstractRESTServlet 
 {    
-	private static final Logger log = Logger.getLogger(LrsCServlet.class.getName());
+	private static final Logger log = Logger.getLogger(NativeServlet.class.getName());
 	
 	private String os;
 	private String program1="";
-	private String program2="";
 	
 	public void init(ServletConfig config) 
 	throws ServletException
 	{
 		super.init(config);           
-		
 		os=System.getProperty("os.name");
-		
-		if (os.startsWith("Windows")){
-			program1="prepare_nash.exe";
-			program2="nash.exe";
-		} else {
-			program1="prepare_nash";
-			program2="nash";
-		}
+	
 		
 	}
 
@@ -75,6 +66,15 @@ public class LrsCServlet extends AbstractRESTServlet
 		Bimatrix game = null;
 		File[] f= new File[3]; //Later we need different temp files; 
 		String consoleOutput="";
+		
+		
+		
+		if (os.startsWith("Windows")){
+			program1=request.getParameter("bw");;
+		} else {
+			program1=request.getParameter("bl");
+		}
+		
 		
 		try {
 			Rational[][] a = parseMultiRowRatParam(request, "a");
@@ -128,7 +128,11 @@ public class LrsCServlet extends AbstractRESTServlet
 					
 					//Create the tempfiles
 					for (int i=0;i<3;i++){
-						f[i]=File.createTempFile("game","lrs");
+						if (i==0) {
+							f[i]=File.createTempFile("game","native");
+						} else {	
+							f[i]=File.createTempFile("temp","native");
+						}
 						log.info(f[i].getCanonicalPath());
 					}
 					
@@ -150,13 +154,6 @@ public class LrsCServlet extends AbstractRESTServlet
 							f[2].getCanonicalPath()};
 					p = rt.exec(cmdArray1);
 					p.waitFor();
-					
-					
-					//Call external program
-					String[] cmdArray2 = new String[]{pathToAlgo+program2, 
-							f[1].getCanonicalPath(),
-							f[2].getCanonicalPath()};
-					p = rt.exec(cmdArray2);
 					
 					//Read consoleOutput
 					String line;
@@ -190,7 +187,7 @@ public class LrsCServlet extends AbstractRESTServlet
 		if (game != null) {
 			response.getWriter().println("NormalForm " + game.nrows() + " " + game.ncols());
 			response.getWriter().println(game.printFormat());
-			response.getWriter().println("From C Algo:");
+			response.getWriter().println("From native Algo:");
 			response.getWriter().println(consoleOutput);
 		}
 		} catch (Exception ex) {

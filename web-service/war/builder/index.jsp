@@ -8,17 +8,71 @@
 	<meta name="keywords" content="" />
 	
 	<script src="swfobject.js" type="text/javascript"></script>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script type="text/javascript">
+	
+
+
+			
+	
 		<!-- For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. --> 
         var swfVersionStr = "10.0.0";
         <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
         var xiSwfUrlStr = "playerProductInstall.swf";
-		var flashvars = {
-			menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=/gte/matrix/",
-		  	msolve: "label=Lemke NF Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=/gte/matrix/",   
-	        xsolve: "label=Lemke SF Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=/gte/tree/",			
-	        lrsC: "label=Lrs C algo;toolTip=Lrs C Algo;type=nf;url=/gte/lrsc/",
-	    };
+        var flashvars ={};
+
+        
+        function prepareVars() {
+	        $.ajax({
+			    type: "GET",
+			    url: "webservices.xml",
+			    dataType: "xml",
+			    success: parseXml,
+			    error:function (xhr, ajaxOptions, thrownError){
+	                alert(xhr.status);
+	                alert(thrownError);}    
+			  });
+        };
+        
+		function parseXml(xml)
+		{
+		  //find every Tutorial and print the author
+		  var i=0;
+		  $(xml).find("Servlet").each(function()
+		  {
+		  	var active=$(this).find("Active").text();
+		  	
+		  	var name=$(this).attr("Name");
+			var tooltip=$(this).find("Tooltip").text();
+			var url=$(this).find("Url").text();	
+			var type=$(this).find("Type").text();	
+			var directory=$(this).find("Directory").text();
+			var bw=$(this).find("BinaryWindows").text();	
+			var bl=$(this).find("BinaryLinux").text();	
+			var s="label="+name+";toolTip="+tooltip+";type="+type+";url="+url+";dir="+directory+";bw="+bw+";bl="+bl;
+			flashvars[i]=s;
+			i++;
+		  });
+		  
+		  swfobject.embedSWF(
+					"GuiBuilder.swf", 
+					"flashContainer", 
+					"100%", 
+					"100%", 
+					swfVersionStr, 
+					xiSwfUrlStr, 
+					flashvars, 
+					params, 
+					attributes);
+		};
+		
+        <!--	var flashvars = { -->
+        <!--			menum: "label=Lrs Find All Eq;toolTip=Lrs Find All Equilibria;type=nf;url=/gte/matrix/",-->
+        <!--			msolve: "label=Lemke NF Eq;toolTip=Lemke Find One Equilibrium;type=nf;url=/gte/matrix/",    -->
+        <!--	        xsolve: "label=Lemke SF Eq;toolTip=Lemke Find One Equilibrium (Sequence Form);type=xf;url=/gte/tree/", -->			
+        <!--	        lrsC: "label=Lrs C algo;toolTip=Lrs C Algo;type=nf;url=/gte/lrsc/servlet;dir=/test" -->
+		
+		
 	    <% if (request.getParameter("s") != null) { %>
 	    flashvars.seed = "<%= request.getParameter("s") %>";
 	    <% } %>
@@ -34,16 +88,7 @@
 		};
 		attributes.align = "middle";
 		
-		swfobject.embedSWF(
-			"GuiBuilder.swf", 
-			"flashContainer", 
-			"100%", 
-			"100%", 
-			swfVersionStr, 
-			xiSwfUrlStr, 
-			flashvars, 
-			params, 
-			attributes);
+		
 			
 			
 		//Changes the window title
@@ -133,7 +178,7 @@
 		object:focus { outline:none; }		
 	</style>
 </head>
-<body>
+<body onload="javascript:prepareVars();">
 	<div id="titleContainer" style="text-align: left; width: 85%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
 		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">

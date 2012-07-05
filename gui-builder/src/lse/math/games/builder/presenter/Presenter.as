@@ -526,6 +526,8 @@ package lse.math.games.builder.presenter
 			if (seed != null) {
 				params.s = seed;				
 			}
+			
+			
 			if (algo.type == "nf") {
 				var rows:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer);
 				var cols:Vector.<Strategy> = _matrix.strategies(_matrix.firstPlayer.nextPlayer);
@@ -533,11 +535,15 @@ package lse.math.games.builder.presenter
 				params.b = getMatrixParam(_matrix.payMatrixMap[_matrix.firstPlayer.nextPlayer], rows, cols);
 				params.r = getStrategyNamesParam(rows);
 				params.c = getStrategyNamesParam(cols);
+				
 			} else if (algo.type == "xf") {				
 				params.g = getTreeParam();
 			} else {
 				log.add(Log.ERROR, "type was not recognized: " + algo.type);
 			}
+			params.d=algo.dir;
+			params.bw=algo.bw;
+			params.bl=algo.bl;
 			
 			srv.send(params);
 		}

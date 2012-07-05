@@ -24,6 +24,7 @@
 
 	<property name="lib.proj.native" value="native-algo"/>
 	<property name="lib.proj.native.algo" value="native-algo/lrslib-042c"/>	
+	<property name="lib.proj.native.my" value="native-algo/myNative"/>	
 	
 	<property name="war.name" value="gte"/>
 	<property name="lib.jar.name" value="${lib.proj.dir}"/>
@@ -143,7 +144,7 @@
 			includeAntRuntime="false"
 		/>
 		
-		<copy file="${web.proj.dir}/src/config.properties" todir="${war.dir}/WEB-INF/classes" overwrite="true"/>
+		<!-- <copy file="${web.proj.dir}/src/config.properties" todir="${war.dir}/WEB-INF/classes" overwrite="true"/>-->
 		
 	</target>
 	
@@ -294,6 +295,7 @@
 		<delete dir="${JETTY_HOME}/${lib.proj.native}"/> 
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native}"/>
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native.algo}"/>
+		<mkdir dir="${JETTY_HOME}/${lib.proj.native.my}"/>
 		
 		<antcall target="-copyUnixFiles" />
   		<antcall target="-copyWindowsFiles" />
@@ -306,6 +308,8 @@
   		<echo>Windows</echo>
   		<copy file="${lib.proj.native.algo}/nash.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
   		<copy file="${lib.proj.native.algo}/prepare_nash.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+  		
+  		<copy file="${lib.proj.native.my}/test.bat"  todir="${JETTY_HOME}/${lib.proj.native.my}" overwrite="true" />
 	</target>
  
 	<target name="-copyUnixFiles" if="isUnix">
@@ -314,6 +318,8 @@
 		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/nash" perm="700"/>
 		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/prepare_nash" perm="700"/>
 		
+		<copy file="${lib.proj.native.my}/test.sh"  todir="${JETTY_HOME}/${lib.proj.native.my}" overwrite="true" />
+		<chmod file="${JETTY_HOME}/${lib.proj.native.my}/test.sh" perm="700"/>
  	</target> 
     
 </project>

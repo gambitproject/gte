@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Servlets>
+  <Servlet Name="LrsCServlet">
+    <Active>1</Active>
+    <Tooltip>LrsCServlet</Tooltip>
+    <Url>/gte/lrsc/servlet</Url>
+    <Type>nf</Type>
+    <Directory>native-algo/lrslib-042c/</Directory>
+  </Servlet>
+
+  <Servlet Name="NativeServlet">
+    <Active>1</Active>
+    <Tooltip>NativeServlet</Tooltip>
+    <Url>/gte/native/servlet</Url>
+    <Type>nf</Type>
+    <Directory>native-algo/myNative/</Directory>
+    <BinaryWindows>test.bat</BinaryWindows>
+    <BinaryLinux>test.sh</BinaryLinux>
+  </Servlet>
+
+
+  
+  <Servlet Name="Lrs Find All Eq">
+    <Active>1</Active>
+    <Tooltip>Lrs Find All Equilibria</Tooltip>
+    <Url>/gte/matrix/</Url>
+    <Type>nf</Type>
+    <Directory></Directory>
+  </Servlet>
+
+
+  <Servlet Name="Lemke NF Eq">
+    <Active>1</Active>
+    <Tooltip>Lemke Find One Equilibrium</Tooltip>
+    <Url>/gte/matrix/</Url>
+    <Type>nf</Type>
+    <Directory></Directory>
+  </Servlet>
+
+  
+    <Servlet Name="Lemke SF Eq">
+    <Active>1</Active>
+    <Tooltip>Lemke Find One Equilibrium (Sequence Form)</Tooltip>
+    <Url>/gte/tree/</Url>
+    <Type>xf</Type>
+    <Directory></Directory>
+  </Servlet>
+
+  
+</Servlets>
