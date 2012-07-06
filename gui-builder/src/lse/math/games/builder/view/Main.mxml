@@ -21,12 +21,17 @@
 			import mx.events.IndexChangedEvent;
 			import mx.managers.PopUpManager;
 			import mx.utils.StringUtil;
+			import mx.controls.ProgressBar;
+			import spark.components.TitleWindow;
+			
 			
 			import util.EvCodes;
 			import util.EventManager;
 			import util.Log;
 			import util.PromptTwoButtons;
 						
+			
+			
 			[Bindable]
 			public var seed:String;
 			
@@ -260,7 +265,20 @@
 				
 			}	
 			
-			
+			//Pops up the TestEditor edition window
+			private function showTestEditor():void
+			{
+				
+				
+				var te:TestEditor = new TestEditor();
+				te.matrix = matrix;
+				te.controller = controller;
+				
+				PopUpManager.addPopUp(te, this, true);
+				PopUpManager.centerPopUp(te);
+				
+				
+			}			
 			
 			/* <--- --- TABS & CANVAS-RELATED FUNCTIONS --- ---> */
 			
@@ -638,6 +656,9 @@
 						<mx:Spacer width="23" />
 						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/table_edit.png')" toolTip="Edit matrixes"
 								   click="showMatrixEditor()" visible="{editMode==1}"/>
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/image.png')" toolTip="Open Test Editor"
+								   click="showTestEditor()" visible="{editMode==1}"/>
+						
 					</s:HGroup>
 				</s:NavigatorContent>					
 			</mx:TabNavigator>
