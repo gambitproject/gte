@@ -10,10 +10,12 @@ import java.util.logging.Logger;
 
 import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
+import lse.math.games.tree.ExtensiveForm;
 import lse.math.games.tree.Iset;
 import lse.math.games.tree.Move;
 import lse.math.games.tree.Player;
 import lse.math.games.tree.SequenceForm;
+import lse.math.games.tree.SequenceForm.ImperfectRecallException;
 
 public class ReducedForm
 {
@@ -45,11 +47,32 @@ public class ReducedForm
 	
     
     /* > **** FOR 2-PERSON EXTENSIVE GAME IN REDUCED FORM **** > */
-	//    class Matrix
+	/* ORIGINAL SYSTEM */
+	RationalMatrix A;
+	RationalMatrix B;
+	RationalMatrix E;
+	RationalMatrix F;
+	RationalMatrix e;
+	RationalMatrix f;
+	
+	/* REDUCED SYSTEM */
+	RationalMatrix p;
+	RationalMatrix P;
+	RationalMatrix q;
+	RationalMatrix Q;
+	RationalMatrix a_;
+	RationalMatrix b_;
+	RationalMatrix A_;
+	RationalMatrix B_;
     /* < **** FOR 2-PERSON EXTENSIVE GAME IN REDUCED FORM **** < */
     
     
 	/*// methods //*/
+	public ReducedForm(ExtensiveForm tree) throws ImperfectRecallException
+	{
+		this(new SequenceForm(tree));	
+	}
+	
 	public ReducedForm(SequenceForm seq)
 	{
 		logi("Making reduced form...");
@@ -211,26 +234,6 @@ public class ReducedForm
 	    makeReducedSystem();
 	}
 
-	
-	/** ORIGINAL SYSTEM **/
-	RationalMatrix A;
-	RationalMatrix B;
-	RationalMatrix E;
-	RationalMatrix F;
-	RationalMatrix e;
-	RationalMatrix f;
-	
-	/** REDUCED SYSTEM **/
-	RationalMatrix p;
-	RationalMatrix P;
-	RationalMatrix q;
-	RationalMatrix Q;
-	RationalMatrix a_;
-	RationalMatrix b_;
-	RationalMatrix A_;
-	RationalMatrix B_;
-	
-	
 	void makeReducedSystem() {
 		
 		/* Make matrix A */
@@ -250,9 +253,7 @@ public class ReducedForm
 		/* Make vector f */
 		f = new RationalMatrix(F.getRowSize(), 1);
 		f.setElement(0, 0, Rational.ONE);
-		
-		printOriginalSystem();
-		
+				
 		{
 			RationalMatrix t1 = E.copy();
 			t1 = t1.appendAfter(e);
@@ -274,7 +275,6 @@ public class ReducedForm
 			q = F_B.inverse().multiply(f_);
 			Q = F_B.inverse().multiply(Rational.NEGONE).multiply(F_I);
 		}
-		
 		{
 			int s1 = A.getRowSize() - P.getRowSize(); 
 			RationalMatrix t1 = new RationalMatrix(s1, P.getColumnSize(), true);
@@ -283,7 +283,6 @@ public class ReducedForm
 
 			a_ = P.appendBelow(t1).transpose().multiply(A).multiply(q.appendBelow(t2));
 		}
-		
 		{
 			int s1 = B.getRowSize() - p.getRowSize(); 
 			RationalMatrix t1 = new RationalMatrix(s1, p.getColumnSize(), false);
@@ -292,7 +291,6 @@ public class ReducedForm
 			
 			b_ = p.appendBelow(t1).transpose().multiply(B).multiply(Q.appendBelow(t2));
 		}
-
 		{
 			int s1 = A.getRowSize() - P.getRowSize(); 
 			RationalMatrix t1 = new RationalMatrix(s1, P.getColumnSize(), true);
@@ -301,7 +299,6 @@ public class ReducedForm
 			
 			A_ = P.appendBelow(t1).transpose().multiply(A).multiply(Q.appendBelow(t2));
 		}
-		
 		{
 			int s1 = B.getRowSize() - P.getRowSize(); 
 			RationalMatrix t1 = new RationalMatrix(s1, P.getColumnSize(), true);
@@ -310,8 +307,6 @@ public class ReducedForm
 			
 			B_ = P.appendBelow(t1).transpose().multiply(B).multiply(Q.appendBelow(t2));
 		}
-		
-		printReducedSystem();
 	}
 	
 	void testRationalMatrices() {
@@ -439,7 +434,7 @@ public class ReducedForm
 		logi(colpp);
 	}
 
-	void printOriginalSystem() {
+	public void printOriginalSystem() {
 		logi("Original matrices:");
 		logi("A:\n%s", A.toString());
 		logi("B:\n%s", B.toString());
@@ -449,7 +444,7 @@ public class ReducedForm
 		logi("f:\n%s", f.toString());
 	}
 	
-	void printReducedSystem() {
+	public void printReducedSystem() {
 		logi("Reduced matrices:");
 		logi("p:\n%s", p.toString());
 		logi("P:\n%s", P.toString());

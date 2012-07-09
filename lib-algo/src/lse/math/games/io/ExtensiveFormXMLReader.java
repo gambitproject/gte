@@ -1,21 +1,30 @@
 package lse.math.games.io;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.w3c.dom.Document;
-//import org.w3c.dom.Node;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import lse.math.games.Rational;
 import lse.math.games.tree.ExtensiveForm;
-import lse.math.games.tree.Outcome;
-import lse.math.games.tree.Node;
 import lse.math.games.tree.Iset;
 import lse.math.games.tree.Move;
+import lse.math.games.tree.Node;
+import lse.math.games.tree.Outcome;
 import lse.math.games.tree.Player;
+
+import org.w3c.dom.Document;
+//import org.w3c.dom.Node;
 
 public class ExtensiveFormXMLReader 
 {	
@@ -43,6 +52,8 @@ public class ExtensiveFormXMLReader
 		moves = new HashMap<String,Move>();
 		players = new HashMap<String,Player>();			
 		
+		writeXmlFile(xml, "test.xml");
+		
 		org.w3c.dom.Node root = xml.getFirstChild();
 		if ("extensiveForm".equals(xml.getFirstChild().getNodeName())) {			
 			for (org.w3c.dom.Node child = root.getFirstChild(); child != null; child = child.getNextSibling()) {
@@ -64,6 +75,28 @@ public class ExtensiveFormXMLReader
 		log.info(tree.toString());		
 		return tree;
 	}	
+	
+
+	// This method writes a DOM document to a file
+	public static void writeXmlFile(Document doc, String filename) {
+	    try {
+	        // Prepare the DOM document for writing
+	        Source source = new DOMSource(doc);
+
+	        // Prepare the output file
+	        StreamResult result = new StreamResult(new StringWriter());
+
+	        // Write the DOM document to the file
+	        Transformer xformer = TransformerFactory.newInstance().newTransformer();
+	        xformer.transform(source, result);
+	        
+	        String xmlString = result.getWriter().toString();
+	        log.info(xmlString);
+	        
+	    } catch (TransformerConfigurationException e) {
+	    } catch (TransformerException e) {
+	    }
+	}
 	
 	//TODO: there has got to be a more efficient algorithm
 	private void hookupAndVerifyMoves()

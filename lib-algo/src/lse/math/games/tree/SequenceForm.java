@@ -385,9 +385,6 @@ public class SequenceForm
     @Override
     public String toString()
     {
-    	// TODO: JUST TEMPORARY
-    	ReducedForm reducedForm = new ReducedForm(this);
-    	
     	// TODO: add matrices
 		StringWriter output = new StringWriter();
 		ColumnTextWriter colpp = new ColumnTextWriter();		
