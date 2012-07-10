@@ -21,6 +21,16 @@
 		<servlet-name>Native</servlet-name>
 		<servlet-class>lse.math.games.web.NativeServlet</servlet-class>
 	</servlet>		
+	<servlet>
+		<servlet-name>Parser</servlet-name>
+		<servlet-class>lse.math.games.web.ParserServlet</servlet-class>
+	</servlet>	
+
+	<servlet-mapping>
+		<servlet-name>Parser</servlet-name>
+		<url-pattern>/parser/servlet</url-pattern>
+	</servlet-mapping>
+
 	
 	<servlet-mapping>
 		<servlet-name>Native</servlet-name>

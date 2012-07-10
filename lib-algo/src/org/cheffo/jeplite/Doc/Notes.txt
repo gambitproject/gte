@@ -1,0 +1,38 @@
+This is a simplified and overoptimized version of the Natan Funk's java expression parser JEP. If you intent to use the parser for fast numeric evaluations, based on double values only, the optimized version is may be your better choice.
+
+The inspiration for this optimized version came from the Dustyscripty (a COL - Children Orineted Language) project. Since the children are rarely tempted to use complex number arithmetics, but instead are less willing to accept longer response times, we had to strip some irrelevant features. The result appeared to be quite successful and so we decided to share it with the public.
+
+Any questions, bug reports and so on for the lite version should be sent to xcheffo at users.sourceforge.net, or to the corresponding forum. 
+
+This FAQ tries to exply the fetures and issues of the optimized version, compared to those in JEP.
+
+Q: What version of JEP is used as a base for enlitement?
+A: Actually, we don't know, and will never understand. In the light version we may have features unique for the most recent JEP release, while some older and useful are omitted in sake of simplicity. 
+
+Q: What is the typical use of the opted version?
+A: Create-Parse-Evaluate. The original JEP is not very open to dirty magic, this optimized version - even less.
+
+Q: What is optimized at all? Do I need the optimized version?
+A: The initial intention was to reduce both source and compiled code size through removal of complex numbed and string arithmetics. So if you _don't_ need those features, the opt version is for you. Later, the use of single numeric type led into a great (about 5-7 times in some test examples) relaxation of the evaluation times, and moderate (20%-30%) relaxation of the parsing times. If complex numbers or string concatenations are crucial for your project, you should consider using the original JEP.
+
+Q: Is JEP outward interface changed? Is my existing code compatible with the optimized version?
+A: Yes, there are some changes in the least frequently used features. More precisely, if your code relies on API entries from the org.funk.jep.function package, it will not compile any more. But if you are merely passing expressions string to be, chancess are that you will have no porting problems. Besides, there is a entirely new package: org.nfunk.jep.utils, where are placed light weighted implementation of stacks with different element types.
+
+Q: But I have some TreeVisitors implemented! Can I use them with the light version?
+A: Most probably yes. If not - concider it as a bug in the lite version and report.
+
+Q: But I have some functions implemented! Can I use them with the light version?
+A: Most probably no. For jeplite, you must extend org.cheffo.jep.PostfixMathCommand (PostfixMathCommandI was removed) and rewrite your function to conforma with the new interface.
+
+Q: But I am using JEP in multiple threads.
+A: There is no heavy tests of the multithreaded stability of the optimized version. But we have a common rule instead: different threads - different JEPs.
+
+Q: So, the lite version is faster, leaner and meaner than the original one. And therefore better?
+A: Absolutely not better. While strippin, some sets of features rendered obsolate their time consuming support. That's all. But JEPLite is to be concidered _worse_ right now, since it has not passed even moderate tests.
+
+Feature comparison
+String evaluations: JEP
+Array evaluations: JEP
+Complex numbers: JEP
+Standart numbers evaluation: JEP, JEPLite
+Row/col error report: JEP
