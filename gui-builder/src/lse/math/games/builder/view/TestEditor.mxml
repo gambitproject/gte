@@ -69,12 +69,22 @@
 			private var glbSettings:UserSettings = UserSettings.instance;
 			
 			[Bindable]
-			private var param1_text:String="Random";
-			private var mode:int=0;
-
+			private var _paramDimensions:String="10";
 			[Bindable]
-			private var param1_input:String;
-			
+			private var _paramMaxPayoff:String="100";
+			[Bindable]
+			private var _paramZeroSum:Boolean=true;
+			[Bindable]
+			private var _paramFormulaP1:String="";
+			[Bindable]
+			private var _paramFormulaP2:String="";
+			[Bindable]
+			private var _discFrom:String="1";
+			[Bindable]
+			private var _discTo:String="10";
+			[Bindable]
+			private var _discStep:String="1";
+	
 			private var waitingpopup:TitleWindow = new TitleWindow();
 			private var pb:ProgressBar
 			private  var timer:Timer;
@@ -458,57 +468,13 @@
 				return matrixString;
 				
 			}
+
 			
-			private function onlyAlignStrategy():void 
-			{
-				payoffMatrix1=new Array();
-				payoffMatrix2=new Array();
-				
-				convertToMatrix(pl1PayMapStr,payoffMatrix1);
-				fillWithZeros(payoffMatrix1,false);
-				pl1PayMapStr=buildMatrixString(payoffMatrix1)
-				
-				convertToMatrix(pl2PayMapStr,payoffMatrix2);
-				fillWithZeros(payoffMatrix2,false);
-				pl2PayMapStr=buildMatrixString(payoffMatrix2)
-				
+			private function getMode():int {
+				return tab.selectedIndex;
 			}
 			
-			private function alignStrategy():void 
-			{
-				
-				payoffMatrix1=new Array();
-				payoffMatrix2=new Array();
-				
-				
-				convertToMatrix(pl1PayMapStr,payoffMatrix1);
-				fillWithZeros(payoffMatrix1,false);
-				makeNegative(payoffMatrix1,payoffMatrix2);
-				pl1PayMapStr=buildMatrixString(payoffMatrix1)
-				pl2PayMapStr=buildMatrixString(payoffMatrix2)
-					
-				pl1NumStr = payoffMatrix1.length;
-				if (payoffMatrix2.length>0) {
-					pl2NumStr = payoffMatrix2[0].length;
-				}else {
-					pl2NumStr =0;
-				}
-				updateAlphabets()
-				
-			}
-			
-			
-			private function changeEvtRadioButton(arg : String):void {
-					if (arg=="F"){
-						param1_text="Formula";
-						param1.text="";
-						mode=1;
-					} else if (arg=="R") {
-						param1_text="Matrix size";
-						param1.text="";
-						mode=0;
-					}
-			}
+		
 			private function keyPressedP1Payoff(event:KeyboardEvent):void{
 				
 			}
@@ -517,39 +483,6 @@
 				
 			}
 
-		
-			function randomRange(max:Number, min:Number = 0, decimal:Boolean=false):Number
-			{
-				if (decimal)
-					return Math.random() * (max - min) + min;
-				else
-					return Math.round(Math.random() * (max - min) + min);
-			}
-			
-			
-			private function compute():void {
-				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
-				var s:String="";
-				var ms:Number;
-				
-				ms=Number(param1.text);
-				for (var i:int=0;i<ms;i++){
-					for (var j:int=0;j<ms;j++){
-						var n:int=randomRange(1,100,false);
-						s=s+n as String;
-						
-						if (j<ms-1)
-							s=s+delimeter;
-							pb.label="j";
-					}
-					if (i<ms-1)
-						s=s+"\n";
-				}
-				pl1PayMapStr=s;
-				alignStrategy();
-				
-			}
-			
 		private function getRandomMatrix():void {
 				if (waitingpopup==null)
 					waitingpopup = new TitleWindow();
@@ -575,9 +508,11 @@
 				pb.setProgress(pb.value + 1, 50);
 				if (pb.value==25){
 					
-					if (mode==0) {
+					if (getMode()==0) {
+						//Random
 						compute();
-					} else if (mode==1) {
+					} else if (getMode()==1) {
+						//Formula
 						callRef();
 					}
 				}
@@ -591,13 +526,96 @@
 				}
 			}
 			
+			
+			function randomRange(max:Number, min:Number = 0, decimal:Boolean=false):Number
+			{
+				if (decimal)
+					return Math.random() * (max - min) + min;
+				else
+					return Math.round(Math.random() * (max - min) + min);
+			}
+			
+			
+			private function compute():void {
+				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
+				var s:String="";
+				var ms:Number;
+				var zs:Boolean=paramZeroSum.selected;
+				var i:int;
+				var j:int;
+				var n:int;
+				var r:int;
+
+				payoffMatrix1=new Array();
+				payoffMatrix2=new Array();
+
+				s="";
+				ms=Number(paramDimensions.text);
+				for (i=0;i<ms;i++){
+					for (j=0;j<ms;j++){
+						n=randomRange(0,Number(paramMaxPayoff.text),false);
+						r=randomRange(1,2,false);
+							if (r==1){
+								n=n*(-1);
+							}
+						s=s+n as String;
+						if (j<ms-1)
+							s=s+delimeter;
+						pb.label="j";
+					}
+					if (i<ms-1)
+						s=s+"\n";
+				}
+
+				pl1PayMapStr=s;
+				convertToMatrix(pl1PayMapStr,payoffMatrix1);
+				fillWithZeros(payoffMatrix1,false);
+				
+				if (!zs) {
+					s="";
+					ms=Number(paramDimensions.text);
+					for (i=0;i<ms;i++){
+						for (j=0;j<ms;j++){
+							n=randomRange(0,Number(paramMaxPayoff.text),false);
+							r=randomRange(1,2,false);
+							if (r==1){
+								n=n*(-1);
+							}
+							s=s+n as String;
+							if (j<ms-1)
+								s=s+delimeter;
+							pb.label="j";
+						}
+						if (i<ms-1)
+							s=s+"\n";
+					}
+					
+					pl2PayMapStr=s;
+					convertToMatrix(pl2PayMapStr,payoffMatrix2);
+					fillWithZeros(payoffMatrix2,false);
+				} else {
+					makeNegative(payoffMatrix1,payoffMatrix2);
+				}
+				
+				pl1PayMapStr=buildMatrixString(payoffMatrix1)
+				pl2PayMapStr=buildMatrixString(payoffMatrix2)
+				
+				pl1NumStr = payoffMatrix1.length;
+				if (payoffMatrix2.length>0) {
+					pl2NumStr = payoffMatrix2[0].length;
+				}else {
+					pl2NumStr =0;
+				}
+				updateAlphabets()				
+			}
+						
+			
+			
 			private function callRef():void {
 				var srv:HTTPService = HTTPService(httpService);
 				srv.url = "/gte/parser/servlet";
 				var params:Object = {};			
-				
 				params.d="[X]+[Y]";
-				
 				srv.send(params);
 			}
 			
@@ -629,19 +647,46 @@
 	</fx:Style>
 
 	<s:VGroup width="819" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-		<s:HGroup width="100%" >
-			<s:Label y="0" width="90" height="20" text="Type of game: " verticalAlign="middle"/>
-			<s:RadioButton groupName="rbg" id="rb_random" label="Random"  selected="true" click="changeEvtRadioButton('R');" />
-			<s:RadioButton groupName="rbg" id="rb_formula" label="Formula" click="changeEvtRadioButton('F');" />
-		</s:HGroup>
-		<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="90" text="{param1_text}" verticalAlign="middle" />
-					<s:TextInput id="param1" width="100%" editable="true" widthInChars="22" text="{param1_input}"  />
-				</s:HGroup>
-		</s:VGroup>
+		<mx:TabNavigator width="796" height="200" id="tab">
+			<s:NavigatorContent  width="100%" height="100%" label="Random">
+				<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+					<s:HGroup width="100%" >
+						<s:Label y="0" width="200" height="20" text="Enter dimensions: " verticalAlign="middle"/>
+						<s:TextInput id="paramDimensions" width="100%" editable="true" widthInChars="22" text="{_paramDimensions}"  />
+					</s:HGroup>
+					<s:HGroup width="100%" >
+						<s:Label y="0" width="200" height="20" text="Enter max payoff: " verticalAlign="middle"/>
+						<s:TextInput id="paramMaxPayoff" width="100%" editable="true" widthInChars="22" text="{_paramMaxPayoff}"  />
+					</s:HGroup>
+					<s:HGroup width="100%" >
+						<s:CheckBox id="paramZeroSum" label="ZeroSum game" selected="{_paramZeroSum}"/>
+					</s:HGroup>
+				</s:VGroup>	
+			</s:NavigatorContent>
+			<s:NavigatorContent width="100%" height="100%" label="Formular">
+				<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+					<s:HGroup  width="100%" verticalAlign="middle">
+						<s:Label height="20" width="200" text="Formula Player 1" verticalAlign="middle" />
+						<s:TextInput id="paramFormulaP1" width="100%" editable="true" widthInChars="22" text="{_paramFormulaP1}"  />
+					</s:HGroup>
+					<s:HGroup  width="100%" verticalAlign="middle">
+						<s:Label height="20" width="200" text="Formula Player 2" verticalAlign="middle" />
+						<s:TextInput id="paramFormulaP2" width="100%" editable="true" widthInChars="22" text="{_paramFormulaP2}"  />
+					</s:HGroup>
+					<s:Label height="20" width="200" text="Discretization" verticalAlign="middle" />
+					<s:HGroup  width="100%" verticalAlign="middle">
+						<s:Label height="20" width="90" text="From:" verticalAlign="middle" />
+						<s:TextInput id="discFrom" width="100%" editable="true" widthInChars="22" text="{_discFrom}"  />
+						<s:Label height="20" width="90" text="To:" verticalAlign="middle" />
+						<s:TextInput id="discTo" width="100%" editable="true" widthInChars="22" text="{_discTo}"  />
+						<s:Label height="20" width="90" text="Granularity" verticalAlign="middle" />
+						<s:TextInput id="discStep" width="100%" editable="true" widthInChars="22" text="{_discStep}"  />
+					</s:HGroup>
+				</s:VGroup> 
+			</s:NavigatorContent>
+		</mx:TabNavigator>
 		<s:HGroup width="100%" gap="0">	
-			<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 				<s:Label height="20" color="#2323E6" text="Player 1 PayOff Matrix"
 						 verticalAlign="middle"/>
 				<s:TextArea id="pl1PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
