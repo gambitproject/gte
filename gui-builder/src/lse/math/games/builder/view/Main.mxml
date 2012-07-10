@@ -448,7 +448,7 @@
 						if(ctrl) controller.save();
 						break;
 					case 82: //'r'
-						if(ctrl) controller.runAlgorithm(algoComboBox.selectedItem, seed);
+						if(ctrl) runAlgorithm(algoComboBox.selectedItem, seed);
 						break;
 					case 90: //'z'
 						if(ctrl) 
@@ -470,6 +470,14 @@
 					toggleZeroSumButton.setStyle("icon",nzeroSumIcon);
 				
 			}
+			
+			//Calls controller.runAlgorithm but captures the type of Algo before, to do some additional stuff depending on the algo.
+			private function runAlgorithm(algo:String,s:String) {
+				trace(algo);
+				controller.runAlgorithm(algo, s);
+			}
+			
+			
 		]]>
 	</fx:Script>
 	
@@ -529,7 +537,7 @@
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="23"/>
 
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="controller.runAlgorithm(algoComboBox.selectedItem, seed)" />			
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(algoComboBox.selectedItem, seed)" />			
 			<mx:Spacer width="4"/>
 			<s:ComboBox id="algoComboBox" width="111" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
