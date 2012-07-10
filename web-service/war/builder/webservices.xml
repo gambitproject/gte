@@ -6,7 +6,9 @@
     <Url>/gte/lrsc/servlet</Url>
     <Type>nf</Type>
     <Directory>native-algo/lrslib-042c/</Directory>
+    <Estimate>1</Estimate>
   </Servlet>
+
 
   <Servlet Name="NativeServlet">
     <Active>1</Active>
@@ -18,7 +20,15 @@
     <BinaryLinux>test.sh</BinaryLinux>
   </Servlet>
 
-
+  <Servlet Name="NativeServlet2">
+    <Active>1</Active>
+    <Tooltip>NativeServlet</Tooltip>
+    <Url>/gte/native/servlet</Url>
+    <Type>nf</Type>
+    <Directory>native-algo/myNative/</Directory>
+    <BinaryWindows>test.bat</BinaryWindows>
+    <BinaryLinux>test.sh</BinaryLinux>
+  </Servlet>
   
   <Servlet Name="Lrs Find All Eq">
     <Active>1</Active>

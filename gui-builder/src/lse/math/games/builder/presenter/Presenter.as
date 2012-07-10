@@ -544,6 +544,11 @@ package lse.math.games.builder.presenter
 			params.d=algo.dir;
 			params.bw=algo.bw;
 			params.bl=algo.bl;
+			if ((algo.es==null) || (algo.es=="")) {
+				params.es="0";
+			} else {
+				params.es=algo.es;
+			}
 			
 			srv.send(params);
 		}

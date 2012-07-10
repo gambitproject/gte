@@ -34,22 +34,26 @@ public class LrsCServlet extends AbstractRESTServlet
 	private static final Logger log = Logger.getLogger(LrsCServlet.class.getName());
 	
 	private String os;
+	//program1=Create H-representation
 	private String program1="";
+	//program2=Solve equation system
 	private String program2="";
+	//program3=Estimate process time
+	private String program3="";
 	
 	public void init(ServletConfig config) 
 	throws ServletException
 	{
 		super.init(config);           
-		
 		os=System.getProperty("os.name");
-		
 		if (os.startsWith("Windows")){
 			program1="prepare_nash.exe";
 			program2="nash.exe";
+			program3="lrs.exe";
 		} else {
 			program1="prepare_nash";
 			program2="nash";
+			program3="lrs";
 		}
 		
 	}
@@ -75,129 +79,248 @@ public class LrsCServlet extends AbstractRESTServlet
 		Bimatrix game = null;
 		File[] f= new File[3]; //Later we need different temp files; 
 		String consoleOutput="";
+
+		String estimate=request.getParameter("es");
+		Rational[][] a = parseMultiRowRatParam(request, "a");
+		Rational[][] b = parseMultiRowRatParam(request, "b");
+		String[] rowNames = request.getParameter("r") != null ? request.getParameter("r").split(" ") : null;
+		String[] colNames = request.getParameter("c") != null ? request.getParameter("c").split(" ") : null;
+		String algo =  request.getParameter("algo");
+		String pathToAlgo=request.getParameter("d");
+		int nrows = 0;
+		int ncols = 0;
+
+		//Check payoff matrix
+		if (a != null) {
+			nrows = a.length;
+			ncols = a.length > 0 ? a[0].length : 0;
+
+			log.info("Processing bimatrix with nrows " + nrows + " and ncols " + ncols);
+
+			if(!checkDimensions(a, nrows, ncols)) {
+				addError(request, "A (" + nrows + "x" + ncols + ") is incomplete: " + request.getParameter("a"));
+			}
+		} else {
+			addError(request, "Unable to parse A: " + request.getParameter("a"));
+		}		
+
+		if (b != null && a != null) {
+			if(!checkDimensions(b, nrows, ncols)) {
+				int nrowsb = a.length;
+				int ncolsb = a.length > 0 ? a[0].length : 0;
+				addError(request, "Dimensions of B (" + nrowsb + "x" + ncolsb + ") do not match A");
+			}
+		} else {
+			addError(request, "Unable to parse B: " + request.getParameter("b"));
+		}
+
+		if (rowNames != null && rowNames.length != nrows) {
+				addError(request, "Row names length does not match pay matrix " + Arrays.toString(rowNames));
+		}
+		if (colNames != null && colNames.length != ncols) {
+				addError(request, "Col names length does not match pay matrix " + Arrays.toString(colNames));
+		}
 		
-		try {
-			Rational[][] a = parseMultiRowRatParam(request, "a");
-			Rational[][] b = parseMultiRowRatParam(request, "b");
-			String[] rowNames = request.getParameter("r") != null ? request.getParameter("r").split(" ") : null;
-			String[] colNames = request.getParameter("c") != null ? request.getParameter("c").split(" ") : null;
-			String algo =  request.getParameter("algo");
-			String pathToAlgo=request.getParameter("d");
-			
-			int nrows = 0;
-			int ncols = 0;
-
-			if (a != null) {
-				nrows = a.length;
-				ncols = a.length > 0 ? a[0].length : 0;
-
-				log.info("Processing bimatrix with nrows " + nrows + " and ncols " + ncols);
-
-				if(!checkDimensions(a, nrows, ncols)) {
-					addError(request, "A (" + nrows + "x" + ncols + ") is incomplete: " + request.getParameter("a"));
-				}
-			} else {
-				addError(request, "Unable to parse A: " + request.getParameter("a"));
-			}		
-
-			if (b != null && a != null) {
-				if(!checkDimensions(b, nrows, ncols)) {
-					int nrowsb = a.length;
-					int ncolsb = a.length > 0 ? a[0].length : 0;
-					addError(request, "Dimensions of B (" + nrowsb + "x" + ncolsb + ") do not match A");
-				}
-			} else {
-				addError(request, "Unable to parse B: " + request.getParameter("b"));
-			}
-
-			if (rowNames != null && rowNames.length != nrows) {
-					addError(request, "Row names length does not match pay matrix " + Arrays.toString(rowNames));
-			}
-			if (colNames != null && colNames.length != ncols) {
-					addError(request, "Col names length does not match pay matrix " + Arrays.toString(colNames));
-			}
-
-			if (!this.hasErrors(request)) 
-			{
-				game = new Bimatrix(new String[]{"A" , "B"}, a, b, rowNames, colNames);
-				
-				log.info(game.toString());
-				log.info(pathToAlgo);
-				
-				try {
-					
-					//Create the tempfiles
-					for (int i=0;i<3;i++){
-						f[i]=File.createTempFile("game","lrs");
-						log.info(f[i].getCanonicalPath());
-					}
-					
-					
-					
-					//Write the game to a file
-					FileWriter fstream= new FileWriter(f[0]);
-					BufferedWriter out = new BufferedWriter(fstream);
-					out.write(game.printFormat());
-					out.close();
-					
-					Runtime rt=Runtime.getRuntime();
-					Process p=null;
-
-					//Call external program
-					String[] cmdArray1 = new String[]{pathToAlgo+program1, 
-							f[0].getCanonicalPath(),
-							f[1].getCanonicalPath(),
-							f[2].getCanonicalPath()};
-					p = rt.exec(cmdArray1);
-					p.waitFor();
-					
-					
-					//Call external program
-					String[] cmdArray2 = new String[]{pathToAlgo+program2, 
-							f[1].getCanonicalPath(),
-							f[2].getCanonicalPath()};
-					p = rt.exec(cmdArray2);
-					
-					//Read consoleOutput
-					String line;
-					String lineSeparator = System.getProperty("line.separator");
-					BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
-						while ((line = bri.readLine()) != null) {
-							consoleOutput+=line+lineSeparator;
-					      }
-					bri.close();
-					p.waitFor();
-				} catch (IOException e1){
-					log.log(Level.SEVERE,e1.toString());
-				} catch(Throwable e2)	{
-					log.log(Level.SEVERE,e2.toString());
-				} finally {
-					//Delete files
-					for (int i=0;i<3;i++){
-						if (f[i]!=null) {
-							f[i].delete();
+		if (!this.hasErrors(request)) 
+		{
+			game = new Bimatrix(new String[]{"A" , "B"}, a, b, rowNames, colNames);
+		
+			if (estimate.equals("0")) {	
+						try {
+							//Create the tempfiles
+							for (int i=0;i<3;i++){
+								f[i]=File.createTempFile("game","lrs");
+								log.info(f[i].getCanonicalPath());
+							}
+							//Write the game to a file
+							FileWriter fstream= new FileWriter(f[0]);
+							BufferedWriter out = new BufferedWriter(fstream);
+							out.write(game.printFormat());
+							out.close();
+							
+							Runtime rt=Runtime.getRuntime();
+							Process p=null;
+		
+							//Call external program and create H-Representation
+							String[] cmdArray1 = new String[]{pathToAlgo+program1, 
+									f[0].getCanonicalPath(),
+									f[1].getCanonicalPath(),
+									f[2].getCanonicalPath()};
+							p = rt.exec(cmdArray1);
+							p.waitFor();
+							
+							//Call external program and calculate equilibria
+							String[] cmdArray2 = new String[]{pathToAlgo+program2, 
+									f[1].getCanonicalPath(),
+									f[2].getCanonicalPath()};
+							p = rt.exec(cmdArray2);
+							
+							//Read consoleOutput
+							String line;
+							String lineSeparator = System.getProperty("line.separator");
+							BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+								while ((line = bri.readLine()) != null) {
+									consoleOutput+=line+lineSeparator;
+							      }
+							bri.close();
+							p.waitFor();
+						} catch (IOException e1){
+							addError(request, e1.getMessage());
+							log.log(Level.SEVERE,e1.toString());
+						} catch(Throwable e2)	{
+							addError(request, e2.getMessage());
+							log.log(Level.SEVERE,e2.toString());
+						} finally {
+							//Delete files
+							for (int i=0;i<3;i++){
+								if (f[i]!=null) {
+									f[i].delete();
+								}
+							}
+							
 						}
+					try {
+						this.writeResponseHeader(request, response);
+						if (game != null) {
+							response.getWriter().println("NormalForm " + game.nrows() + " " + game.ncols());
+							response.getWriter().println(game.printFormat());
+							response.getWriter().println("From C Algo:");
+							response.getWriter().println(consoleOutput);
+						}
+					} catch (Exception ex) {
+						response.getWriter().println(ex.getMessage());
 					}
+				
+				} else if (estimate.equals("1")) {
+					try {
+						//Create the tempfiles
+						for (int i=0;i<3;i++){
+							f[i]=File.createTempFile("game","lrs");
+							log.info(f[i].getCanonicalPath());
+						}
+						//Write the game to a file
+						FileWriter fstream= new FileWriter(f[0]);
+						BufferedWriter out = new BufferedWriter(fstream);
+						out.write(game.printFormat());
+						out.close();
+						
+						Runtime rt=Runtime.getRuntime();
+						Process p=null;
+	
+						//Call external program and create H-Representation
+						String[] cmdArray1 = new String[]{pathToAlgo+program1, 
+								f[0].getCanonicalPath(),
+								f[1].getCanonicalPath(),
+								f[2].getCanonicalPath()};
+						p = rt.exec(cmdArray1);
+						p.waitFor();
+						
+						//Add parameters to the outputfile of the H-representation
+						String lineSeparator = System.getProperty("line.separator");
+						fstream= new FileWriter(f[1],true);
+						out = new BufferedWriter(fstream);
+						out.write(lineSeparator+"maxdepth 5");
+						out.write(lineSeparator+"estimates 1");
+						out.close();
+						
+						//Call external program and estimate the process time
+						String[] cmdArray2 = new String[]{pathToAlgo+program3,f[1].getCanonicalPath()};
+						p = rt.exec(cmdArray2);
+						
+						//Read consoleOutput
+						String line;
+
+						String bases="0";
+						String nodes="0";
+						String time="0";
+
+						int startIndex=-1;
+						int endIndex=-1;
+						
+						
+						BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+							while ((line = bri.readLine()) != null) {
+								if (line.startsWith("*Estimates")){
+									log.info(line);
+									startIndex=line.indexOf("bases=");
+									endIndex=line.indexOf(" ",startIndex);
+									bases=line.substring(startIndex+6,endIndex).trim();
+									consoleOutput+=lineSeparator+"Bases:"+bases;
+									log.info(bases);
+								} else if (line.startsWith("*Total number")){
+									log.info(line);
+									startIndex=line.indexOf("evaluated:");
+									endIndex=line.indexOf(" ",startIndex);
+									nodes=line.substring(startIndex+10,line.length()).trim();
+									consoleOutput+=lineSeparator+"Nodes:"+nodes;
+									log.info(nodes);
+								} else if (line.startsWith("*Estimated total")){
+									log.info(line);
+									startIndex=line.indexOf("time=");
+									endIndex=line.indexOf(" ",startIndex);
+									time=line.substring(startIndex+5,endIndex).trim();
+									consoleOutput+=lineSeparator+"Time(sec):"+time;
+									log.info(time);
+								}
+						      }
+						bri.close();
+						p.waitFor();
+						
+						int _bases=0;
+						int _nodes=0;
+						double _time=0;
+						double esTime=0;
+						String esTimeText="Estimation:";
+						try {
+							_bases=Integer.parseInt(bases);
+							_nodes=Integer.parseInt(nodes);
+							_time=Double.parseDouble(time);
+							if ((_nodes>0) && (_time>0)) {
+								esTime=(_bases/_nodes)*_time;
+								esTimeText+=Math.round(esTime);
+							} else {
+								esTimeText+="0";
+							}
+						} catch (Exception e) {
+							addError(request, e.getMessage());
+							log.log(Level.SEVERE,e.toString());
+						}
+						
+						consoleOutput+=lineSeparator+esTimeText;
+						log.log(Level.SEVERE,consoleOutput);
 					
+					} catch (IOException e1){
+						addError(request, e1.getMessage());
+						log.log(Level.SEVERE,e1.toString());
+					} catch(Throwable e2)	{
+						addError(request, e2.getMessage());
+						log.log(Level.SEVERE,e2.toString());
+					} finally {
+						//Delete files
+						for (int i=0;i<3;i++){
+							if (f[i]!=null) {
+								f[i].delete();
+							}
+						}
+						
+					}
+					try {
+						this.writeResponseHeader(request, response);
+						
+						if (game != null) {
+							response.getWriter().println("STEP");
+							response.getWriter().println(consoleOutput);
+						}
+						
+					} catch (Exception ex) {
+						response.getWriter().println(ex.getMessage());
+					}
 				}
-			} //has !errors
-			
-		} catch (Exception ex) {
-			addError(request, ex.getMessage());
-		}
-		try {
-		this.writeResponseHeader(request, response);
-		if (game != null) {
-			response.getWriter().println("NormalForm " + game.nrows() + " " + game.ncols());
-			response.getWriter().println(game.printFormat());
-			response.getWriter().println("From C Algo:");
-			response.getWriter().println(consoleOutput);
-		}
-		} catch (Exception ex) {
-			response.getWriter().println(ex.getMessage());
-		}
+			}
 	}
 
+
+		
 	private <T> boolean checkDimensions(T[][] mat, int row, int col) {
 		if (mat.length != row) return false;
 		for (int i = 0; i < row; ++i)

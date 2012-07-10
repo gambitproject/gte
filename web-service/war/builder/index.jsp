@@ -49,7 +49,8 @@
 			var directory=$(this).find("Directory").text();
 			var bw=$(this).find("BinaryWindows").text();	
 			var bl=$(this).find("BinaryLinux").text();	
-			var s="label="+name+";toolTip="+tooltip+";type="+type+";url="+url+";dir="+directory+";bw="+bw+";bl="+bl;
+			var es=$(this).find("Estimate").text();
+			var s="label="+name+";toolTip="+tooltip+";type="+type+";url="+url+";dir="+directory+";bw="+bw+";bl="+bl+";es="+es;
 			flashvars[i]=s;
 			i++;
 		  });

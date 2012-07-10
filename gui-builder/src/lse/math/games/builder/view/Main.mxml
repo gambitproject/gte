@@ -67,7 +67,6 @@
 
 			
 			
-			
 			/* <--- --- MODE CHANGING FUNCTIONS --- ---> */
 			//Changes the controller mode 
 			private function changeEditMode(inmode:int):void
@@ -89,6 +88,11 @@
 				}
 			}
 			
+			private function resultFromHTTPService():void {
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
+					runAlgorithm(1);
+				}
+			}
 				
 			//Registers a listener for changes on the mode, which will update the gui if it needs to be done
 			private function initModeChangeListener():void
@@ -124,16 +128,39 @@
 			
 			//Pops up the -internal or external- output window
 			private function showOutput(text:String):void {
-				if (ExternalInterface.available && !settings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean) {
-					ExternalInterface.call('writeSolution', text);
-					log.add(Log.HINT, "You don't see the output? Then you must allow popups " +
-						"in your browser. Don't forget to save your changes before. Or you could " +
-						"activate the 'Display output internally' setting in the Settings panel.");
-				}
-				else {
-					PopUpManager.addPopUp(intOutputWindow, this, false);
-					intOutputWindow.setText(text);
-					PopUpManager.centerPopUp(intOutputWindow);
+				
+				var i:int=text.indexOf("STEP");
+				if (i!= -1){
+					i=text.indexOf("Estimation:");
+					var seconds:String=text.substr(i+11,text.length)
+					
+					seconds.replace( /^([\s|\t|\n]+)?(.*)([\s|\t|\n]+)?$/gm, "" );
+					
+					if (seconds=="") {
+						seconds="0";
+					}
+					
+					if (Number(seconds)<30) {
+						runAlgorithm(1);
+						
+					} else {
+						var s:String="This process will take approx. "+Number(seconds)+" seconds ("+Math.round(Number(seconds)/60)+" minutes). Do you want to wait?"
+						PromptTwoButtons.show(resultFromHTTPService,s );
+					}
+					
+				} else {
+				
+					if (ExternalInterface.available && !settings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean) {
+						ExternalInterface.call('writeSolution', text);
+						log.add(Log.HINT, "You don't see the output? Then you must allow popups " +
+							"in your browser. Don't forget to save your changes before. Or you could " +
+							"activate the 'Display output internally' setting in the Settings panel.");
+					}
+					else {
+						PopUpManager.addPopUp(intOutputWindow, this, false);
+						intOutputWindow.setText(text);
+						PopUpManager.centerPopUp(intOutputWindow);
+					}
 				}
 			}
 			
@@ -448,7 +475,7 @@
 						if(ctrl) controller.save();
 						break;
 					case 82: //'r'
-						if(ctrl) runAlgorithm(algoComboBox.selectedItem, seed);
+						if(ctrl) runAlgorithm(0);
 						break;
 					case 90: //'z'
 						if(ctrl) 
@@ -472,9 +499,25 @@
 			}
 			
 			//Calls controller.runAlgorithm but captures the type of Algo before, to do some additional stuff depending on the algo.
-			private function runAlgorithm(algo:String,s:String) {
-				trace(algo);
-				controller.runAlgorithm(algo, s);
+			private function runAlgorithm(m:int):void {
+				var a:Object=algoComboBox.selectedItem;
+				var s:String=seed;
+				if (m==0) {
+					//Run the Algo for the first time to estimate the process time
+					if (a.es=="1") {
+						//First run the estimation
+						controller.runAlgorithm(a, s);
+						//showOutput() will handle the process and asks the user, if he wants to continue.
+						
+					} else {
+						controller.runAlgorithm(a, s);
+					}
+				} else if (m==1){
+					//After estimation completes and user wants to continue, process the algo without estimation.
+					a.es="0";
+					controller.runAlgorithm(a, s);
+					a.es="1";
+				}
 			}
 			
 			
@@ -537,7 +580,7 @@
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="23"/>
 
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(algoComboBox.selectedItem, seed)" />			
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(0)" />			
 			<mx:Spacer width="4"/>
 			<s:ComboBox id="algoComboBox" width="111" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
