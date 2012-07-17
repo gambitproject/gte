@@ -137,7 +137,11 @@ package lse.math.games.builder.settings
 		public static const EDITOR_MATRIX_DELIMETER:String = "EDITOR_MATRIX_DELIMETER";	
 		
 		/** Boolean represents true/false if autoadjust is enabled */
-		public static const TREE_AUTO_ADJUST:String = "TREE_AUTO_ADJUST";	
+		public static const TREE_AUTO_ADJUST:String = "TREE_AUTO_ADJUST";
+		
+		/** Boolean represents true/false if autoadjust is enabled */
+		public static const SYSTEM_ENABLE_GUIDANCE:String = "SYSTEM_ENABLE_GUIDANCE";	
+
 		
 		/* <--- OTHER SETTINGS (Not shown under the Settings panel) ---> */
 		
@@ -174,6 +178,7 @@ package lse.math.games.builder.settings
 			settings.setValue(DEFAULT_CELL_PADDING_HOR, new Number(5));
 			settings.setValue(EDITOR_MATRIX_DELIMETER, " ");
 			settings.setValue(TREE_AUTO_ADJUST, true);
+			settings.setValue(SYSTEM_ENABLE_GUIDANCE, true);
 			//OTHER SETTINGS
 			settings.setValue(EXPANDED, false);
 		}

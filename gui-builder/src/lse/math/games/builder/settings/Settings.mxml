@@ -208,6 +208,15 @@
 										
 										change="setGlobalSetting(SCodes.EDITOR_MATRIX_DELIMETER, MATRIX_DELIMETER.text);" />
 						</mx:FormItem>
+						<mx:FormItem label="Enable guidance">
+							<s:CheckBox id="SYSTEM_ENABLE_GUIDANCE" 
+										toolTip="Enable this option and experience how to create a game tree."
+										
+										creationComplete="SYSTEM_ENABLE_GUIDANCE.selected =
+										glbSettings.getValue(SCodes.SYSTEM_ENABLE_GUIDANCE) as Boolean;"
+										
+										change="setGlobalSetting(SCodes.SYSTEM_ENABLE_GUIDANCE, SYSTEM_ENABLE_GUIDANCE.selected);" />
+						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
 			</s:NavigatorContent>	
