@@ -1,7 +1,7 @@
 package lse.math.games.builder.model
 {
 	import util.Log;
-	
+	import lse.math.games.builder.settings.UserSettings;
 	/**	  
 	 * This class represents an information set.</p>
 	 * It contains:
@@ -23,7 +23,7 @@ package lse.math.games.builder.model
 		private var _player:Player;
 		
 		private var log:Log = Log.instance;
-
+		private var settings:UserSettings = UserSettings.instance;
 		
 		
 		public function Iset(player:Player) 
@@ -215,11 +215,21 @@ package lse.math.games.builder.model
 				if (n > 1) {
 					// don't assign the last node yet, let it keep the residual... it will even out when the new node is added
 					// otherwise it will push the residual back to the node before
-					for (var child:Node = _firstNode.firstChild; child.sibling != null; child = child.sibling) {					
-						child.reachedby.prob = new Rational(1, n);
+					for (var child:Node = _firstNode.firstChild; child.sibling != null; child = child.sibling) {	
+						if (settings.getValue("SYSTEM_MODE_GUIDANCE")==0){
+							child.reachedby.prob = Rational.NaN;
+						} else {
+							child.reachedby.prob = new Rational(1, n);
+						}
 					}
 				}
-				move.prob = new Rational(1, n);
+					
+				if (settings.getValue("SYSTEM_MODE_GUIDANCE")==0){	
+					move.prob = Rational.NaN;
+				}
+				else {
+					move.prob = new Rational(1, n);
+				}
 			}
 			assignMove(move);			
 			return move;
@@ -262,6 +272,10 @@ package lse.math.games.builder.model
 				
 				var iset:Iset = newIset(destPlayer);
 				iset.appendNode(child);
+				
+				if (settings.getValue("SYSTEM_MODE_GUIDANCE")==0){
+					iset.makeChance();
+				}
 			}
 			return move;
 		}
@@ -436,7 +450,11 @@ package lse.math.games.builder.model
 		{
 			var m:Move = new Move();
 			if (_player == Player.CHANCE) {
-				m.prob = new Rational(1, numSiblings);
+				if (settings.getValue("SYSTEM_MODE_GUIDANCE")==0){
+					m.prob = Rational.NaN;
+				} else {
+					m.prob = new Rational(1, numSiblings);
+				}
 			}
 			m.setIset(this);
 			return m;
@@ -454,6 +472,11 @@ package lse.math.games.builder.model
 			else _player = _player.nextPlayer; 
 		}
 		
+		public function changeToSpecificPlayer(firstPlayer:Player):void
+		{		
+			_player=firstPlayer;
+		}
+		
 		/**
 		 * Convert the player to CHANCE, dissolving the Iset first, 
 		 * and then applying probability to each of the children
@@ -467,10 +490,15 @@ package lse.math.games.builder.model
 			var n:int = _firstNode.numChildren;
 			for (var child:Node = _firstNode.firstChild; child != null; child = child.sibling)
 			{
-				child.reachedby.prob = new Rational(1, n);				
+				if (settings.getValue("SYSTEM_MODE_GUIDANCE")==0){
+					child.reachedby.prob = Rational.NaN;
+				} else {
+					child.reachedby.prob = new Rational(1, n);
+				}
 			}			
 		}
 		
+	
 		
 		
 		//Linked-List-Node functionality				

@@ -62,6 +62,7 @@ package lse.math.games.builder.model
 		
 		/** Name of the player */
 		public function get name():String {	return _name; }
+		public function set name(value:String):void {	_name=value; }
 		
 		/** Next player */
 		public function get nextPlayer():Player { return _nextPlayer; }

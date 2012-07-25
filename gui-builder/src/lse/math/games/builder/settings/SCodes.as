@@ -141,7 +141,7 @@ package lse.math.games.builder.settings
 		
 		/** Boolean represents true/false if autoadjust is enabled */
 		public static const SYSTEM_ENABLE_GUIDANCE:String = "SYSTEM_ENABLE_GUIDANCE";	
-
+		public static const SYSTEM_MODE_GUIDANCE:String = "SYSTEM_MODE_GUIDANCE";	
 		
 		/* <--- OTHER SETTINGS (Not shown under the Settings panel) ---> */
 		
@@ -179,6 +179,7 @@ package lse.math.games.builder.settings
 			settings.setValue(EDITOR_MATRIX_DELIMETER, " ");
 			settings.setValue(TREE_AUTO_ADJUST, true);
 			settings.setValue(SYSTEM_ENABLE_GUIDANCE, true);
+			settings.setValue(SYSTEM_MODE_GUIDANCE, new Number(0));
 			//OTHER SETTINGS
 			settings.setValue(EXPANDED, false);
 		}

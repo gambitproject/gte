@@ -2,7 +2,7 @@ package lse.math.games.builder.view
 {		
 	import flash.display.DisplayObject;
 	import flash.text.engine.TextLine;
-	
+	import spark.components.TextInput;
 	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.presenter.Presenter;
@@ -13,7 +13,8 @@ package lse.math.games.builder.view
 	import mx.controls.Alert;
 	
 	import util.Log;
-	import util.PromptTextInput;
+	//import util.PromptTextInput;
+	import util.PromptTextInputCanvas;
 	
 	/**
 	 * Linked list of Painters, usable as Painter itself, applying each operation to the whole list
@@ -26,7 +27,7 @@ package lse.math.games.builder.view
 		private var _end:PainterChainLink;
 		
 		private var log:Log = Log.instance;
-		
+		private var ti:TextInput =null;
 		
 		
 		public function PainterChain() {}
@@ -122,6 +123,16 @@ package lse.math.games.builder.view
 			if(controller.treeMode)
 			{
 				_controller = controller;
+				
+				/*ti=new TextInput();
+				ti.x=300;
+				ti.y=300;
+				ti.width=100;
+				ti.height=30;
+				ti.depth=1;
+				ti.setFocus();
+				ti.text="sd";
+				_controller.canvas.addChild(ti);*/
 				_selectedLabelKey = null;
 				for (var labelKey:String in labels)
 				{
@@ -134,13 +145,13 @@ package lse.math.games.builder.view
 							log.add(Log.HINT, "Player name editing is not supported yet");
 						} else if(labelKey.indexOf("move_")==0)
 						{						
-							PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new name for the move");
+							PromptTextInputCanvas.show(onReturnFromPrompt, label.textBlock.content.rawText,x,y);
 							_selectedLabelKey = labelKey;
 							break;
 						}
 						else if(labelKey.indexOf("outcome_")==0)
 						{
-							PromptTextInput.show(onReturnFromPrompt, label.textBlock.content.rawText, "Introduce new value for the payoff");
+							PromptTextInputCanvas.show(onReturnFromPrompt, label.textBlock.content.rawText,x,y);
 							_selectedLabelKey = labelKey;
 							break;
 						}
@@ -156,7 +167,7 @@ package lse.math.games.builder.view
 		//Executes the edit action
 		private function onReturnFromPrompt():void
 		{
-			if(PromptTextInput.lastEnteredText!=null && PromptTextInput.lastEnteredText!="")
+			if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
 			{
 				_controller.doAction(getEditAction);
 			}
@@ -170,14 +181,14 @@ package lse.math.games.builder.view
 			if(_selectedLabelKey.indexOf("move_")==0)
 			{
 				var id:int = parseInt(_selectedLabelKey.split("_")[1]);
-				action = new LabelChangeAction(id, PromptTextInput.lastEnteredText);
+				action = new LabelChangeAction(id, PromptTextInputCanvas.lastEnteredText);
 			} else if(_selectedLabelKey.indexOf("outcome_")==0)
 			{
 				var payCode:String = (_selectedLabelKey.split("_")[1]);
 				id = parseInt(payCode.split(":")[0]);
 				var playerName:String = payCode.split(":")[1];
 					
-				var pay:Rational = Rational.parse(PromptTextInput.lastEnteredText);
+				var pay:Rational = Rational.parse(PromptTextInputCanvas.lastEnteredText);
 				if(pay==Rational.NaN)
 				{
 					log.add(Log.ERROR, "Bad number format, please use just numbers and '/' '.' characters for decimals");

@@ -3,6 +3,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Rational;
+	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.presenter.ActionChain;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.action.*;
@@ -215,8 +216,19 @@ package lse.math.games.builder.viewmodel
 			var h:Iset = grid.findIset(x, y);
 			var n:Node = grid.findNode(x, y);			
 			
+			n.isLeaf
 			if (h == null && n == null) return null;
 			else return new ChangePlayerAction(h, n);
+		}
+		
+		public function setPlayer(grid:TreeGrid, x:Number, y:Number, player:Player):IAction
+		{
+			var h:Iset = grid.findIset(x, y);
+			var n:Node = grid.findNode(x, y);			
+			
+			
+			if ((h == null && n == null)|| (n.isLeaf)) return null;
+			else return new SetPlayerAction(h, n,player);
 		}
 		
 		public function makeChance(grid:TreeGrid, x:Number, y:Number):IAction
@@ -224,6 +236,16 @@ package lse.math.games.builder.viewmodel
 			var h:Iset = grid.findIset(x, y);
 			var n:Node = grid.findNode(x, y);			
 						
+			if (h == null && n == null) return null;
+			
+			var action:MakeChanceAction = new MakeChanceAction(h, n);
+			action.onDissolve = _depthAdjuster;
+			return action;
+		}
+		
+		public function makeChanceAtNode(grid:TreeGrid, n:Node):IAction
+		{
+			var h:Iset = n.iset;
 			if (h == null && n == null) return null;
 			
 			var action:MakeChanceAction = new MakeChanceAction(h, n);

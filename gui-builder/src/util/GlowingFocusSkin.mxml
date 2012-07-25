@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+                xmlns:s="library://ns.adobe.com/flex/spark" 
+                xmlns:mx="library://ns.adobe.com/flex/mx"
+                creationComplete="startEffects()">
+    <fx:Script>
+        <![CDATA[
+            import mx.events.FlexEvent;
+            
+            import spark.components.supportClasses.SkinnableComponent;
+            
+            private var _target:SkinnableComponent;
+            
+            public function get target():SkinnableComponent
+            {
+                return _target;
+            }
+            
+            public function set target(value:SkinnableComponent):void
+            {
+                _target = value;
+                
+                if (_target.skin)
+                    _target.skin.addEventListener(FlexEvent.UPDATE_COMPLETE,
+                        skin_updateCompleteHandler, false, 0, true);
+            }
+            
+             override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+            {
+                //target.skin.alpha *= .6;
+                this.setActualSize(target.width, target.height);
+                super.updateDisplayList(target.width, target.height);
+            } 
+            
+            private function skin_updateCompleteHandler(event:Event):void
+            {
+                invalidateDisplayList();
+            }
+            
+            import spark.filters.GlowFilter;
+            private function startEffects():void {
+                sparkGlow.play()
+            }
+            
+        ]]>
+    </fx:Script>
+    
+    <fx:Declarations>
+        <s:AnimateFilter id="sparkGlow" duration="1000" target="{focusGroup}" bitmapFilter="{new spark.filters.GlowFilter()}" repeatBehavior="reverse" repeatCount="0">
+            <s:SimpleMotionPath property="color" valueFrom="0xFF0000" valueTo="0xFF0000"/>
+            <s:SimpleMotionPath property="alpha" valueFrom="0.3" valueTo="1"/>
+            <s:SimpleMotionPath property="blurX" valueFrom="0" valueTo="10"/>
+            <s:SimpleMotionPath property="blurY" valueFrom="0" valueTo="10"/>
+        </s:AnimateFilter>
+    </fx:Declarations>
+            
+    
+    <s:Rect id="focusGroup" top="0" left="0" right="0" bottom="0">
+        <s:fill>
+            <s:LinearGradient rotation="90">
+                <s:GradientEntry color="0xFFFFFF" />
+                <s:GradientEntry color="0xE3E3FF" />
+            </s:LinearGradient>
+        </s:fill>
+    </s:Rect>
+
+</s:Group>

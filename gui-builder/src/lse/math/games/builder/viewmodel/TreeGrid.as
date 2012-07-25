@@ -60,6 +60,7 @@ package lse.math.games.builder.viewmodel
 		private var fileSettings:FileSettings = FileSettings.instance;
 		private var log:Log = Log.instance;
 		
+		private var settings:UserSettings = UserSettings.instance;
 		
 		
 		public function TreeGrid() 
@@ -152,6 +153,11 @@ package lse.math.games.builder.viewmodel
 			
 			this.root = createNode();	
 			this.root.makeNonTerminal();
+			
+			if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")){
+				this.root.iset.makeChance();
+			}
+			
 		}
 		
 		// Creates a TreeGridNode with a determinate 'number' (id)

@@ -9,6 +9,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.DepthAdjuster;
 	import lse.math.games.builder.viewmodel.TreeGrid;
+	import lse.math.games.builder.settings.UserSettings;
+
 	
 	import util.Log;
 	
@@ -26,6 +28,8 @@ package lse.math.games.builder.viewmodel.action
 		private var _nodeId:int = -1;
 		private static var _depthAdjuster:IAction = new DepthAdjuster(); //TODO: remove and use ActionChain or onAdd decorator
 		private var log:Log = Log.instance;
+		
+		private var settings:UserSettings = UserSettings.instance;
 		
 		private var _timeElapsed:int = 0;
 		
@@ -85,7 +89,8 @@ package lse.math.games.builder.viewmodel.action
 			}
 			if (player == null) {
 				player = grid.firstPlayer;
-			}	
+			}
+			
 			
 			if (parent.isChildless)
 				parent.addMove(player);	

@@ -2,6 +2,8 @@ package lse.math.games.builder.model
 {	
 	import flash.net.FileReference;
 	
+	import mx.utils.StringUtil;
+	
 	import util.Log;
 
 	/**	  
@@ -205,6 +207,229 @@ package lse.math.games.builder.model
 				}				
 			}			
 		}
+		
+		
+		private var treeHasNaNChance:Boolean=false;
+		
+		
+		public function treeHasOnlyRoot():Boolean {
+			if (root.numChildren==0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+			
+		public function treeHasUnsetPlayers():Boolean
+		{
+			treeHasNaNChance=false;
+			
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				treeHasNaNChance=true;
+			} else {
+				iterateTreePlayers(root);
+			}
+			return treeHasNaNChance;
+		}
+		
+		
+		private function iterateTreePlayers(x:Node):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+						
+			while (y != null)
+			{
+				if (y.reachedby.isChance) {
+					if (y.reachedby.prob==Rational.NaN) {
+						treeHasNaNChance=true;
+						//y.toString();
+					}
+				}
+
+				
+				
+				iterateTreePlayers(y);
+				y = y.sibling;
+			}	
+		}
+		
+		private var playerMoves:String="";
+		
+		public function getPlayerMoves(value:Player):String
+		{
+			playerMoves="";
+			
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				return null;
+			} else {
+				iterateTreeMoves(root,value);
+			}
+			return playerMoves;
+		}
+		
+		private function iterateTreeMoves(x:Node,value:Player):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			while (y != null)
+			{
+				if (x.iset.player==value) {
+					playerMoves = playerMoves+y.reachedby.label+" ";
+				}
+				iterateTreeMoves(y,value);
+				y = y.sibling;
+			}	
+		}
+		
+		public function setPlayerMoves(value:Player,moves:String):void
+		{
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				return
+			} else {
+				iterateTreeMovesAndSet(root,value,moves);
+			}
+			
+		}
+		
+		private function iterateTreeMovesAndSet(x:Node,value:Player,moves:String):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			
+			while (y != null)
+			{
+				if (x.iset.player==value) {
+					var pos:int=moves.indexOf(" ")
+					if (pos>=0){
+						var newLabel:String=moves.substring(0,pos);
+						newLabel=StringUtil.trim(newLabel);
+						y.reachedby.label=newLabel;
+						moves=moves.substring(pos+1,moves.length);
+					} else if (moves!=""){
+						if (StringUtil.trim(moves)!="") {
+							y.reachedby.label=StringUtil.trim(moves);
+							moves=""
+						}
+					}
+				}
+			iterateTreeMovesAndSet(y,value,moves);
+				y = y.sibling;
+			}	
+		}
+
+		private var playerPayoffs:String="";
+		
+		public function getPlayerPayoffs(value:Player):String
+		{
+			playerPayoffs="";
+			
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				return null;
+			} else {
+				iterateTreePayoffs(root,value);
+			}
+			return playerPayoffs;
+		}
+		
+		private function iterateTreePayoffs(x:Node,value:Player):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			while (y != null)
+			{
+				if (x.iset.player==value) {
+					if (y.outcome!=null) {
+						playerPayoffs = playerPayoffs+y.outcome.getOutcomeAsString()+" ";
+					}
+				}
+				iterateTreePayoffs(y,value);
+				y = y.sibling;
+			}	
+		}
+		
+		
+		public function setPlayerPayoffs(value:Player,payoffs:String):void
+		{
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				return
+			} else {
+				iterateTreePayoffsAndSet(root,value,payoffs);
+			}
+			
+		}
+		
+		private function iterateTreePayoffsAndSet(x:Node,value:Player,moves:String):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			
+			while (y != null)
+			{
+				if (x.iset.player==value) {
+					var pos:int=moves.indexOf(" ")
+					if (pos>=0){
+						var newLabel:String=moves.substring(0,pos);
+						newLabel=StringUtil.trim(newLabel);
+						y.outcome.setOutcomeFromString(newLabel);
+						moves=moves.substring(pos+1,moves.length);
+					} else if (moves!=""){
+						if (StringUtil.trim(moves)!="") {
+							y.outcome.setOutcomeFromString(StringUtil.trim(moves));
+							moves=""
+						}
+					}
+				}
+				iterateTreePayoffsAndSet(y,value,moves);
+				y = y.sibling;
+			}	
+		}
+		
+		
+		var autoLabel:Number=0;
+		public function setPlayerPayoffsAuto(zeroSum:Boolean):void
+		{
+			
+			autoLabel=0;
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				return
+			} else {
+				iterateTreePayoffsAndSetAuto(root,zeroSum);
+			}
+			
+		}
+		
+		private function iterateTreePayoffsAndSetAuto(x:Node,zeroSum:Boolean):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			
+			while (y != null)
+			{
+				if (x.iset.player!=Player.CHANCE) {
+					var p1:String;
+					var p2:String;
+					if (zeroSum) {
+						p1=String(autoLabel);
+						p2=String(autoLabel*-1);
+					} else {
+						p1=String(autoLabel);
+						p2=p1;
+					}
+					y.outcome.setOutcomeFromString(p1+","+p2);
+					autoLabel++;
+				}
+				iterateTreePayoffsAndSetAuto(y,zeroSum);
+				y = y.sibling;
+			}	
+		}
+		
 		
 		//Creates isets for each group of nodes in the vector with the same own move sequence
 		private function mergeNodesWithSameOwnMoveSequence(nodesToMerge:Vector.<Node>):void

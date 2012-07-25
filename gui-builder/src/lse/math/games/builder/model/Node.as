@@ -34,6 +34,8 @@ package lse.math.games.builder.model
 		
 		private var log:Log = Log.instance;
 		
+		//Mode=0 if no player or iset is attache dto the node, else mode=1
+		private var _mode:int=1;
 		
 		
 		public function Node(extensiveForm:ExtensiveForm, number:int) 
@@ -41,6 +43,11 @@ package lse.math.games.builder.model
 			_tree = extensiveForm;
 			_number = number;
 		}
+
+		/** Determines the mode of the node */
+		public function get mode():int { return _mode; }
+		public function set mode(value:int):void { _mode = value; }
+
 		
 		/** Move which leads to this node */
 		public function get reachedby():Move { return _reachedby; }
@@ -51,7 +58,7 @@ package lse.math.games.builder.model
 		
 		/** Information set to which this node blongs */
 		public function get iset():Iset { return _iset; }
-		internal function setIset(iset:Iset):void { _iset = iset; }
+		internal function setIset(iset:Iset):void { _iset = iset;}
 		
 		/** Next node in the iset */
 		public function get nextInIset():Node { return _nextInIset; }

@@ -4,6 +4,7 @@ package lse.math.games.builder.viewmodel.action
 	
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
+	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
@@ -16,26 +17,25 @@ package lse.math.games.builder.viewmodel.action
 	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
-	public class ChangePlayerAction implements IAction
+	public class SetPlayerAction implements IAction
 	{
 		private var _isetId:int = -1;		
 		private var _nodeId:int = -1;
 		private var log:Log = Log.instance;
+		private var _player:Player=null;
 		private var _timeElapsed:int = 0;
 		
 		
 		
 		public function get timeElapsed():int {return _timeElapsed; }
 		
-		public function ChangePlayerAction(iset:Iset, node:Node) 
+		public function SetPlayerAction(iset:Iset, node:Node, player:Player) 
 		{
 			if (iset != null) _isetId = iset.idx;
 			if (node != null) _nodeId = node.number;
-			
+			_player=player;
 		}
 		
-		
-			
 		public function doAction(grid:TreeGrid):void
 		{				
 			var prevTime:int = getTimer();
@@ -52,8 +52,9 @@ package lse.math.games.builder.viewmodel.action
 				} else
 					log.add(Log.ERROR, "Couldn't find any iset with idx "+_isetId, "ChangePlayerAction");
 			} else {
-					iset.changePlayer(grid.firstPlayer);
-				
+				if (_player!=null) {
+					iset.changeToSpecificPlayer(_player);
+				}
 			}
 			
 			_timeElapsed = getTimer() - prevTime;
@@ -72,4 +73,3 @@ package lse.math.games.builder.viewmodel.action
 		}		
 	}
 }
-

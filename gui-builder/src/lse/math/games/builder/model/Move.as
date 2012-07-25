@@ -1,6 +1,8 @@
 package lse.math.games.builder.model 
 {
 	import util.Log;
+	import lse.math.games.builder.settings.UserSettings;
+	
 
 	/**	 
 	 * This class represents a move, which can be: 
@@ -21,7 +23,7 @@ package lse.math.games.builder.model
 		private var _label:String;
 	
 		private var log:Log = Log.instance;
-		
+		private var settings:UserSettings = UserSettings.instance;	
 		
 		
 		public function Move() {}
@@ -113,17 +115,22 @@ package lse.math.games.builder.model
 		
 		//Assigns probability accordingly
 		private function assignProb(desiredProb:Rational):void {
-			if (desiredProb.isGreaterThan(Rational.ONE)) {
+			if (desiredProb.isNaN){
+				_prob = desiredProb;
+			} else if (desiredProb.isGreaterThan(Rational.ONE)) {
 				desiredProb = Rational.ONE;
+				_prob = desiredProb;
 				log.add(Log.ERROR_HIDDEN, "prob greater than 1 set to " + desiredProb);
 			} else if (desiredProb.isLessThan(Rational.ZERO)) {
 				desiredProb = Rational.ZERO;
+				_prob = desiredProb;
 				log.add(Log.ERROR_HIDDEN, "prob less than 0 set to " + desiredProb);
+			} else {
+				_prob = desiredProb;
 			}
-			
-			_prob = desiredProb;
+
 			if (iset != null) {
-				var pie:Rational = Rational.ONE.subtract(_prob);
+				var pie:Rational=Rational.ONE.subtract(_prob);
 				//trace("pie starts at " + pie);
 				for (var n:Node = iset.firstNode.firstChild; n != null; n = n.sibling) {
 					var move:Move = n.reachedby;
@@ -140,14 +147,25 @@ package lse.math.games.builder.model
 							//trace("adjusting prob from " + toAssign + " to " + pie);
 							toAssign = pie;
 						}
-						move._prob = toAssign;
-
+						
+						if (desiredProb.isNaN) {
+							move._prob = Rational.NaN;
+						} else {
+							move._prob = toAssign;	
+						}
+					
 						pie = pie.subtract(toAssign);
 						//trace("pie is now " + pie);
 					}
 				}
 				if (pie.isGreaterThan(Rational.ZERO)) {
-					_prob = _prob.add(pie);
+						if (desiredProb.isNaN) {
+							_prob = Rational.NaN;
+						} else {
+							_prob = _prob.add(pie);
+						}
+
+
 				}
 			}
 		}

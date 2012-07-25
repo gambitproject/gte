@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import spark.components.supportClasses.SkinnableComponent;
+			
+			private var _target:SkinnableComponent;
+			
+			public function get target():SkinnableComponent
+			{
+				return _target;
+			}
+			
+			public function set target(value:SkinnableComponent):void
+			{
+				_target = value;
+				
+				if (_target.skin)
+					_target.skin.addEventListener(FlexEvent.UPDATE_COMPLETE,
+						skin_updateCompleteHandler, false, 0, true);
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				this.setActualSize(target.width, target.height);
+				super.updateDisplayList(target.width, target.height);
+				
+				animateArrows();
+			} 
+			
+			private function skin_updateCompleteHandler(event:Event):void
+			{
+				invalidateDisplayList();
+			}
+			
+			private function animateArrows():void
+			{
+				if (!moveEffects.isPlaying)
+					moveEffects.play();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group id="focusGroup" top="0" left="-10" right="-10" bottom="0">
+		<!-- Arrow 1 -->
+		<s:Path id="arrow1" verticalCenter="0" data="M 0 -10 L 0 10 L 10 0 L 0 -10 Z">
+			<s:fill>
+				<s:SolidColor color="0" alpha=".5" />
+			</s:fill>
+		</s:Path>
+		<!-- Arrow 2 -->
+		<s:Path id="arrow2" right="0" verticalCenter="0" data="M 0 -10 L 0 10 L -10 0 L 0 -10 Z">
+			<s:fill>
+				<s:SolidColor color="0" alpha=".5" />
+			</s:fill>
+		</s:Path>
+	</s:Group>
+	
+	<fx:Declarations>
+		<s:Parallel id="moveEffects" duration="1000">
+			<s:Animate id="mv1" target="{arrow1}">
+				<s:easer>
+					<s:Bounce />
+				</s:easer>
+				<s:SimpleMotionPath property="left" valueFrom="-50" valueTo="0" />
+			</s:Animate>
+			<s:Animate id="mv2" target="{arrow2}">
+				<s:easer>
+					<s:Bounce />
+				</s:easer>
+				<s:SimpleMotionPath property="right" valueFrom="-50" valueTo="0" />
+			</s:Animate>
+			<s:Fade id="fd" target="{focusGroup}" alphaFrom="0" alphaTo="1" />
+		</s:Parallel>
+	</fx:Declarations>
+	
+</s:Group>

@@ -13,6 +13,7 @@ package lse.math.games.builder.presenter
 	import lse.math.games.builder.io.XMLImporter;
 	import lse.math.games.builder.model.Iset;
 	import lse.math.games.builder.model.Node;
+	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.model.Rational;
 	import lse.math.games.builder.model.StrategicForm;
 	import lse.math.games.builder.model.Strategy;
@@ -278,6 +279,12 @@ package lse.math.games.builder.presenter
 				
 				//TODO #32 do lots of things here
 			}
+		}
+		
+		public function setPlayerName(p:Player,n:String):void {
+			p.name=n;
+			invalidate(true, false, true);
+			
 		}
 		
 		/**
@@ -641,12 +648,32 @@ package lse.math.games.builder.presenter
 		public function doActionAt(x:Number, y:Number):void
 		{
 			//reset zooming flag
+			
 			_lastActionZoom=false;
 			if(treeMode) {
 				if(getClickAction!= null)
 				{
 					selectedOutcome = -1;
 					var action:IAction = getClickAction(grid, x, y);
+					if (action != null) {
+						_actionHandler.processAction(action, grid);									
+						invalidate(action.changesData, action.changesSize, action.changesDisplay);
+					}
+				}
+			} else if(matrixMode) {
+				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
+			}
+		}	
+		
+		public function doActionAtWithPlayer(x:Number, y:Number,player:Player):void
+		{
+			//reset zooming flag
+			_lastActionZoom=false;
+			if(treeMode) {
+				if(getClickAction!= null)
+				{
+					selectedOutcome = -1;
+					var action:IAction = getClickAction(grid, x, y,player);
 					if (action != null) {
 						_actionHandler.processAction(action, grid);									
 						invalidate(action.changesData, action.changesSize, action.changesDisplay);

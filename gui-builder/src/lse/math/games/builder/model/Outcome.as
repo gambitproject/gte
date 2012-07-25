@@ -48,5 +48,26 @@ package lse.math.games.builder.model
 			}
 			return sb.join(" ");
 		}
+		
+		public function getOutcomeAsString():String
+		{
+			var sb:Vector.<String> = new Vector.<String>();
+			for (var pl:Object in _payoffs) {				
+				sb.push(_payoffs[pl]);
+			}
+			return sb.join(",");
+		}
+		
+		public function setOutcomeFromString(value:String):void
+		{
+			var a:Array=value.split(",");
+			var i:int=0;
+			for (var pl:Object in _payoffs) {
+				if (i<a.length) {
+					_payoffs[pl]=Rational.parse(a[i]);
+				}
+				i++;
+			}
+		}
 	}
 }
