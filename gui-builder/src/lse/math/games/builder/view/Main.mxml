@@ -1054,7 +1054,7 @@
 
 						<s:HGroup  id="btn" visible="{showStartButton}" verticalAlign="middle"  includeInLayout="{showStartButton}">
 							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_down.png')" />
-							<s:Label styleName="mxLabel" text="Start here and click on the suqare." />
+							<s:Label styleName="mxLabel" text="Start here and click on the square." />
 							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_down.png')" />
 						</s:HGroup>
 						

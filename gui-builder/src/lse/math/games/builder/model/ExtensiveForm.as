@@ -284,18 +284,21 @@ package lse.math.games.builder.model
 			}	
 		}
 		
+		private var movesToSet:String="";
+		
 		public function setPlayerMoves(value:Player,moves:String):void
 		{
+			movesToSet=moves;
 			if (treeHasOnlyRoot()){
 				//Exit if we only have a root node
 				return
 			} else {
-				iterateTreeMovesAndSet(root,value,moves);
+				iterateTreeMovesAndSet(root,value);
 			}
 			
 		}
 		
-		private function iterateTreeMovesAndSet(x:Node,value:Player,moves:String):void  
+		private function iterateTreeMovesAndSet(x:Node,value:Player):void  
 		{
 			//Preorder
 			var y:Node = x.firstChild;
@@ -303,20 +306,20 @@ package lse.math.games.builder.model
 			while (y != null)
 			{
 				if (x.iset.player==value) {
-					var pos:int=moves.indexOf(" ")
+					var pos:int=movesToSet.indexOf(" ")
 					if (pos>=0){
-						var newLabel:String=moves.substring(0,pos);
+						var newLabel:String=movesToSet.substring(0,pos);
 						newLabel=StringUtil.trim(newLabel);
 						y.reachedby.label=newLabel;
-						moves=moves.substring(pos+1,moves.length);
-					} else if (moves!=""){
-						if (StringUtil.trim(moves)!="") {
-							y.reachedby.label=StringUtil.trim(moves);
-							moves=""
+						movesToSet=movesToSet.substring(pos+1);
+					} else if (movesToSet!=""){
+						if (StringUtil.trim(movesToSet)!="") {
+							y.reachedby.label=StringUtil.trim(movesToSet);
+							movesToSet=""
 						}
 					}
 				}
-			iterateTreeMovesAndSet(y,value,moves);
+			iterateTreeMovesAndSet(y,value);
 				y = y.sibling;
 			}	
 		}
@@ -381,47 +384,51 @@ package lse.math.games.builder.model
 			}	
 		}
 		
+		private var payoffsToSet:String="";
+		
 		public function setPlayerPayoffs(value:Player,payoffs:String):void
 		{
+			payoffsToSet=payoffs;
 			if (treeHasOnlyRoot()){
 				//Exit if we only have a root node
 				return
 			} else {
 				if (payoffs.substring(payoffs.length-1,1)!=" ")
 					payoffs+=" ";
-				iterateTreePayoffsAndSet(root,value,payoffs);
+				iterateTreePayoffsAndSet(root,value);
 			}
 			
 		}
 		
-		private function iterateTreePayoffsAndSet(x:Node,value:Player,moves:String):void  
+		private function iterateTreePayoffsAndSet(x:Node,value:Player):void  
 		{
 			//Preorder
 			var y:Node = x.firstChild;
-			trace(moves);
+			
 			while (y != null)
 			{
 				if (y.isLeaf) {
-					var pos:int=moves.indexOf(" ")
+					
+					var pos:int=payoffsToSet.indexOf(" ")
 					if (pos>=0){
 						
-							var newLabel:String=moves.substring(0,pos);
+							var newLabel:String=payoffsToSet.substring(0,pos);
 							newLabel=StringUtil.trim(newLabel);
 							trace(newLabel);
 							if (y.outcome==null)
 								y.makeTerminal();
 							y.outcome.setPay(value,Rational.parse(newLabel));
-							moves=moves.substring(pos+1,moves.length);
-					}  else if (moves!=""){
-						if (StringUtil.trim(moves)!="") {
+							payoffsToSet=payoffsToSet.substring(pos+1);
+					}  else if (payoffsToSet!=""){
+						if (StringUtil.trim(payoffsToSet)!="") {
 								if (y.outcome==null)
 									y.makeTerminal();
-								y.outcome.setPay(value,Rational.parse(StringUtil.trim(moves)));
-								moves=""
+								y.outcome.setPay(value,Rational.parse(StringUtil.trim(payoffsToSet)));
+								payoffsToSet=""
 						}
 					}
 				}
-				iterateTreePayoffsAndSet(y,value,moves);
+				iterateTreePayoffsAndSet(y,value);
 				y = y.sibling;
 			}	
 		}
