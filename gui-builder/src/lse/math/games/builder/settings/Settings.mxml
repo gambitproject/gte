@@ -89,6 +89,29 @@
 					invalidate();
 			}
 			
+			
+			// Changes orientation of the tree
+			private function changeOrientation(orientation:int):void
+			{
+				setFileSetting(SCodes.TREE_ORIENTATION, orientation, true);
+				switch(orientation)
+				{
+					case 0:
+						_controller.doAction(actions.orientationUp);
+						break;
+					case 1:
+						_controller.doAction(actions.orientationDown);
+						break;
+					case 2:
+						_controller.doAction(actions.orientationLeft);
+						break;
+					case 3:
+						_controller.doAction(actions.orientationRight);
+						break;
+				}
+				invalidate();
+			}
+			
 			//Sets the file settings as default
 			private function setFileSettingsAsDefault():void
 			{
@@ -117,8 +140,9 @@
 			}
 		]]>
 	</fx:Script>
-	
-
+	<fx:Declarations>
+		<TreeGridActionFactory id="actions" xmlns="lse.math.games.builder.viewmodel.*" />	
+	</fx:Declarations>
 	
 		<mx:TabNavigator tabHeight="22" left="-1" right="-1" top="-1" bottom="-1">
 			<!-- General settings tab -->
@@ -240,6 +264,22 @@
 												
 												change="setFileSetting(SCodes.FILE_PLAYER_2_COLOR, event.target.selectedColor, true);"/>
 							</s:HGroup>
+						</mx:FormItem>
+						<mx:FormItem label="Tree orientation">
+							<mx:ToggleButtonBar id="orientationBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" 
+												selectedIndex="{fileSettings.getValue(SCodes.TREE_ORIENTATION) as Number}" 
+												valueCommit="changeOrientation(orientationBar.selectedIndex)">
+								<mx:dataProvider>	
+									<mx:ArrayCollection>
+										<mx:source>
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_up.png')" toolTip="Orientation: Root at top"/>
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_down.png')" toolTip="Orientation: Root at bottom"/>
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_left.png')" toolTip="Orientation: Root at left"/>
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_right.png')" toolTip="Orientation: Root at right"/>
+										</mx:source>
+									</mx:ArrayCollection>
+								</mx:dataProvider>
+							</mx:ToggleButtonBar>
 						</mx:FormItem>
 						<mx:FormItem label="Default font" toolTip="Select the default Font" >
 							<s:ComboBox id="FILE_FONT" width="106" height="24" 

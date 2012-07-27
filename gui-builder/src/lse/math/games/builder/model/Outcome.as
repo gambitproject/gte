@@ -58,6 +58,7 @@ package lse.math.games.builder.model
 			return sb.join(",");
 		}
 		
+
 		public function setOutcomeFromString(value:String):void
 		{
 			var a:Array=value.split(",");
@@ -69,5 +70,18 @@ package lse.math.games.builder.model
 				i++;
 			}
 		}
+		
+		public function setOutcomeFromStringAddNew(value:String,player1:Player,player2:Player):void
+		{
+			var a:Array=value.split(",");
+			var i:int=0;
+			for (var pl:Object in _payoffs) {
+				if (i<a.length) {
+					_payoffs[pl]=Rational.parse(a[i]);
+				}
+				i++;
+			}
+		}
+		
 	}
 }

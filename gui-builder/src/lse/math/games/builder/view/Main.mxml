@@ -26,7 +26,7 @@
 			import mx.utils.StringUtil;
 			import mx.controls.ProgressBar;
 			import spark.components.TitleWindow;
-			
+			import util.PromptTextInputCanvas;
 			
 			import util.EvCodes;
 			import util.EventManager;
@@ -120,7 +120,11 @@
 			[Bindable]
 			private var _player2Name:String="";
 
+			private var ngPayoffsPlayer:int=1;
+			private var ngMovesPlayer:int=1;
 			
+			[Bindable]
+			private var showStartButton:Boolean=false;
 			
 			//Embeed icons for NEWGUI
 			[Embed(source='../../../../../../assets/icons/zerosum.png')]
@@ -165,6 +169,12 @@
 			[Bindable]
 			public var ngMovesHoverIcon:Class; 
 			
+			[Embed(source='../../../../../../assets/icons/ng_finalize.png')]
+			[Bindable]
+			public var ngFinalizeIcon:Class; 
+			[Embed(source='../../../../../../assets/icons/ng_finalize_hover.png')]
+			[Bindable]
+			public var ngFinalizeHoverIcon:Class; 
 				
 			
 			/**
@@ -208,12 +218,13 @@
 				if (value==-1) {
 					return;
 				}
-				
+			
 				switch (extensiveStep) {
 					case 0:
 						log.add(Log.HINT,"Choose an option below to add or delete a node by clicking on a black square. Click on PLAYERS and move to the next step.");
 						ngTreeStep.setStyle("icon",ngTreeHoverIcon);
 						controller.getClickAction = getClickCallback(1);
+
 						break ;
 					case 1:
 						log.add(Log.HINT,"Choose a player and click on a square to assign this player to the node. After all nodes are assigned to a player click on INFOSETS and move to the next step.");
@@ -230,18 +241,15 @@
 						break ;
 					case 3:
 						ngMovesStep.setStyle("icon",ngMovesHoverIcon);
-						ngMovesPlayer1.selected=true;
-						readMovesfromTree(controller.grid.firstPlayer);
 						controller.getClickAction = getClickCallback(8);
 						break ;
 					case 4:
 						ngPayoffsStep.setStyle("icon",ngPayoffsHoverIcon);
-						ngPayoffsPlayer1.selected=true;
-						readPayoffsfromTree(controller.grid.firstPlayer);
 						controller.getClickAction = getClickCallback(8);
 						break ;
 				} 
 			}
+			
 			
 			/**
 			 * Controlls the Icons of the NEWGUI wether they are enabled or disabled and alpha blended. 
@@ -256,34 +264,56 @@
 					ngInfosetsStep.alpha=1;
 					ngMovesStep.alpha=1;
 					ngPayoffsStep.alpha=1;
+					ngFinalizeStep.alpha=1;
 	
 					ngPlayersStep.enabled=true;
 					ngInfosetsStep.enabled=true;
 					ngMovesStep.enabled=true;
 					ngPayoffsStep.enabled=true;
-	
+					ngFinalizeStep.enabled=true;
+					showStartButton=false;
 					
 					if (controller.grid.treeHasOnlyRoot()){
 							ngPlayersStep.alpha=0.3;
 							ngInfosetsStep.alpha=0.3;
 							ngMovesStep.alpha=0.3;
 							ngPayoffsStep.alpha=0.3;
+							ngFinalizeStep.alpha=0.3;
 							
 							ngPlayersStep.enabled=false;
 							ngInfosetsStep.enabled=false;
 							ngMovesStep.enabled=false;
 							ngPayoffsStep.enabled=false;
+							ngFinalizeStep.enabled=false;
+							
+							
+							btn.x=canvas.x+canvas.width/2 -130;
+							btn.y=canvas.y+canvas.height/2 -130;
+							showStartButton=true;
+							bounceEffect.play([btn]);
+							
+							
 					}
 	
 					if (controller.grid.treeHasUnsetPlayers()){
 							ngInfosetsStep.alpha=0.3;
 							ngMovesStep.alpha=0.3;
 							ngPayoffsStep.alpha=0.3;
+							ngFinalizeStep.alpha=0.3;
 							
 							ngInfosetsStep.enabled=false;
 							ngMovesStep.enabled=false;
 							ngPayoffsStep.enabled=false;
+							ngFinalizeStep.enabled=false;
 					}
+					
+					/*
+					if (controller.grid.hasUnsetPayoffs()){
+						ngFinalizeStep.alpha=0.3;
+						ngFinalizeStep.enabled=false;
+					}
+					*/
+					
 				}
 			}
 			
@@ -502,25 +532,7 @@
 				} return null;
 			}
 			
-			// Changes orientation of the tree
-			private function changeOrientation(orientation:int):void
-			{
-				switch(orientation)
-				{
-					case 0:
-						controller.doAction(actions.orientationUp);
-						break;
-					case 1:
-						controller.doAction(actions.orientationDown);
-						break;
-					case 2:
-						controller.doAction(actions.orientationLeft);
-						break;
-					case 3:
-						controller.doAction(actions.orientationRight);
-						break;
-				}
-			}
+		
 					
 			/**
 			 * Opens the MatrixEditor
@@ -842,62 +854,39 @@
 				}
 			}
 
-			private function keyDownMoves(event:KeyboardEvent):void{
-				if (event.keyCode==Keyboard.ENTER) {
-					if (ngMovesPlayer1.selected) {
-						controller.grid.setPlayerMoves(controller.grid.firstPlayer,ngMovesArea.text)
-					} else if (ngMovesPlayer2.selected) {
-						controller.grid.setPlayerMoves(controller.grid.firstPlayer.nextPlayer,ngMovesArea.text)
-					}
-					controller.invalidate(true, false, true);
-				} else if (event.keyCode==Keyboard.ESCAPE) {
-					if (ngMovesPlayer1.selected) {
-						readMovesfromTree(controller.grid.firstPlayer)
-					} else if (ngMovesPlayer2.selected) {
-						readMovesfromTree(controller.grid.firstPlayer.nextPlayer)
-					}
-					
-				}
-			}
-	
-			private function keyDownPayoffs(event:KeyboardEvent):void{
-				
-				if (event.keyCode==Keyboard.ENTER) {
-					if (ngPayoffsPlayer1.selected) {
-						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer,ngPayoffsArea.text);
-					} else if (ngPayoffsPlayer2.selected) {
-						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer.nextPlayer,ngPayoffsArea.text);
-					} else if (ngPayoffsChance.selected) {
-						controller.grid.setPlayerPayoffs(Player.CHANCE,ngPayoffsArea.text);
-					}
-					controller.invalidate(true, false, true);
-				} else if (event.keyCode==Keyboard.ESCAPE) {
-					if (ngPayoffsPlayer1.selected) {
-						readPayoffsfromTree(controller.grid.firstPlayer);
-					} else if (ngPayoffsPlayer2.selected) {
-						readPayoffsfromTree(controller.grid.firstPlayer.nextPlayer);
-					} else if (ngPayoffsChance.selected) {
-						readPayoffsfromTree(Player.CHANCE);
-					}
 
-					
-				} 
-			}
-			
 			private function setAutoPayoffs():void {
-				controller.grid.setPlayerPayoffsAuto(controller.isZeroSum);
+				controller.grid.setPlayerPayoffsAuto(controller.isZeroSum,controller.grid.firstPlayer);
 				controller.invalidate(true,false,true);
 			}
 			
-			private function readMovesfromTree(p:Player):void {
-				ngMovesArea.text=controller.grid.getPlayerMoves(p)
+
+			//Executes the edit action
+			private function onReturnFromPromptMoves():void
+			{
+				if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
+				{
+					if (ngMovesPlayer==1) {
+						controller.grid.setPlayerMoves(controller.grid.firstPlayer,PromptTextInputCanvas.lastEnteredText);
+					} else if (ngMovesPlayer==2) {
+						controller.grid.setPlayerMoves(controller.grid.firstPlayer.nextPlayer,PromptTextInputCanvas.lastEnteredText);
+					} 
+					controller.invalidate(true, false, true);
+				}
 			}
-			
-			private function readPayoffsfromTree(p:Player):void {
-				ngPayoffsArea.text=controller.grid.getPlayerPayoffs(p)
-			}
-			
 		
+			private function onReturnFromPromptPayoffs():void
+			{
+				if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
+				{
+					if (ngPayoffsPlayer==1) {
+						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer,PromptTextInputCanvas.lastEnteredText);
+					} else if (ngPayoffsPlayer==2) {
+						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer.nextPlayer,PromptTextInputCanvas.lastEnteredText);
+					} 
+					controller.invalidate(true, false, true);
+				}
+			}
 			
 			
 		]]>
@@ -963,6 +952,11 @@
 		<TreeGridActionFactory id="actions" xmlns="lse.math.games.builder.viewmodel.*" />		
 		<Presenter id="controller" xmlns="lse.math.games.builder.presenter.*" grid="{grid}" matrix="{matrix}" getDataUpdateAction="actions.outcomeDataUpdate" />
 		<OutputWindow id="intOutputWindow" xmlns="lse.math.games.builder.view.*" skinClass="lse.math.games.builder.view.OutputWindowSkin" />
+		
+		
+		<mx:Sequence id="bounceEffect" repeatCount="1">
+			<mx:Move duration="2000" yBy="100" easingFunction="{Bounce.easeOut}"/>
+		</mx:Sequence>
 	</fx:Declarations>
 	
 
@@ -977,7 +971,7 @@
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
 
-			<mx:TextInput id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
+			<mx:TextInput styleName="mxLabels" id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
 						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) fileManager.filename= filename.text; else filename.text = fileManager.filename" 
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
@@ -1002,12 +996,18 @@
 					   click="controller.undo()" />
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" 
 					   click="controller.redo()" />				
-			<mx:Spacer width="23"/>			
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
-					   click="controller.doAction(actions.randomPayoffs)" />
-			<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
-					   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
-			<mx:Spacer width="23" />		
+			<mx:Spacer width="23"/>	
+			
+			<s:HGroup  visible="{extensiveStep==-1}" verticalAlign="middle" includeInLayout="{extensiveStep==-1}">
+				<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
+						   click="controller.doAction(actions.randomPayoffs)" />
+				<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
+						   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
+			</s:HGroup>
+				
+			<mx:Spacer width="23" />
+			
+			
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" 
 					   click="controller.zoomIn()" />
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" 
@@ -1039,42 +1039,42 @@
 					
 					<!-- NEWGUI-->
 					<s:VGroup left="10" top="5" >
-						<!-- NEWGUI Ioons-->
-						<s:HGroup gap="-2" visible="{extensiveStep>=0}" >
-							<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Clear [Ctrl+c]" click="setExtensiveStep(0);" />
-							<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Open [Ctrl+o]" click="setExtensiveStep(1);" />	
-							<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(2);" />	
-							<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(3);" />
-							<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(4);" />
-						</s:HGroup>
-
 						<!-- Tree Step-->
 						<s:HGroup  visible="{extensiveStep==0}" verticalAlign="middle"  includeInLayout="{extensiveStep==0}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/add.png')" />
-							<s:RadioButton styleName="mxLabels" groupName="ngTree" id="ngTreeAdd" label="Add node"  selected="true"  />
+							<mx:Button id="ngTreeAdd" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/add.png')"  
+									   toggle="true" selected="true" click="ngTreeDelete.selected=false;" />
+							<s:Label styleName="mxLabels" id="ngTreeAdd1" text="Add node"    />
 						</s:HGroup>	
 						<s:HGroup  visible="{extensiveStep==0}" verticalAlign="middle"  includeInLayout="{extensiveStep==0}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/delete.png')" />
-							<s:RadioButton styleName="mxLabels" groupName="ngTree" id="ngTreeDelete" label="Delete node" />
+							<mx:Button id="ngTreeDelete" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/delete.png')"  
+									   toggle="true" selected="false" click="ngTreeAdd.selected=false;" />
+							<s:Label styleName="mxLabels" id="ngTreeDelete1" text="Delete node" />
+						</s:HGroup>
+
+
+						<s:HGroup  id="btn" visible="{showStartButton}" verticalAlign="middle"  includeInLayout="{showStartButton}">
+							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_down.png')" />
+							<s:Label styleName="mxLabel" text="Start here and click on the suqare." />
+							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_down.png')" />
 						</s:HGroup>
 						
 
 						<!-- Players Step-->
 						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-							<s:RadioButton groupName="ngPlayers" id="ngPlayer1" label=""  selected="true"  />
+							<mx:Button id="ngPlayer1" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_go.png')"  
+									   toggle="true" selected="true" click="ngChance.selected=false;ngPlayer2.selected=false;" />
 							<s:TextInput styleName="mxLabels" id="ngPlayer1Input" text="Player1" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer1(event);" />
 						</s:HGroup>	
 
 						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-							<s:RadioButton groupName="ngPlayers"  id="ngPlayer2" label="" />
+							<mx:Button id="ngPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_go.png')"  
+									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngChance.selected=false;" />
 							<s:TextInput styleName="mxLabels" id="ngPlayer2Input" text="Player2" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer2(event);"  />
 						</s:HGroup>	
 						
 						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_delete.png')"/>
-							<s:RadioButton groupName="ngPlayers" id="ngChance" label=""  />
+							<mx:Button id="ngChance" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_delete.png')"  
+									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngPlayer2.selected=false;" />
 							<s:TextInput styleName="mxLabels" id="ngChanceInput" text="Chance" focusSkin="util.GlowingFocusSkin" editable="false" />
 						</s:HGroup>	
 
@@ -1084,59 +1084,57 @@
 						
 						<!-- Infosets Step-->
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/link.png')"/>
-							<s:RadioButton styleName="mxLabels" groupName="ngInfosets" id="ngInfosetsJoin" label="Merge Infosets"  selected="true"  />
+							<mx:Button id="ngInfosetsJoin" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/link.png')"  
+									   toggle="true" selected="true" click="ngInfosetsCut.selected=false;ngInfosetsDisjoin.selected=false;" />
+							<s:Label styleName="mxLabels" id="ngInfosetsJoin1" text="Merge Infosets"   />
 						</s:HGroup>	
 						
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/link_break.png')"/>
-							<s:RadioButton styleName="mxLabels" groupName="ngInfosets"  id="ngInfosetsDisjoin" label="Disolve Infosets" />
+							<mx:Button id="ngInfosetsDisjoin" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/link_break.png')"  
+									   toggle="true" selected="false" click="ngInfosetsCut.selected=false;ngInfosetsJoin.selected=false;" />
+							<s:Label styleName="mxLabels" id="ngInfosetsDisjoin1" text="Disolve Infosets" />
 						</s:HGroup>	
 						
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
-							<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/cut_red.png')"/>
-							<s:RadioButton styleName="mxLabels" groupName="ngInfosets" id="ngInfosetsCut" label="Cut Infosets"  />
+							<mx:Button id="ngInfosetsCut" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cut_red.png')"  
+									   toggle="true" selected="false" click="ngInfosetsDisjoin.selected=false;ngInfosetsJoin.selected=false;" />
+							<s:Label styleName="mxLabels" id="ngInfosetsCut1" text="Cut Infosets"  />
 						</s:HGroup>	
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
 							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="controller.doAction(actions.perfectRecall)" />
+							<s:Label styleName="mxLabels" text="Perfect Recall"  />
 						</s:HGroup>
 						
 						<!-- moves Step-->
-						<s:HGroup  visible="{extensiveStep==3}" verticalAlign="top" includeInLayout="{extensiveStep==3}">
-							<s:VGroup>
-								<s:HGroup>
-									<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-									<s:RadioButton styleName="mxLabels" groupName="ngMoves" id="ngMovesPlayer1" label="{_player1Name}"  selected="true" click="readMovesfromTree(controller.grid.firstPlayer);" />
-								</s:HGroup>
-								<s:HGroup>
-									<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-									<s:RadioButton styleName="mxLabels" groupName="ngMoves" id="ngMovesPlayer2" label="{_player2Name}"   click="readMovesfromTree(controller.grid.firstPlayer.nextPlayer);"  />
-								</s:HGroup>
-							</s:VGroup>
-							<s:TextArea id="ngMovesArea"  styleName="mxLabels" lineBreak="toFit" width="150" height="40" focusSkin="util.GlowingFocusSkin" keyDown="keyDownMoves(event);" />
-						</s:HGroup>	
+						<s:HGroup visible="{extensiveStep==3}" verticalAlign="middle" includeInLayout="{extensiveStep==3}">
+							<mx:Button id="ngMovesPlayer1" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/font_add.png')"  
+									   click="ngMovesPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer),0,0,2);" />
+							<s:Label styleName="mxLabels" text="{_player1Name}"   />
+						</s:HGroup>
+						<s:HGroup visible="{extensiveStep==3}" verticalAlign="middle" includeInLayout="{extensiveStep==3}">
+							<mx:Button id="ngMovesPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/font_add.png')"  
+									   click="ngMovesPlayer=2;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer.nextPlayer),0,0,2);" />
+							<s:Label styleName="mxLabels" text="{_player2Name}"   />
+						</s:HGroup>
 						<s:VGroup visible="{extensiveStep==3}" includeInLayout="{extensiveStep==3}">
-							<s:Label styleName="mxSmallLabels" text="Accept:Enter Cancel:Esc" verticalAlign="middle" />	
+							<s:Label styleName="mxSmallLabels" text="Click on a move-label to change it in place." verticalAlign="middle" />	
 						</s:VGroup>
 						
 						<!-- Payoffs Step-->
-						<s:HGroup  visible="{extensiveStep==4}" verticalAlign="top" includeInLayout="{extensiveStep==4}">
-							<s:VGroup>
-								<s:HGroup>
-									<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-									<s:RadioButton styleName="mxLabels" groupName="ngPayoffs" id="ngPayoffsPlayer1" label="{_player1Name}"  selected="true" click="readPayoffsfromTree(controller.grid.firstPlayer);" />
-								</s:HGroup>
-								<s:HGroup>
-									<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-									<s:RadioButton styleName="mxLabels" groupName="ngPayoffs" id="ngPayoffsPlayer2" label="{_player2Name}"   click="readPayoffsfromTree(controller.grid.firstPlayer.nextPlayer);"  />
-								</s:HGroup>
-								<s:HGroup>
-									<s:BitmapImage  source="@Embed(source='../../../../../../assets/icons/user_go.png')"/>
-									<s:RadioButton styleName="mxLabels" groupName="ngPayoffs" id="ngPayoffsChance" label="Chance"   click="readPayoffsfromTree(Player.CHANCE)"  />
-								</s:HGroup>
-							</s:VGroup>
-							<s:TextArea id="ngPayoffsArea"  styleName="mxLabels" lineBreak="toFit" width="150" height="60" focusSkin="util.GlowingFocusSkin" keyDown="keyDownPayoffs(event);" />
-						</s:HGroup>	
+						<s:HGroup  visible="{extensiveStep==4}" verticalAlign="middle" includeInLayout="{extensiveStep==4}">
+							<mx:Button id="ngPayoffsPlayer1" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/brick_go.png')"  
+									   click="ngPayoffsPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer),0,0,2);" />
+							<s:Label styleName="mxLabels" text="{_player1Name}"   />
+						</s:HGroup>
+						
+						<s:HGroup  visible="{extensiveStep==4}" verticalAlign="middle" includeInLayout="{extensiveStep==4}">
+							<mx:Button id="ngPayoffsPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/brick_go.png')"  
+									  
+									   click="ngPayoffsPlayer=2;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer.nextPlayer),0,0,2);" />
+							<s:Label styleName="mxLabels" text="{_player2Name}"   />
+						</s:HGroup>
+						
+															
 						<s:VGroup visible="{extensiveStep==4}" includeInLayout="{extensiveStep==4}">
 							<s:HGroup>
 								<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   click="controller.doAction(actions.randomPayoffs)" />
@@ -1144,10 +1142,7 @@
 								<mx:Button id="ngToggleZeroSum" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
 										   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
 							</s:HGroup>
-							<s:Label styleName="mxSmallLabels" text="Accept:Enter Cancel:Esc" verticalAlign="middle" />
-							
-							
-							
+							<s:Label styleName="mxSmallLabels" text="Click on a payoff-label to change it in place." verticalAlign="middle" />
 						</s:VGroup>
 						
 					</s:VGroup>
@@ -1161,25 +1156,21 @@
 					</s:HGroup>
 					
 					
-					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="middle" clipAndEnableScrolling="true">
+					<s:HGroup gap="-1" left="230" right="0" top="-21" depth="3" verticalAlign="middle" clipAndEnableScrolling="true">
 						
-						<mx:ToggleButtonBar id="orientationBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="changeOrientation(orientationBar.selectedIndex)">
-							<mx:dataProvider>	
-								<mx:ArrayCollection>
-									<mx:source>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_up.png')" toolTip="Orientation: Root at top"/>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_down.png')" toolTip="Orientation: Root at bottom"/>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_left.png')" toolTip="Orientation: Root at left"/>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/orientation_right.png')" toolTip="Orientation: Root at right"/>
-									</mx:source>
-								</mx:ArrayCollection>
-							</mx:dataProvider>
-						</mx:ToggleButtonBar>
-						<mx:Spacer width="23" />
-						<mx:ToggleButtonBar id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" 
+						
+						<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}">
+							<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Clear [Ctrl+c]" click="setExtensiveStep(0);" />
+							<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Open [Ctrl+o]" click="setExtensiveStep(1);" />	
+							<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(2);" />	
+							<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(3);" />
+							<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(4);" />
+							<mx:Button id="ngFinalizeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngFinalizeIcon}" overIcon="{ngFinalizeHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(-1);" />
+						</s:HGroup>
+						
+						<mx:ToggleButtonBar visible="{extensiveStep==-1}"  includeInLayout="{extensiveStep==-1}"  id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" 
 											lastButtonStyleName="myButton" selectedIndex="1" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" 
-											valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);"
-											visible="{editMode==0}">
+											valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
 							<mx:dataProvider>					
 								<mx:ArrayCollection>
 									<mx:source>
@@ -1197,8 +1188,12 @@
 							</mx:dataProvider>
 						</mx:ToggleButtonBar>
 						<mx:Spacer width="23" />
-						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" 
-								   click="controller.doAction(actions.perfectRecall)" visible="{editMode==0}" />
+						<s:HGroup gap="-2" visible="{extensiveStep==-1}"  includeInLayout="{extensiveStep==-1}">
+							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" 
+									   click="controller.doAction(actions.perfectRecall)" />
+							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/controller.png')" toolTip="Switch to Guided Mode" 
+										   click="setExtensiveStep(0);" />
+						</s:HGroup>							
 					</s:HGroup>					
 					
 				</s:NavigatorContent>

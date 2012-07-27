@@ -5,6 +5,7 @@ package util
 	
 	import spark.components.Label;
 	import spark.components.TextInput;
+	import spark.components.TextArea;
 	import mx.core.FlexGlobals;
 	
 	import mx.managers.PopUpManager;
@@ -25,7 +26,9 @@ package util
 	public class PromptTextInputCanvas
 	{		
 		private static var ti:TextInput;
+		private static var ta:TextArea;
 		private static var vg:VGroup;
+		private static var mode:int;
 		private static var _onReturn:Function;
 		private static var _parent:DisplayObject = FlexGlobals.topLevelApplication as DisplayObject;
 		
@@ -37,44 +40,60 @@ package util
 		 * @param onReturn: Function to execute after the user has pressed one of the buttons and closed the popup
 		 * @param text: Text to show the user 
 		 */
-		public static function show(onReturn:Function, text:String, x:Number, y:Number):void {
+		public static function show(onReturn:Function, text:String, x:Number, y:Number,type:int):void {
 			vg=new VGroup();
 			vg.x=x;
 			vg.y=y;
-			ti=new TextInput();
-			//ti.setStyle("cornerRadius","10");
-			//ti.setStyle("borderStyle","solid");
-			ti.text=text;
-		
-			ti.setStyle("focusSkin","null");
-			ti.setStyle("focusColor","#aa0000"); 
-
-			ti.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedEnter);	
-			ti.selectAll();
+			mode=type;
+			
+			if (mode==1) {
+				ti=new TextInput();
+				ti.text=text;
+				ti.setStyle("focusSkin","null");
+				ti.setStyle("focusColor","#aa0000"); 
+				ti.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedEnter);	
+				ti.selectAll();
+				vg.addElement(ti);
+			} else if (mode==2) {
+				ta=new TextArea();
+				ta.text=text;
+				ta.setStyle("lineBreak","toFit");
+				ta.setStyle("focusSkin","null");
+				ta.setStyle("focusColor","#aa0000"); 
+				ta.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedEnter);	
+				vg.addElement(ta);
+				ta.selectAll();
 				
+			}
+			
 			var l:Label=new Label()
 			l.text="Accept:Enter Cancel:Esc";
 			l.setStyle("fontStyle","italic");
 			l.setStyle("sontSize","8");
 			l.setStyle("color","#505050");
 			
-			vg.addElement(ti);
+			
 			vg.addElement(l);
-			
-			
 			_onReturn=onReturn;
 			PopUpManager.addPopUp(vg, _parent, true);
-			ti.setFocus();
 			vg.invalidateDisplayList();
 	
-			//PopUpManager.centerPopUp(ti);
+			if (mode==1) {
+				ti.setFocus();
+			} else if (mode==2) {
+				ta.setFocus();
+				PopUpManager.centerPopUp(vg);
+			}
 		}
 		
 		private static function keyPressedEnter(event:KeyboardEvent):void{
 			
 			if (event.keyCode==13){
 				PopUpManager.removePopUp(vg);
-				lastEnteredText=ti.text;
+				if (mode==1)
+					lastEnteredText=ti.text;
+				else if (mode==2)
+					lastEnteredText=ta.text;
 				_onReturn();
 			} else if (event.keyCode==27){
 				PopUpManager.removePopUp(vg);
@@ -83,13 +102,6 @@ package util
 			}
 			
 			//lastEnteredText = null;
-		}
-		
-		
-		//Creates, throws and centers the popup using the panel filled previoulsy
-		private static function createPopUp():void {
-		
-			
 		}
 	
 	}

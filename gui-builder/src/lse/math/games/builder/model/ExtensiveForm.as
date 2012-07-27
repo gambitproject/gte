@@ -342,16 +342,44 @@ package lse.math.games.builder.model
 			var y:Node = x.firstChild;
 			while (y != null)
 			{
-				if (x.iset.player==value) {
+				if (y.isLeaf) {
 					if (y.outcome!=null) {
-						playerPayoffs = playerPayoffs+y.outcome.getOutcomeAsString()+" ";
+						playerPayoffs = playerPayoffs+y.outcome.pay(value)+" ";
 					}
+					
 				}
 				iterateTreePayoffs(y,value);
 				y = y.sibling;
 			}	
 		}
 		
+		private var isUnsetPayoffs:Boolean=false;
+		
+		public function hasUnsetPayoffs():Boolean
+		{
+			isUnsetPayoffs=false;
+			if (treeHasOnlyRoot()){
+				//Exit if we only have a root node
+				return true;
+			} else {
+				iterateTreeUnsetPayoffs(root);
+			}
+			return isUnsetPayoffs;
+		}
+		
+		private function iterateTreeUnsetPayoffs(x:Node):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			while (y != null)
+			{
+				if (y.outcome==null) {
+					isUnsetPayoffs=true;
+				}
+				iterateTreeUnsetPayoffs(y);
+				y = y.sibling;
+			}	
+		}
 		
 		public function setPlayerPayoffs(value:Player,payoffs:String):void
 		{
@@ -359,6 +387,8 @@ package lse.math.games.builder.model
 				//Exit if we only have a root node
 				return
 			} else {
+				if (payoffs.substring(payoffs.length-1,1)!=" ")
+					payoffs+=" ";
 				iterateTreePayoffsAndSet(root,value,payoffs);
 			}
 			
@@ -368,20 +398,26 @@ package lse.math.games.builder.model
 		{
 			//Preorder
 			var y:Node = x.firstChild;
-			
+			trace(moves);
 			while (y != null)
 			{
-				if (x.iset.player==value) {
+				if (y.isLeaf) {
 					var pos:int=moves.indexOf(" ")
 					if (pos>=0){
-						var newLabel:String=moves.substring(0,pos);
-						newLabel=StringUtil.trim(newLabel);
-						y.outcome.setOutcomeFromString(newLabel);
-						moves=moves.substring(pos+1,moves.length);
-					} else if (moves!=""){
+						
+							var newLabel:String=moves.substring(0,pos);
+							newLabel=StringUtil.trim(newLabel);
+							trace(newLabel);
+							if (y.outcome==null)
+								y.makeTerminal();
+							y.outcome.setPay(value,Rational.parse(newLabel));
+							moves=moves.substring(pos+1,moves.length);
+					}  else if (moves!=""){
 						if (StringUtil.trim(moves)!="") {
-							y.outcome.setOutcomeFromString(StringUtil.trim(moves));
-							moves=""
+								if (y.outcome==null)
+									y.makeTerminal();
+								y.outcome.setPay(value,Rational.parse(StringUtil.trim(moves)));
+								moves=""
 						}
 					}
 				}
@@ -392,7 +428,7 @@ package lse.math.games.builder.model
 		
 		
 		var autoLabel:Number=0;
-		public function setPlayerPayoffsAuto(zeroSum:Boolean):void
+		public function setPlayerPayoffsAuto(zeroSum:Boolean,firstPlayer:Player):void
 		{
 			
 			autoLabel=0;
@@ -400,32 +436,33 @@ package lse.math.games.builder.model
 				//Exit if we only have a root node
 				return
 			} else {
-				iterateTreePayoffsAndSetAuto(root,zeroSum);
+				iterateTreePayoffsAndSetAuto(root,zeroSum,firstPlayer);
 			}
 			
 		}
 		
-		private function iterateTreePayoffsAndSetAuto(x:Node,zeroSum:Boolean):void  
+		private function iterateTreePayoffsAndSetAuto(x:Node,zeroSum:Boolean,firstPlayer:Player):void  
 		{
 			//Preorder
 			var y:Node = x.firstChild;
 			
 			while (y != null)
 			{
-				if (x.iset.player!=Player.CHANCE) {
-					var p1:String;
-					var p2:String;
-					if (zeroSum) {
-						p1=String(autoLabel);
-						p2=String(autoLabel*-1);
-					} else {
-						p1=String(autoLabel);
-						p2=p1;
+				if (y.isLeaf) {
+					if (y.outcome==null)
+						y.makeTerminal();
+					var p:Player=firstPlayer;
+
+					var payoff:Number=autoLabel;
+					while (p!=null) {
+						y.outcome.setPay(p,Rational.parse(String(payoff)));
+						p=p.nextPlayer;
+						if (zeroSum)
+							payoff=payoff * (-1)
 					}
-					y.outcome.setOutcomeFromString(p1+","+p2);
 					autoLabel++;
 				}
-				iterateTreePayoffsAndSetAuto(y,zeroSum);
+				iterateTreePayoffsAndSetAuto(y,zeroSum,firstPlayer);
 				y = y.sibling;
 			}	
 		}

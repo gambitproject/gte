@@ -145,13 +145,13 @@ package lse.math.games.builder.view
 							log.add(Log.HINT, "Player name editing is not supported yet");
 						} else if(labelKey.indexOf("move_")==0)
 						{						
-							PromptTextInputCanvas.show(onReturnFromPrompt, label.textBlock.content.rawText,x,y);
+							PromptTextInputCanvas.show(onReturnFromPrompt, label.textBlock.content.rawText,x,y,1);
 							_selectedLabelKey = labelKey;
 							break;
 						}
 						else if(labelKey.indexOf("outcome_")==0)
 						{
-							PromptTextInputCanvas.show(onReturnFromPrompt, label.textBlock.content.rawText,x,y);
+							PromptTextInputCanvas.show(onReturnFromPrompt, label.textBlock.content.rawText,x,y,1);
 							_selectedLabelKey = labelKey;
 							break;
 						}
