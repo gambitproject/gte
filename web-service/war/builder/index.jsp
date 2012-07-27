@@ -234,7 +234,7 @@
 		<div>
 		<div style="display: inline-block; margin-bottom: 5px;">Last modified: yyyy-MM-dd hh:mm GMT</div><br/>
 		<!--  Copyright 2010 <span style="color: #ffffff;">Mark Egesdal</span><br/> -->
-		Developed by <span style="color: #ffffff;">Mark Egesdal</span> et al.<br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.
+		Developed by <span style="color: #ffffff;">Mark Egesdal, Alfonso Gómez-Jordana and Martin Prause</span><br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.
 		</div>
 	</div> 
 </body>
