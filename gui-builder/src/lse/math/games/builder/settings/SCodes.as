@@ -142,7 +142,7 @@ package lse.math.games.builder.settings
 		/** Boolean represents true/false if autoadjust is enabled */
 		public static const SYSTEM_ENABLE_GUIDANCE:String = "SYSTEM_ENABLE_GUIDANCE";	
 		public static const SYSTEM_MODE_GUIDANCE:String = "SYSTEM_MODE_GUIDANCE";
-		
+				
 		/** Represents the tree orientation in extensive mode
 		 * <ul>
 		 * <li> 0: top-down </li>
@@ -153,6 +153,15 @@ package lse.math.games.builder.settings
 		 * @default 0
 		 * */
 		public static const TREE_ORIENTATION:String = "TREE_ORIENTATION";
+		
+		/** Max payoff for randomly setting payoffs in extensive and strategic form
+		 * @default 25
+		 * */
+		public static const SYSTEM_MAX_PAYOFF:String = "SYSTEM_MAX_PAYOFF";
+		
+		public static const SYSTEM_DECIMAL_LAYOUT:String = "SYSTEM_DECIMAL_LAYOUT";
+		public static const SYSTEM_DECIMAL_PLACES:String = "SYSTEM_DECIMAL_PLACES";
+		
 		
 		/* <--- OTHER SETTINGS (Not shown under the Settings panel) ---> */
 		
@@ -192,6 +201,12 @@ package lse.math.games.builder.settings
 			settings.setValue(SYSTEM_ENABLE_GUIDANCE, true);
 			settings.setValue(SYSTEM_MODE_GUIDANCE, new Number(0));
 			settings.setValue(TREE_ORIENTATION, new Number(0));
+			settings.setValue(SYSTEM_MAX_PAYOFF, new Number(25));
+			settings.setValue(SYSTEM_DECIMAL_LAYOUT, false);
+			settings.setValue(SYSTEM_DECIMAL_PLACES, 2);
+			
+			
+			
 			//OTHER SETTINGS
 			settings.setValue(EXPANDED, false);
 		}

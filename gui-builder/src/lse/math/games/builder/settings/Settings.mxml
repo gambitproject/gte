@@ -93,23 +93,25 @@
 			// Changes orientation of the tree
 			private function changeOrientation(orientation:int):void
 			{
-				setFileSetting(SCodes.TREE_ORIENTATION, orientation, true);
-				switch(orientation)
-				{
-					case 0:
-						_controller.doAction(actions.orientationUp);
-						break;
-					case 1:
-						_controller.doAction(actions.orientationDown);
-						break;
-					case 2:
-						_controller.doAction(actions.orientationLeft);
-						break;
-					case 3:
-						_controller.doAction(actions.orientationRight);
-						break;
+				if (_controller.treeMode){
+					setFileSetting(SCodes.TREE_ORIENTATION, orientation, true);
+					switch(orientation)
+					{
+						case 0:
+							_controller.doAction(actions.orientationUp);
+							break;
+						case 1:
+							_controller.doAction(actions.orientationDown);
+							break;
+						case 2:
+							_controller.doAction(actions.orientationLeft);
+							break;
+						case 3:
+							_controller.doAction(actions.orientationRight);
+							break;
+					}
+					invalidate();
 				}
-				invalidate();
 			}
 			
 			//Sets the file settings as default
@@ -146,7 +148,7 @@
 	
 		<mx:TabNavigator tabHeight="22" left="-1" right="-1" top="-1" bottom="-1">
 			<!-- General settings tab -->
-			<s:NavigatorContent width="100%" height="100%" label="General settings" >
+			<s:NavigatorContent width="100%"  label="General settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
 					<mx:Form width="100%" height="100%" >
 						<mx:FormItem label="Remember settings" toolTip="test">
@@ -235,19 +237,53 @@
 						<mx:FormItem label="Enable guidance">
 							<s:CheckBox id="SYSTEM_ENABLE_GUIDANCE" 
 										toolTip="Enable this option and experience how to create a game tree."
+									
 										
 										creationComplete="SYSTEM_ENABLE_GUIDANCE.selected =
 										glbSettings.getValue(SCodes.SYSTEM_ENABLE_GUIDANCE) as Boolean;"
 										
 										change="setGlobalSetting(SCodes.SYSTEM_ENABLE_GUIDANCE, SYSTEM_ENABLE_GUIDANCE.selected);" />
 						</mx:FormItem>
+						<mx:FormItem label="Max Payoff">
+							<s:TextInput id="SYSTEM_MAX_PAYOFF" 
+										 toolTip="Sets the maximum payoff for random payoffs."
+										 
+										 creationComplete="SYSTEM_MAX_PAYOFF.text =
+										 String(glbSettings.getValue(SCodes.SYSTEM_MAX_PAYOFF));"
+										 
+										 change="setGlobalSetting(SCodes.SYSTEM_MAX_PAYOFF, Number(SYSTEM_MAX_PAYOFF.text));" />
+						</mx:FormItem>
+						
+						
+						<mx:FormItem label="Decimal Layout">
+							<s:HGroup>
+								
+								
+								<s:CheckBox id="SYSTEM_DECIMAL_LAYOUT" 
+											toolTip="Display payoffs in rational layout or with decimal places "
+									
+											creationComplete="SYSTEM_DECIMAL_LAYOUT.selected =
+											glbSettings.getValue(SCodes.SYSTEM_DECIMAL_LAYOUT) as Boolean;"
+											
+											change="setGlobalSetting(SCodes.SYSTEM_DECIMAL_LAYOUT, SYSTEM_DECIMAL_LAYOUT.selected);" />
+								
+								<s:TextInput id="SYSTEM_DECIMAL_PLACES" visible="{SYSTEM_DECIMAL_LAYOUT.selected}"
+											 toolTip="Determine the number of decimals."
+											 
+											 creationComplete="SYSTEM_DECIMAL_PLACES.text =
+											 String(glbSettings.getValue(SCodes.SYSTEM_DECIMAL_PLACES));"
+											 
+											 change="setGlobalSetting(SCodes.SYSTEM_DECIMAL_PLACES, Number(SYSTEM_DECIMAL_PLACES.text));" />
+							</s:HGroup>								
+						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
 			</s:NavigatorContent>	
 			
 			<!-- Current file graphic settings tab -->
-			<s:NavigatorContent width="100%" height="100%" label="Current file graphic settings" >
+			<s:NavigatorContent width="100%"  label="Current file graphic settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
+					<s:VGroup>
 					<mx:Form width="100%" height="100%" >
 						<mx:FormItem label="Player colors">
 							<s:HGroup verticalAlign="middle">
@@ -377,11 +413,17 @@
 								<s:Label text="{FILE_CELL_PADDING_HOR.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
+		
+
 					</mx:Form>
-					<s:Button bottom="25" label="Use these as the default settings" cornerRadius="0" 
-							  click="setFileSettingsAsDefault()" />
-					<s:Button bottom="0" label="Reset these to the default settings" cornerRadius="0" 
-							  click="resetFileSettingsFromDefaults()" />
+					<s:HGroup>
+						<s:Button bottom="25" label="Use as default settings" cornerRadius="0" 
+								  click="setFileSettingsAsDefault()" />
+						<s:Button bottom="0" label="Reset to default settings" cornerRadius="0" 
+								  click="resetFileSettingsFromDefaults()" />
+						
+					</s:HGroup>
+					</s:VGroup>
 				</s:Group>
 			</s:NavigatorContent>
 			

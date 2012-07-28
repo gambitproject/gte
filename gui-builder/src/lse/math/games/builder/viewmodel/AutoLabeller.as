@@ -113,23 +113,24 @@ package lse.math.games.builder.viewmodel
 		/* <--- --- TREE AUTO LABELLING --- ---> */
 		
 		/** Auto labels a tree */
-		public function autoLabelTree(grid:TreeGrid):void
+		public function autoLabelTree(grid:TreeGrid, reset:Boolean):void
 		{										
-			initFromTree(grid);
-			recLabelTree(grid.root, grid);
+			initFromTree(grid,reset);
+			recLabelTree(grid.root, grid,reset);
 		}
 		
-		private function initFromTree(tree:ExtensiveForm):void
+		private function initFromTree(tree:ExtensiveForm,reset:Boolean):void
 		{
 			_uniqueLabelNum = 0;
-			number_of_uniqueLabelname(tree);
+			if (!reset)
+			 	number_of_uniqueLabelname(tree);
 			
 			initCounts();		
 		}
 		
-		private function recLabelTree(x:Node, tree:ExtensiveForm):void
+		private function recLabelTree(x:Node, tree:ExtensiveForm,reset:Boolean):void
 		{			
-			if (x.parent != null && !x.reachedby.hasLabel)    // if father exists and I am not assigned, then label
+			if (x.parent != null && (!x.reachedby.hasLabel || reset ))    // if father exists and I am not assigned, then label
 			{	
 				var labGen:Boolean = true;						
 				var player:Player = x.parent.iset.player;
@@ -174,7 +175,7 @@ package lse.math.games.builder.viewmodel
 			
 			var y:Node = x.firstChild;
 			while (y != null) {
-				recLabelTree(y, tree);
+				recLabelTree(y, tree,reset);
 				y = y.sibling;
 			}
 		}

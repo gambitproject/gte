@@ -50,7 +50,7 @@ package lse.math.games.builder.viewmodel
 		
 		private var _isZeroSum:Boolean = true;
 		private var _isStrategicReduced:Boolean = true;
-		private var _maxPayoff:Number = 25; //TODO: SETTING
+		
 		
 		private var _matrix:StrategicForm = null;
 		private var _isSecondary:Boolean = false; //This must change to true if it is decided 
@@ -123,10 +123,8 @@ package lse.math.games.builder.viewmodel
 		public function set isZeroSum(value:Boolean):void { _isZeroSum = value; }
 		
 		/** When creating random payoffs, maximum payoff possible to be created */
-		//TODO: I don't think this should be here. Could be either a preference, something that is selected when pressing the button,
-		//or other thing, but doesn't have much sense here
-		public function get maxPayoff():Number { return _maxPayoff; }		
-		public function set maxPayoff(value:Number):void { _maxPayoff = value; }			
+		public function get maxPayoff():Number { return settings.getValue("SYSTEM_MAX_PAYOFF") as Number; }		
+					
 		
 		/** If the grid is the secondary model. That happens in [MATRIX_MODE] */
 		public function set isSecondary(value:Boolean):void { _isSecondary = value; }

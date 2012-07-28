@@ -10,6 +10,7 @@ package lse.math.games.builder.viewmodel
 	import lse.math.games.builder.model.StrategicForm;
 	import lse.math.games.builder.model.Strategy;
 	import lse.math.games.builder.settings.FileSettings;
+	import lse.math.games.builder.settings.UserSettings;
 	import lse.math.games.builder.settings.SCodes;
 	import lse.math.games.builder.view.AbstractPainter;
 	import lse.math.games.builder.view.IGraphics;
@@ -43,6 +44,7 @@ package lse.math.games.builder.viewmodel
 		private var _matrix:StrategicForm = null; 
 		
 		private var fileSettings:FileSettings = FileSettings.instance;
+		private var glbSettings:UserSettings = UserSettings.instance;
 		
 		private var log:Log = Log.instance;
 		
@@ -184,11 +186,23 @@ package lse.math.games.builder.viewmodel
 					{												
 						var pairKey:String = Strategy.key([row, col]);
 						var outcomeText:String = getNumberText(matrix, pairKey);
+						
+						
+						if (glbSettings.getValue("SYSTEM_DECIMAL_LAYOUT")){
+							var dp:int=glbSettings.getValue("SYSTEM_DECIMAL_PLACES") as int;
+							outcomeText=String(roundTodecimal(Rational.parse(outcomeText).floatValue,dp));
+						}	
 						this.registerLabel(pl.name + "_" + pairKey, outcomeText, color, fontFamily, styleOutcome);
 					}						
 				}
 			}			
 		}
+		
+		function roundTodecimal(n:Number, p:int = 0):Number
+		{
+			var dp:Number = Math.pow(10, p);
+			return Math.round(dp * n) / dp;
+		}	
 		
 		private function getNumberText(map:Object, key:String):String
 		{

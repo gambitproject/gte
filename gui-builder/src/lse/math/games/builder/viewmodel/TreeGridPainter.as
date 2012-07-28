@@ -262,6 +262,15 @@ package lse.math.games.builder.viewmodel
 				var pay2:Rational = node.outcome.pay(p2);
 				var pay1Str:String = pay1.isNaN ? "?" : pay1.toString();
 				var pay2Str:String = pay2.isNaN ? "?" : pay2.toString();
+				
+				
+				if (glbSettings.getValue("SYSTEM_DECIMAL_LAYOUT")){
+					var dp:int=glbSettings.getValue("SYSTEM_DECIMAL_PLACES") as int;
+					pay1Str=String(roundTodecimal(pay1.floatValue,dp));
+					pay2Str=String(roundTodecimal(pay2.floatValue,dp));
+				}					
+				
+				
 				registerLabel(getOutcomeLabelKey(node, p1), pay1Str, grid.player1Color, grid.fontFamily, styleOutcome);
 				registerLabel(getOutcomeLabelKey(node, p2), pay2Str, grid.player2Color, grid.fontFamily, styleOutcome);
 				registerLabel(getCommaLabelKey(node, p1), ",", 0x000000, grid.fontFamily, styleOutcome);
@@ -468,7 +477,6 @@ package lse.math.games.builder.viewmodel
 			} 
 			
 			
-			
 			if ((grid.rotate == 0 ) || (grid.rotate == 1 ) || (grid.rotate == 2 )) {
 				this.moveLabel(first, xpos1, ypos1);
 				this.moveLabel(comma, xpos1+width1, ypos1);
@@ -478,14 +486,21 @@ package lse.math.games.builder.viewmodel
 				this.moveLabel(comma, xpos2+width2, ypos1);
 				this.moveLabel(second, xpos2, ypos2);
 			}
+		
 
-				
+
 			
 			//TODO #52
 //			if(grid.rotate == 1 || grid.rotate == 3)
 //				this.moveLabel(comma(grid), xpos1, xpos2);
 		}		
 		
+		function roundTodecimal(n:Number, p:int = 0):Number
+		{
+			var dp:Number = Math.pow(10, p);
+			return Math.round(dp * n) / dp;
+		}	
+	
 		//TODO #52: This is not drawing the comma
 //		private function comma(grid:TreeGrid):TextLine
 //		{			

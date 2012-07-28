@@ -30,7 +30,7 @@ package lse.math.games.builder.viewmodel.action
 			grid.makePerfectRecall();
 			
 			var labeler:AutoLabeller = new AutoLabeller;
-			labeler.autoLabelTree(grid);
+			labeler.autoLabelTree(grid,false);
 			
 			grid.orderIds();
 			

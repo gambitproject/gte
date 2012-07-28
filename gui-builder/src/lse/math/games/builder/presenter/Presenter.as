@@ -62,7 +62,7 @@ package lse.math.games.builder.presenter
            feature is disabled for that move */
 		private var _lastActionZoom:Boolean =false;
 		
-
+		private var _controllNewGuiMode:Function=null;
 		
 		public function Presenter():void
 		{
@@ -163,6 +163,14 @@ package lse.math.games.builder.presenter
 				log.add(Log.ERROR_THROW, "Fatal ERROR: The program is working in an unknown mode");
 				return null;
 			}
+		}
+		
+		
+		[Bindable]
+		/** Action executed when clicking in the canvas */
+		public function get getControllNewGuiMode():Function {	return _controllNewGuiMode; }
+		public function set getControllNewGuiMode(value:Function):void {
+			_controllNewGuiMode = value;
 		}
 		
 		[Bindable]
@@ -481,6 +489,7 @@ package lse.math.games.builder.presenter
 		/** Loads a tree/matrix from xml, deleting any previous states */
 		public function loadFromXML(xml:XML):void
 		{			
+			_controllNewGuiMode();
 			var type:int = new XMLImporter(xml).type;
 			if(type == XMLImporter.EF)
 				loadTreeFromXML(xml);
@@ -629,14 +638,15 @@ package lse.math.games.builder.presenter
 		{     
 			//reset zooming flag
 			_lastActionZoom=false;
-			if(treeMode) {
+			if ((treeMode)) {
 				var action:IAction = getAction(grid);
 				if (action != null) {
 					_actionHandler.processAction(action, grid);						
 					invalidate(action.changesData, action.changesSize, action.changesDisplay);
 				}
 			} else if(matrixMode) {
-				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
+								
+				//log.add(Log.ERROR_THROW, "This function has not been implemented yet");
 			}
 		}
 

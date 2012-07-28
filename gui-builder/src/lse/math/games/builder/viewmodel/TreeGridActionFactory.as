@@ -125,6 +125,14 @@ package lse.math.games.builder.viewmodel
 			return chain;
 		}
 		
+		public function autoLabelMoves(grid:TreeGrid):IAction
+		{			
+			var chain:ActionChain = new ActionChain();			
+			chain.push(new AutoLabelMovesAction());
+			chain.push(_depthAdjuster);
+			return chain;
+		}
+		
 		public function makeZeroSumPayoffs(grid:TreeGrid):IAction
 		{
 			var chain:ActionChain = new ActionChain();			

@@ -412,6 +412,43 @@
 				}
 			}
 			
+			protected function randomInt(max:Number):int
+			{
+				return int(Math.random() * max);
+			}
+			
+			private function makeRandom(pmFrom:Array,pmTo:Array,copy:Boolean):void {
+				var pay2:Rational=null;
+				for (var i:int=0;i<pmFrom.length;i++){
+					var columns:Array=new Array();
+					for (var j:int=0;j<pmFrom[i].length;j++){
+						if (copy)
+							pay2=Rational.parse(pmFrom[i][j]);
+						else
+							pay2=new Rational(randomInt(glbSettings.getValue("SYSTEM_MAX_PAYOFF") as Number), 1);
+						
+						if (instyle=="ZG")					
+							pay2=pay2.negate();
+						columns.push(pay2.toString());	
+					}
+					pmTo.push(columns)
+				}
+			}
+			
+			private function generateRandomPayoffs():void
+			{
+				payoffMatrix1=new Array();
+				payoffMatrix2=new Array();
+				
+				convertToMatrix(pl1PayMapStr,payoffMatrix1);
+				fillWithZeros(payoffMatrix1,false);
+				makeRandom(payoffMatrix1,payoffMatrix2,false);
+				payoffMatrix1=new Array();
+				makeRandom(payoffMatrix2,payoffMatrix1,true);
+				pl1PayMapStr=buildMatrixString(payoffMatrix1);
+				pl2PayMapStr=buildMatrixString(payoffMatrix2);
+			}
+			
 			private function makeTranspo(pmFrom:Array,pmTo:Array):void {
 				
 				for (var j:int=0;j<pmFrom[0].length;j++){
@@ -609,7 +646,7 @@
 			<s:RadioButton groupName="rbg" id="rgb_ZG" label="Zerosum game (A,-A)"  selected="true" click="changeEvtRadioButton('ZG');dataChanged=true;" />
 			<s:RadioButton groupName="rbg" id="rgb_SG" label="Symmetric game (A,AT)" click="changeEvtRadioButton('SG');dataChanged=true;" />
 			<s:RadioButton groupName="rbg" id="rgb_2G" label="General game (A,B)"   click="changeEvtRadioButton('2G');dataChanged=true;" />
-			
+			<s:Button label="Random Payoffs" click="generateRandomPayoffs();" />
 		</s:HGroup>
 		<s:HGroup width="100%" gap="0">
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">

@@ -126,7 +126,18 @@
 			[Bindable]
 			private var showStartButton:Boolean=false;
 			
+			[Bindable]
+			private var decimalLayout:Boolean=false;
+			
 			//Embeed icons for NEWGUI
+			
+			[Embed(source='../../../../../../assets/icons/decimal.png')]
+			[Bindable]
+			public var decimalIcon:Class; 
+			[Embed(source='../../../../../../assets/icons/rational.png')]
+			[Bindable]
+			public var rationalIcon:Class;
+			
 			[Embed(source='../../../../../../assets/icons/zerosum.png')]
 			[Bindable]
 			public var zeroSumIcon:Class; 
@@ -177,17 +188,30 @@
 			public var ngFinalizeHoverIcon:Class; 
 				
 			
+			private function turnOffNewGUI():void{
+				setExtensiveStep(-1);
+				showStartButton=false;
+				if (controller.treeMode) {
+					opModeBar2.selectedIndex = 0;
+					controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);
+				}
+				
+			}
+			
 			/**
 			 * Directly called from the <it>creationComplete event</it> after the application is created. 
 			 * Determines if we use the NEWGUI and sets the variables accordingly.
 			 *@author Martin  
 			 */		
 			private function init():void{
+				
+				controller.getControllNewGuiMode=turnOffNewGUI;
+				
 				if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
 					setExtensiveStep(0);
 				} else {
 					//Turn newGUI off
-					setExtensiveStep(-1);
+					turnOffNewGUI();
 				}
 			}
 			
@@ -330,9 +354,12 @@
 			private function changeEditMode(value:int):void
 			{
 				if (value==0) {
+
 					editMode=0;
 					controller.toggleTreeMode(); 
+					turnOffNewGUI();				
 				} else	if (value==1) {
+					showStartButton=false;
 					PromptTwoButtons.show(resultFromSwitchStrategic, "If you edit the game in strategic form the game tree form will be reinitialized from the matrix. Do you want to continue?");					
 				}
 			}
@@ -347,7 +374,7 @@
 					editMode=1;
 					controller.toggleMatrixMode();
 					//Turn off NEWGUI
-					setExtensiveStep(-1);
+					turnOffNewGUI();
 				}
 			}
 
@@ -366,10 +393,18 @@
 					if(mouseScrollingEnabled) {
 						disableMouseScrolling();
 					}
-					opModeBar2.selectedIndex = 0;
-					controller.clear();
-					if ((settings.getValue("SYSTEM_ENABLE_GUIDANCE")) && (controller.treeMode)) {
-						setExtensiveStep(0);
+					
+					
+					if (controller.treeMode) { 
+						controller.clear();
+						
+						if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
+							setExtensiveStep(0);
+						} else {
+							turnOffNewGUI();
+						}
+					} else {
+						controller.clear();
 					}
 				}
 			}
@@ -605,6 +640,22 @@
 					toggleZeroSumButton.setStyle("icon",nzeroSumIcon);
 				
 			}
+			
+			/**
+			 * Sets the ZeroSum Icon in the toolbar
+			 *@author Martin
+			 */
+			private function toggleDecimalLayout():void {
+				if (decimalLayout) {
+					settings.setValue("SYSTEM_DECIMAL_LAYOUT",true);
+					toggleDecimalLayoutButton.setStyle("icon",decimalIcon);
+				} else {
+					settings.setValue("SYSTEM_DECIMAL_LAYOUT",false);
+					toggleDecimalLayoutButton.setStyle("icon",rationalIcon);
+				}
+				controller.invalidate(true,false,true);
+			}			
+			
 			
 			/**
 			 * Controlls mouse clicks on the canvas area and makes apropriate action calls.
@@ -889,6 +940,16 @@
 			}
 			
 			
+			private function autoLabelMovesAction(){
+				PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
+			}
+			
+			private function resultFromAutoLabelMoves():void {
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
+					controller.doAction(actions.autoLabelMoves);
+				}
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -966,12 +1027,12 @@
 		<!-- TOP CONTROL BAR -->		
 		<s:HGroup left="{expanded ? 3 : 0}" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
+			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="showStartButton=false;controller.open()" />	
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
 
-			<mx:TextInput styleName="mxLabels" id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
+			<mx:TextInput  id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
 						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) fileManager.filename= filename.text; else filename.text = fileManager.filename" 
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
@@ -998,11 +1059,13 @@
 					   click="controller.redo()" />				
 			<mx:Spacer width="23"/>	
 			
-			<s:HGroup  visible="{extensiveStep==-1}" verticalAlign="middle" includeInLayout="{extensiveStep==-1}">
-				<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
-						   click="controller.doAction(actions.randomPayoffs)" />
-				<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
-						   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
+			<s:HGroup  visible="{editMode==0}" verticalAlign="middle" includeInLayout="{editMode==0}">
+				<s:HGroup  visible="{extensiveStep==-1}" verticalAlign="middle" includeInLayout="{extensiveStep==-1}">
+					<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
+							   click="controller.doAction(actions.randomPayoffs)" />
+					<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
+							   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
+				</s:HGroup>
 			</s:HGroup>
 				
 			<mx:Spacer width="23" />
@@ -1016,6 +1079,9 @@
 					   click="controller.zoomAdjust()" />				
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarSF.mouseScrollingEnabled ? 'ON' : 'OFF'} [Hold SpaceBar]" 
 					   toggle="true" selected="{mouseScrollingEnabled}" change="if(mouseScrollingEnabled) disableMouseScrolling(); else enableMouseScrolling()" />
+			<mx:Button id="toggleDecimalLayoutButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/rational.png')" toolTip="Decimal Layout {decimalLayout ? 'ON' : 'OFF'}" 
+					   toggle="true" selected="{decimalLayout}" change="decimalLayout = event.target.selected;toggleDecimalLayout();"  overIcon="@Embed(source='../../../../../../assets/icons/decimal.png')"/>
+			
 			<mx:Spacer width="23" />
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" 
 					   click="showSettings()"/>			
@@ -1077,6 +1143,10 @@
 									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngPlayer2.selected=false;" />
 							<s:TextInput styleName="mxLabels" id="ngChanceInput" text="Chance" focusSkin="util.GlowingFocusSkin" editable="false" />
 						</s:HGroup>	
+						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
+							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="autoLabelMovesAction();" />
+							<s:Label styleName="mxLabels" text="Auto Label Moves"  />
+						</s:HGroup>
 
 						<s:VGroup visible="{extensiveStep==1}" includeInLayout="{extensiveStep==1}">
 							<s:Label styleName="mxSmallLabels" text="Accept:Enter Cancel:Esc" verticalAlign="middle" />	
@@ -1099,11 +1169,13 @@
 							<mx:Button id="ngInfosetsCut" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cut_red.png')"  
 									   toggle="true" selected="false" click="ngInfosetsDisjoin.selected=false;ngInfosetsJoin.selected=false;" />
 							<s:Label styleName="mxLabels" id="ngInfosetsCut1" text="Cut Infosets"  />
-						</s:HGroup>	
+						</s:HGroup>
+						<!--
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
 							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="controller.doAction(actions.perfectRecall)" />
 							<s:Label styleName="mxLabels" text="Perfect Recall"  />
 						</s:HGroup>
+						-->
 						
 						<!-- moves Step-->
 						<s:HGroup visible="{extensiveStep==3}" verticalAlign="middle" includeInLayout="{extensiveStep==3}">
@@ -1168,32 +1240,37 @@
 							<mx:Button id="ngFinalizeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngFinalizeIcon}" overIcon="{ngFinalizeHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(-1);" />
 						</s:HGroup>
 						
-						<mx:ToggleButtonBar visible="{extensiveStep==-1}"  includeInLayout="{extensiveStep==-1}"  id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" 
-											lastButtonStyleName="myButton" selectedIndex="1" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" 
-											valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
-							<mx:dataProvider>					
-								<mx:ArrayCollection>
-									<mx:source>
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/add_iset.png')" toolTip="Add Children in Iset" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/add.png')" toolTip="Add Children" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/delete.png')" toolTip="Delete Node" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/cut_red.png')" toolTip="Cut Iset" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link_break.png')" toolTip="Dissolve Iset" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/link.png')" toolTip="Merge Isets" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_go.png')" toolTip="Change Player" /> 
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_delete.png')" toolTip="Make Chance" />
-										<fx:Object icon="@Embed(source='../../../../../../assets/icons/text_replace.png')" toolTip="Edit Labels" /> 
-									</mx:source>
-								</mx:ArrayCollection>
-							</mx:dataProvider>
-						</mx:ToggleButtonBar>
+						
+						<s:HGroup  visible="{editMode==0}" verticalAlign="middle" includeInLayout="{editMode==0}">
+							<mx:ToggleButtonBar visible="{extensiveStep==-1}"  includeInLayout="{extensiveStep==-1}"  id="opModeBar2" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" 
+												lastButtonStyleName="myButton" selectedIndex="1" creationComplete="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex)" 
+												valueCommit="controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);">
+								<mx:dataProvider>					
+									<mx:ArrayCollection>
+										<mx:source>
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/add_iset.png')" toolTip="Add Children in Iset" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/add.png')" toolTip="Add Children" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/delete.png')" toolTip="Delete Node" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/cut_red.png')" toolTip="Cut Iset" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/link_break.png')" toolTip="Dissolve Iset" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/link.png')" toolTip="Merge Isets" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_go.png')" toolTip="Change Player" /> 
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/user_delete.png')" toolTip="Make Chance" />
+											<fx:Object icon="@Embed(source='../../../../../../assets/icons/text_replace.png')" toolTip="Edit Labels" /> 
+										</mx:source>
+									</mx:ArrayCollection>
+								</mx:dataProvider>
+							</mx:ToggleButtonBar>
+						</s:HGroup>
 						<mx:Spacer width="23" />
-						<s:HGroup gap="-2" visible="{extensiveStep==-1}"  includeInLayout="{extensiveStep==-1}">
-							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" 
-									   click="controller.doAction(actions.perfectRecall)" />
-							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/controller.png')" toolTip="Switch to Guided Mode" 
-										   click="setExtensiveStep(0);" />
-						</s:HGroup>							
+						<s:HGroup  visible="{editMode==0}" verticalAlign="middle" includeInLayout="{editMode==0}">
+							<s:HGroup gap="-2" visible="{extensiveStep==-1}"  includeInLayout="{extensiveStep==-1}">
+								<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')" toolTip="Make Perfect Recall" 
+										   click="controller.doAction(actions.perfectRecall)" />
+								<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/controller.png')" toolTip="Switch to Guided Mode" 
+											   click="setExtensiveStep(0);" />
+							</s:HGroup>
+						</s:HGroup>	
 					</s:HGroup>					
 					
 				</s:NavigatorContent>
