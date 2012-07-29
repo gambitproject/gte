@@ -15,32 +15,94 @@ package lse.math.games.builder.presenter
 	
 	import util.Log;
 	
-
+	// TODO: Manage the switch between edit modes. Currently i am not sure if the
+	// undo queue is resetted, probably yes, else it would potentially cause lots'a problems
 	
 	/**
 	 * Class that handles Action executing, as well as undoing and redoing, and reseting the workspace either 
 	 * to the default (just root) game, or to one loaded via an xml container.</p>
 	 * 
-	 * @author Mark & alfongj
+	 * @author alfongj
 	 */
 	public class ActionHandler
 	{
-		private const MAXIMUM_TIME_UNDO:int = 1000; //When the undo buffer actions sum up more than these ms, 
-													//it starts trimming, always keeping at least the 
-													//MINIMUM_BUFFER_SIZE in settings.
-		
-		private var _undone:Vector.<IAction> = new Vector.<IAction>();
-		private var _history:Vector.<IAction> = new Vector.<IAction>();
-		private var _xml:XML = null; 
+		private var _xml:XML = null; // XML corresponding to the current tree
 		private var _fileManager:FileManager;	
 		private var settings:UserSettings = UserSettings.instance;
 		private var log:util.Log = Log.instance;
-		
+		private var _undone:Vector.<XML> = new Vector.<XML>();
+		private var _history:Vector.<XML> = new Vector.<XML>();
+		private var _xmlWriter:XMLExporter = new XMLExporter();
 		
 				
 		public function ActionHandler(fileManager:FileManager) {
 			_fileManager = fileManager;
 		}
+
+		
+		
+		//Restores tree from a xml file or creates a default one (just the root)
+		private function initGame(game:Game):void
+		{			
+			if(game is TreeGrid)
+			{
+				var tree:TreeGrid = game as TreeGrid;
+				if (_xml != null) {
+					var reader:XMLImporter = new XMLImporter(_xml);
+					reader.loadTree(tree);
+					
+					var depthAdjuster:IAction = new DepthAdjuster();
+					depthAdjuster.doAction(tree);
+				} else {
+					tree.clearTree();
+					tree.defaultTree();
+					_xml = _xmlWriter.writeTree(tree);
+				}
+			} else if(game is StrategicForm)
+			{
+				var matrix:StrategicForm = game as StrategicForm;
+				if(_xml != null) {
+					log.add(Log.ERROR_THROW, "This function has not been implemented yet");
+					//TODO #32
+				} else {
+					matrix.clearMatrix();
+					matrix.defaultMatrix();
+					//TODO #32
+				}
+			}
+		}
+		
+		/** Loads a game from a xml file, and resets history and undone data */
+		public function load(xml:XML, game:Game):void
+		{			
+			if(game is TreeGrid)
+			{
+				_xml = xml;
+				initGame(game as TreeGrid);	
+				_undone = new Vector.<XML>();
+				_history = new Vector.<XML>();
+			} else if(game is StrategicForm)
+			{
+				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
+				//TODO: #32
+			}		
+		}
+		
+		/** Creates the default game and resets history and undone data */
+		public function reset(game:Game):void
+		{
+			_xml = null;
+			if(game is TreeGrid) {
+				initGame(game as TreeGrid);
+			} else if(game is StrategicForm) {
+				initGame(game as StrategicForm);
+			}
+			
+			_undone = new Vector.<XML>();
+			_history = new Vector.<XML>();
+		}
+		
+		
 				
 		/** Executes action, and stores it in 'history' vector, if it changes Data */
 		public function processAction(action:IAction, game:Game):void
@@ -48,12 +110,17 @@ package lse.math.games.builder.presenter
 			if(game is TreeGrid)
 			{
 				if (action != null) {
-					if (action.changesData) { // TODO: else add it to a pending list of actions todo	
+					if (action.changesData) { 
 						
 						while(_undone.length>0) _undone.pop(); //Empty the 'undone' queue		
 						action.doAction(game as TreeGrid);
 						_fileManager.unsavedChanges = true;
-						manageTreeBuffer(action);
+						
+						if(_xml != null) {
+							_history.push(_xml);
+						}
+						
+						_xml = _xmlWriter.writeTree(game as TreeGrid);
 					} else
 						action.doAction(game as TreeGrid);
 				}
@@ -61,43 +128,8 @@ package lse.math.games.builder.presenter
 				
 				//	manageMatrixBuffer(action);
 				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
-				//TODO: #32			
+				// TODO: #32	Implement Undo/Redo in strategic form?		
 			}
-		}		
-		
-		/* 
-		 * Pushes the action into the buffer of done actions. 
-		 * If the list of actions exceeds in processing time MAXIMUM_TIME_UNDO 
-		 * and in length MINIMUM_BUFFER_SIDE, it deletes the last stored action,
-		 * and updates with it the recovery _xml.
-		 */
-		private function manageTreeBuffer(action:IAction):void
-		{			
-			_history.push(action);
-			
-			var totalTimeInBuffer:int = 0;
-			var i:int = _history.length;
-			while(--i) totalTimeInBuffer += _history[i].timeElapsed;
-			
-			if(totalTimeInBuffer > MAXIMUM_TIME_UNDO
-				&& _history.length > (settings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int))
-			{	
-				var recGrid:TreeGrid = new TreeGrid();
-				initGame(recGrid); //Create a treegrid from the recovery xml
-				
-				_history.shift().doAction(recGrid); //Update the recovery grid while
-													//erasing the last action
-				
-				var xmlWriter:XMLExporter = new XMLExporter();
-				_xml = xmlWriter.writeTree(recGrid); //Store the grid into xml again
-			}
-		}
-
-		
-		private function manageMatrixBuffer(action:IAction):void
-		{
-			log.add(Log.ERROR_THROW, "This function has not been implemented yet");
-			//TODO: #32
 		}
 		
 		/** 
@@ -109,20 +141,10 @@ package lse.math.games.builder.presenter
 			if(game is TreeGrid)
 			{
 				if (_history.length > 0) {				
+					
+					_undone.push(_xml);
+					_xml = _history.pop();
 					initGame(game);
-					_undone.push(_history.pop());
-	
-					var redoStack:Vector.<IAction> = new Vector.<IAction>();
-					while (_history.length > 0) {
-						redoStack.push(_history.pop());
-					}
-	
-					while (redoStack.length > 0)
-					{
-						var todo:IAction = redoStack.pop();
-						todo.doAction(game as TreeGrid);			
-						_history.push(todo);				
-					}
 					
 					_fileManager.unsavedChanges = true;
 					
@@ -141,7 +163,7 @@ package lse.math.games.builder.presenter
 				return false;
 			}
 		}
-
+		
 		/** 
 		 * Repeats last undone Action.
 		 * @return True if there was operation to redo, False if not
@@ -150,11 +172,11 @@ package lse.math.games.builder.presenter
 		{
 			if(game is TreeGrid)
 			{
-				if (_undone.length != 0)
+				if (_undone.length > 0)
 				{
-					var todo:IAction = _undone.pop();
-					todo.doAction(game as TreeGrid);
-					_history.push(todo);
+					_history.push(_xml);
+					_xml = _undone.pop();
+					initGame(game);
 					
 					_fileManager.unsavedChanges = true;
 					
@@ -172,69 +194,6 @@ package lse.math.games.builder.presenter
 				log.add(Log.ERROR_THROW, "Fatal error: unknown type of game", "ActionHandler.redo()");
 				return false;
 			}	
-		}		
-				
-		//Restores tree from a xml file or creates a default one (just the root)
-		private function initGame(game:Game):void
-		{			
-			if(game is TreeGrid)
-			{
-				var tree:TreeGrid = game as TreeGrid;
-				if (_xml != null) {
-					var reader:XMLImporter = new XMLImporter(_xml);
-					reader.loadTree(tree);
-					
-					var depthAdjuster:IAction = new DepthAdjuster();
-					depthAdjuster.doAction(tree);
-				} else {
-					tree.clearTree();
-					tree.defaultTree();
-				}
-			} else if(game is StrategicForm)
-			{
-				var matrix:StrategicForm = game as StrategicForm;
-				if(_xml != null) {
-					log.add(Log.ERROR_THROW, "This function has not been implemented yet");
-					//TODO #32
-				} else {
-					matrix.clearMatrix();
-					matrix.defaultMatrix();
-				}
-			}
-		}
-		
-		/** Loads a game from a xml file, and resets history and undone data */
-		public function load(xml:XML, game:Game):void
-		{			
-			if(game is TreeGrid)
-			{
-				_xml = xml;
-				initGame(game as TreeGrid);	
-				_undone = new Vector.<IAction>();
-				_history = new Vector.<IAction>();
-			} else if(game is StrategicForm)
-			{
-				log.add(Log.ERROR_THROW, "This function has not been implemented yet");
-				//TODO: #32
-			}		
-		}
-		
-		/** Creates the default game and resets history and undone data */
-		public function reset(game:Game):void
-		{
-			if(game is TreeGrid)
-			{
-				_xml = null;
-				initGame(game as TreeGrid);
-				_undone = new Vector.<IAction>();
-				_history = new Vector.<IAction>();
-			} else if(game is StrategicForm)
-			{
-				_xml = null;
-				initGame(game as StrategicForm);
-				_undone = new Vector.<IAction>();
-				_history = new Vector.<IAction>();
-			}
-		}
+		}	
 	}
 }

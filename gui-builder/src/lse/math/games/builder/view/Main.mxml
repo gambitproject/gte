@@ -10,27 +10,29 @@
 		<![CDATA[		
 			import lse.math.games.builder.io.FileManager;
 			import lse.math.games.builder.io.XMLExporter;
-			import lse.math.games.builder.model.Strategy;
 			import lse.math.games.builder.model.Player;
+			import lse.math.games.builder.model.Strategy;
 			import lse.math.games.builder.settings.SCodes;
 			import lse.math.games.builder.settings.Settings;
 			import lse.math.games.builder.settings.UserSettings;
+			import lse.math.games.builder.viewmodel.AutoLabeller;
 			import lse.math.games.builder.viewmodel.TreeGrid;
 			
 			import mx.controls.Alert;
-			import mx.effects.easing.*;
+			import mx.controls.ProgressBar;
 			import mx.core.FlexGlobals;
+			import mx.effects.easing.*;
 			import mx.events.FlexEvent;
 			import mx.events.IndexChangedEvent;
 			import mx.managers.PopUpManager;
 			import mx.utils.StringUtil;
-			import mx.controls.ProgressBar;
+			
 			import spark.components.TitleWindow;
-			import util.PromptTextInputCanvas;
 			
 			import util.EvCodes;
 			import util.EventManager;
 			import util.Log;
+			import util.PromptTextInputCanvas;
 			import util.PromptTwoButtons;
 						
 			[Bindable]
@@ -669,16 +671,15 @@
 						//Check mode
 						if (!controller.matrixMode){
 							if (extensiveStep==1) {
+								var al:AutoLabeller = new AutoLabeller();
 								if (ngPlayer1.selected){
-									controller.getClickAction = getClickCallback(9)
+									controller.getClickAction = getClickCallback(9);
 									controller.doActionAtWithPlayer(canvas.mouseX, canvas.mouseY,grid.firstPlayer);
-									controller.doAction(actions.perfectRecall)
 								} else if (ngPlayer2.selected){
-									controller.getClickAction = getClickCallback(9)
+									controller.getClickAction = getClickCallback(9);
 									controller.doActionAtWithPlayer(canvas.mouseX, canvas.mouseY,grid.firstPlayer.nextPlayer);
-									controller.doAction(actions.perfectRecall)
 								} else if (ngChance.selected) {
-									controller.getClickAction = getClickCallback(7)
+									controller.getClickAction = getClickCallback(7);
 									controller.doActionAt(canvas.mouseX, canvas.mouseY);
 								}
 							} else if (extensiveStep==0) {

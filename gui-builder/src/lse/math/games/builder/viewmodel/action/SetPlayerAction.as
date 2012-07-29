@@ -6,6 +6,7 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.model.Node;
 	import lse.math.games.builder.model.Player;
 	import lse.math.games.builder.presenter.IAction;
+	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	
 	import util.Log;
@@ -40,6 +41,8 @@ package lse.math.games.builder.viewmodel.action
 		{				
 			var prevTime:int = getTimer();
 			
+			var labeler:AutoLabeller = new AutoLabeller;
+			
 			var iset:Iset = grid.getIsetById(_isetId);
 			if (iset == null) {
 				if(_nodeId >= 0)
@@ -47,6 +50,8 @@ package lse.math.games.builder.viewmodel.action
 					var node:Node = grid.getNodeById(_nodeId);
 					if (node != null) {
 						iset = node.makeNonTerminal();
+						
+						labeler.autoLabelTree(grid,false);
 					} else
 						log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "ChangePlayerAction");
 				} else
@@ -54,6 +59,8 @@ package lse.math.games.builder.viewmodel.action
 			} else {
 				if (_player!=null) {
 					iset.changeToSpecificPlayer(_player);
+					
+					labeler.autoLabelTree(grid,false);
 				}
 			}
 			
