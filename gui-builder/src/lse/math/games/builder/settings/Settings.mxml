@@ -255,20 +255,10 @@
 						</mx:FormItem>
 						
 						
-						<mx:FormItem label="Decimal Layout">
+						<mx:FormItem label="Decimal places">
 							<s:HGroup>
-								
-								
-								<s:CheckBox id="SYSTEM_DECIMAL_LAYOUT" 
-											toolTip="Display payoffs in rational layout or with decimal places "
-									
-											creationComplete="SYSTEM_DECIMAL_LAYOUT.selected =
-											glbSettings.getValue(SCodes.SYSTEM_DECIMAL_LAYOUT) as Boolean;"
-											
-											change="setGlobalSetting(SCodes.SYSTEM_DECIMAL_LAYOUT, SYSTEM_DECIMAL_LAYOUT.selected);" />
-								
-								<s:TextInput id="SYSTEM_DECIMAL_PLACES" visible="{SYSTEM_DECIMAL_LAYOUT.selected}"
-											 toolTip="Determine the number of decimals."
+								<s:TextInput id="SYSTEM_DECIMAL_PLACES" 
+											 toolTip="Determine the number of decimals if you switch between decimal or rational layout"
 											 
 											 creationComplete="SYSTEM_DECIMAL_PLACES.text =
 											 String(glbSettings.getValue(SCodes.SYSTEM_DECIMAL_PLACES));"
