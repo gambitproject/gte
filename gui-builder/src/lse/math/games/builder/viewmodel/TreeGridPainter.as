@@ -418,7 +418,6 @@ package lse.math.games.builder.viewmodel
 		
 		private function positionOutcomeLabels(n:TreeGridNode, grid:TreeGrid, first:TextLine, second:TextLine,comma:TextLine):void
 		{							
-			//TODO #52 Add a comma in between the payoffs in rotate 1 and 3 (hor. positions)
 			var width1:Number = first.width;
 			var height1:Number = first.height;
 			var width2:Number = second.width;
@@ -455,21 +454,41 @@ package lse.math.games.builder.viewmodel
 			} */
 
 			if (grid.rotate == 0) {
+				/* with comma
 				xpos1 = n.xpos - ((width1+comma.width+width2) / 2);
 				xpos2 = xpos1 + width1 +comma.width;
 				ypos1 = n.ypos + ascent1 + pbuffy;
-				ypos2 = n.ypos + ascent1 + pbuffy;
+				ypos2 = n.ypos + ascent1 + pbuffy;*/
+				
+				//without comma
+				xpos1 = n.xpos - width1 / 2;
+				xpos2 = n.xpos + width1 / 2 - width2;
+				ypos1 = n.ypos + ascent1 + pbuffy;
+				ypos2 = n.ypos + ascent2 + height1 + 2*pbuffy;
 			} else if(grid.rotate == 1) {
+				
+				//with comma
 				xpos1 = n.xpos + pbuffx;
 				xpos2 = n.xpos + width1 + 2* pbuffx +comma.width;
 				ypos1 = n.ypos + ascent1 - height1 / 2;
-				ypos2 = n.ypos + ascent2 - height2 / 2;							
+				ypos2 = n.ypos + ascent2 - height2 / 2;
+				
 			} else if(grid.rotate == 2) {
+				/* with comma				
 				xpos1 = n.xpos - ((width1+comma.width+width2) / 2);
 				xpos2 = xpos1 + width1 +comma.width;
 				ypos1 = n.ypos + ascent1 - height1 - pbuffy;
 				ypos2 = n.ypos + ascent1 - height1 - pbuffy;
+				*/
+				
+				//without comma
+				xpos1 = n.xpos - width1 / 2;
+				xpos2 = n.xpos + width1 / 2 - width2;
+				ypos1 = n.ypos + ascent1 - height1 - pbuffy;
+				ypos2 = n.ypos + ascent2 - height1 - height2 - 2*pbuffy;	
+
 			} else {
+				//with comma
 				xpos1 = n.xpos - width1 - pbuffx;
 				xpos2 = n.xpos - width1 - width2 - 2*pbuffx - comma.width;
 				ypos1 = n.ypos + ascent1 - height1 / 2;
@@ -477,7 +496,10 @@ package lse.math.games.builder.viewmodel
 			} 
 			
 			
-			if ((grid.rotate == 0 ) || (grid.rotate == 1 ) || (grid.rotate == 2 )) {
+			if ((grid.rotate == 0 ) || (grid.rotate == 2 )) {
+				this.moveLabel(first, xpos1, ypos1);
+				this.moveLabel(second, xpos2, ypos2);
+			} else if(grid.rotate == 1) {
 				this.moveLabel(first, xpos1, ypos1);
 				this.moveLabel(comma, xpos1+width1, ypos1);
 				this.moveLabel(second, xpos2, ypos2);
