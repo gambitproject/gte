@@ -909,7 +909,16 @@
 				}
 			}
 
-
+			private function focusOutNGPlayer1(eventObj:Event):void {
+				controller.setPlayerName(controller.grid.firstPlayer,ngPlayer1Input.text);
+				_player1Name=ngPlayer1Input.text;
+			}
+			
+			private function focusOutNGPlayer2(eventObj:Event):void {
+				controller.setPlayerName(controller.grid.firstPlayer.nextPlayer,ngPlayer2Input.text);
+				_player2Name=ngPlayer2Input.text;
+			}
+			
 			private function setAutoPayoffs():void {
 				controller.grid.setPlayerPayoffsAuto(controller.isZeroSum,controller.grid.firstPlayer);
 				controller.invalidate(true,false,true);
@@ -1135,6 +1144,7 @@
 									   toggle="true" selected="true" click="ngChance.selected=false;ngPlayer2.selected=false;" 
 									     toolTip="Click on a black square to assign a player to the selected node"/>
 							<s:TextInput styleName="mxLabels" id="ngPlayer1Input" text="Player1" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer1(event);"
+										 focusOut="focusOutNGPlayer1(event);"
 										 toolTip="Click on a black square to assign a player to the selected node"/>
 						</s:HGroup>	
 
@@ -1142,7 +1152,8 @@
 							<mx:Button id="ngPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_go.png')"  
 									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngChance.selected=false;" 
 									   toolTip="Click on a black square to assign a player to the selected node" />
-							<s:TextInput styleName="mxLabels" id="ngPlayer2Input" text="Player2" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer2(event);" 
+							<s:TextInput styleName="mxLabels" id="ngPlayer2Input" text="Player2" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer2(event);"
+										 focusOut="focusOutNGPlayer2(event);"
 										toolTip="Click on a black square to assign a player to the selected node"/>
 						</s:HGroup>	
 						
