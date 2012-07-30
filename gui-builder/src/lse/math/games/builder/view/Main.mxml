@@ -188,11 +188,20 @@
 			[Embed(source='../../../../../../assets/icons/ng_finalize_hover.png')]
 			[Bindable]
 			public var ngFinalizeHoverIcon:Class; 
-				
+
+			
+			private function resetNewGuiButtons():void {
+				ngTreeAdd.selected=true;ngTreeDelete.selected=false;
+				ngPlayer1.selected=true;ngPlayer2.selected=false;ngChance.selected=false;
+				ngInfosetsJoin.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsCut.selected=false;
+			}
 			
 			private function turnOffNewGUI():void{
 				setExtensiveStep(-1);
 				showStartButton=false;
+				resetNewGuiButtons();
+				
+				
 				if (controller.treeMode) {
 					opModeBar2.selectedIndex = 0;
 					controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);
@@ -250,7 +259,7 @@
 						log.add(Log.HINT,"Choose an option below to add or delete a node by clicking on a black square. Click on PLAYERS and move to the next step.");
 						ngTreeStep.setStyle("icon",ngTreeHoverIcon);
 						controller.getClickAction = getClickCallback(1);
-						ngTreeAdd.selected=true;ngTreeDelete.selected=false;
+						
 						break ;
 					case 1:
 						log.add(Log.HINT,"Choose a player and click on a square to assign this player to the node. After all nodes are assigned to a player click on INFOSETS and move to the next step.");
@@ -260,12 +269,12 @@
 						_player1Name=ngPlayer1Input.text
 						_player2Name=ngPlayer2Input.text
 						controller.getClickAction = getClickCallback(9);
-						ngPlayer1.selected=true;ngPlayer2.selected=false;ngChance.selected=false;
+						
 						break ;
 					case 2:
 						ngInfosetsStep.setStyle("icon",ngInfosetsHoverIcon);
 						controller.getClickAction = getClickCallback(5);
-						ngInfosetsJoin.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsCut.selected=false;
+						
 						break ;
 					case 3:
 						ngMovesStep.setStyle("icon",ngMovesHoverIcon);
@@ -402,10 +411,16 @@
 					if (controller.treeMode) {
 						if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
 							setExtensiveStep(0);
+							resetNewGuiButtons();
 						} else {
 							turnOffNewGUI();
 						}
 						controller.clear();
+						//Set it again, to update the step buttons (arrows)
+						if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
+							setExtensiveStep(0);
+						}
+						
 					} else {
 						controller.clear();
 					}
@@ -985,19 +1000,19 @@
 		*/
 		.mxTabLabels {
 			textFieldClass: ClassReference("mx.core.UIFTETextField");
-			fontFamily: Times; 
+			fontFamily: Helvetica; 
 			fontSize: 12;
 			fontWeight: bold;			
 		}
 		
 		.mxLabels {
-			fontFamily: Times; 
+			fontFamily: Helvetica; 
 			fontSize: 12;
 		}	
 		
 		.mxSmallLabels {
 			textFieldClass: ClassReference("mx.core.UIFTETextField");
-			fontFamily: Times; 
+			fontFamily: Helvetica; 
 			fontSize: 10;
 			fontStyle: italic;	
 		}

@@ -43,6 +43,7 @@ package lse.math.games.builder.viewmodel
 
 		private var styleOutcome:Object = new Object();
 		private var styleNode:Object = new Object();
+		private var styleChanceProb:Object = new Object();
 		
 		private var _leafCount:int;
 		private var _minDepth:Number;
@@ -67,6 +68,11 @@ package lse.math.games.builder.viewmodel
 			styleOutcome["fontWeight"] = FontWeight.NORMAL;
 			styleOutcome["fontStyle"] = FontPosture.NORMAL;
 			styleOutcome["fontSize"] = 15.0;
+			
+			styleChanceProb["fontWeight"] = FontWeight.NORMAL;
+			styleChanceProb["fontStyle"] = FontPosture.NORMAL;
+			styleChanceProb["fontSize"] = 15.0;
+			
 		}
 		
 		public function set grid(value:TreeGrid):void {
@@ -247,8 +253,20 @@ package lse.math.games.builder.viewmodel
 				if ((n.parent.iset.player==Player.CHANCE) && (n.reachedby.label=="NaN")) {
 					// do nothing
 				} else {
-					var key:String = getMoveLabelKey(n);
-					registerLabel(key, text, color, grid.fontFamily, styleNode);
+					//Check with Bernhard if this is intended
+					//if ((glbSettings.getValue("SYSTEM_MODE_GUIDANCE")>=0) &&
+					//	(glbSettings.getValue("SYSTEM_MODE_GUIDANCE")<=2) &&
+					//	(glbSettings.getValue("SYSTEM_ENABLE_GUIDANCE"))) {
+							//Do not show labels
+					//	} else {
+							var key:String = getMoveLabelKey(n);
+							//USe a different Style for prob moves
+							if (n.parent.iset.player==Player.CHANCE) {
+								registerLabel(key, text, color, "Times", styleChanceProb);									
+							} else {
+								registerLabel(key, text, color, grid.fontFamily, styleNode);
+							}
+					//	}
 				}
 				
 			}
@@ -314,8 +332,15 @@ package lse.math.games.builder.viewmodel
 					//Do nothing, don't show the label if NaN and Chance
 				}
 				else {
-					var label:TextLine = this.labels[getMoveLabelKey(n)] as TextLine;
-					positionMoveLabel(n, grid, label);
+					//Check with Bernhard if this is intended
+					//if ((glbSettings.getValue("SYSTEM_MODE_GUIDANCE")>=0) &&
+					//	(glbSettings.getValue("SYSTEM_MODE_GUIDANCE")<=2) &&
+					//	(glbSettings.getValue("SYSTEM_ENABLE_GUIDANCE"))) {
+						//Do not show labels
+					//} else {
+						var label:TextLine = this.labels[getMoveLabelKey(n)] as TextLine;
+						positionMoveLabel(n, grid, label);
+					//}
 				}
 			}
 
