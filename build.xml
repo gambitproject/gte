@@ -116,14 +116,27 @@
 	</taskdef>
 	
 	
-	<!-- <target name="main" depends="clean, test-core, test-gui, package"> -->
+	<!-- <target name="main" depends="clean, jetty-stop, test-core, test-gui, copy-package, copy-natives"> -->
 	
-	<target name="compileComplete" depends="clean, test-core, compileOnlyNative, package">
+	<target name="compileComplete" depends="clean, jetty-stop, test-core, compileOnlyNative, copy-package, copy-natives ">
 		<echo>Finished</echo>
 	</target>
 	
-	<target name="compileQuick" depends="clean, package">
+	<target name="compileQuick" depends="clean,  jetty-stop, copy-package, copy-natives">
+		<jetty-start/>	
 		<echo>Finished</echo>
+	</target>
+
+	<target name="makeProductive" depends="clean, compileOnlyNative, copy-package, copy-natives">
+		<echo>Finished make productive</echo>
+	</target>
+
+	<target name="makeWarFile" depends="clean, copy-package-war-dist">
+		<echo>Finished make copy-package-war-dist</echo>
+	</target>
+
+	<target name="makeJettyFile" depends="clean, copy-package-jetty-dist">
+		<echo>Finished make copy-package-jetty-dist</echo>
 	</target>
 
 			
@@ -235,7 +248,7 @@
 		</junit>
 	</target>
 	
-	<target name="package" depends="compile-core, compile-gui, jetty-stop">
+	<target name="create-package" depends="compile-core, compile-gui">
 		
 		<echo>Building WAR directory...</echo>		
 		<mkdir dir="${war.dir}"/>
@@ -288,9 +301,36 @@
 			webxml="${war.dir}/WEB-INF/web.xml"
 			basedir="${war.dir}">		
 		</war>	
-		
+	</target>
+	
+	
+	<target name="copy-package" depends="create-package">	
 		<copy file="${build.dir}/${war.name}.war" todir="${JETTY_HOME}/webapps" overwrite="true" />
+	</target>
+	
+	<target name="copy-package-war-dist" depends="create-package">	
+		<copy file="${build.dir}/${war.name}.war" todir="${WAR_DIST_DIR}" overwrite="true" />
+	</target>
+	
+	<target name="copy-package-jetty-dist" depends="create-package">
 		
+		<copy file="${build.dir}/${war.name}.war" todir="${JETTY_DIST_DIR}/webapps" overwrite="true" />
+		
+		<delete dir="${JETTY_DIST_DIR}/${lib.proj.native}"/> 
+		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.native}"/>
+		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.native.algo}"/>
+		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.native.my}"/>
+		
+		<antcall target="-copyUnixFiles" />
+  		<antcall target="-copyWindowsFiles" />
+
+		<zip destfile="${JETTY_ZIP_DIR}/${war.name}.zip"
+			basedir="${JETTY_DIST_DIR}">		
+		</zip>	
+
+	</target>	
+	
+	<target name="copy-natives">	
 		
 		<delete dir="${JETTY_HOME}/${lib.proj.native}"/> 
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native}"/>
@@ -299,9 +339,7 @@
 		
 		<antcall target="-copyUnixFiles" />
   		<antcall target="-copyWindowsFiles" />
-		
-		
-		<jetty-start/>	
+
 	</target>	
     
     <target name="-copyWindowsFiles" if="isWindows">
