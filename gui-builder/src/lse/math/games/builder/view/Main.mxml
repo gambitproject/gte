@@ -636,10 +636,13 @@
 			 *@author Martin
 			 */
 			private function toggleZeroSum():void {
-				if (controller.isZeroSum) 
+				if (controller.isZeroSum) { 
 					toggleZeroSumButton.setStyle("icon",zeroSumIcon);
-				else
+					ngToggleZeroSum.setStyle("icon",zeroSumIcon);
+				} else {
 					toggleZeroSumButton.setStyle("icon",nzeroSumIcon);
+					ngToggleZeroSum.setStyle("icon",nzeroSumIcon);
+				}
 				
 			}
 			
@@ -1109,13 +1112,13 @@
 						<!-- Tree Step-->
 						<s:HGroup  visible="{extensiveStep==0}" verticalAlign="middle"  includeInLayout="{extensiveStep==0}">
 							<mx:Button id="ngTreeAdd" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/add.png')"  
-									   toggle="true" selected="true" click="ngTreeDelete.selected=false;" />
-							<s:Label styleName="mxLabels" id="ngTreeAdd1" text="Add node"    />
+									   toggle="true" selected="true" click="ngTreeDelete.selected=false;"  toolTip="Click on a black square to add a child node" />
+							<s:Label styleName="mxLabels" id="ngTreeAdd1" text="Add node"  toolTip="Click on a black square to add a child node"  />
 						</s:HGroup>	
 						<s:HGroup  visible="{extensiveStep==0}" verticalAlign="middle"  includeInLayout="{extensiveStep==0}">
 							<mx:Button id="ngTreeDelete" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/delete.png')"  
-									   toggle="true" selected="false" click="ngTreeAdd.selected=false;" />
-							<s:Label styleName="mxLabels" id="ngTreeDelete1" text="Delete node" />
+									   toggle="true" selected="false" click="ngTreeAdd.selected=false;"  toolTip="Click on a black square to add a child node" />
+							<s:Label styleName="mxLabels" id="ngTreeDelete1" text="Delete node" toolTip="Click on a black square to add a child node"/>
 						</s:HGroup>
 
 
@@ -1129,25 +1132,28 @@
 						<!-- Players Step-->
 						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
 							<mx:Button id="ngPlayer1" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_go.png')"  
-									   toggle="true" selected="true" click="ngChance.selected=false;ngPlayer2.selected=false;" />
-							<s:TextInput styleName="mxLabels" id="ngPlayer1Input" text="Player1" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer1(event);" />
+									   toggle="true" selected="true" click="ngChance.selected=false;ngPlayer2.selected=false;" 
+									     toolTip="Click on a black square to assign a player to the selected node"/>
+							<s:TextInput styleName="mxLabels" id="ngPlayer1Input" text="Player1" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer1(event);"
+										 toolTip="Click on a black square to assign a player to the selected node"/>
 						</s:HGroup>	
 
 						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
 							<mx:Button id="ngPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_go.png')"  
-									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngChance.selected=false;" />
-							<s:TextInput styleName="mxLabels" id="ngPlayer2Input" text="Player2" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer2(event);"  />
+									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngChance.selected=false;" 
+									   toolTip="Click on a black square to assign a player to the selected node" />
+							<s:TextInput styleName="mxLabels" id="ngPlayer2Input" text="Player2" focusSkin="util.GlowingFocusSkin" keyDown="keyDownNGPlayer2(event);" 
+										toolTip="Click on a black square to assign a player to the selected node"/>
 						</s:HGroup>	
 						
 						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
 							<mx:Button id="ngChance" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/user_delete.png')"  
-									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngPlayer2.selected=false;" />
-							<s:TextInput styleName="mxLabels" id="ngChanceInput" text="Chance" focusSkin="util.GlowingFocusSkin" editable="false" />
+									   toggle="true" selected="false" click="ngPlayer1.selected=false;ngPlayer2.selected=false;"
+									   toolTip="Click on a black square to assign the chance-player to the selected node"/>
+							<s:TextInput styleName="mxLabels" id="ngChanceInput" text="Chance" focusSkin="util.GlowingFocusSkin" editable="false"
+									   toolTip="Click on a black square to assign the chance-player to the selected node"/>
 						</s:HGroup>	
-						<s:HGroup  visible="{extensiveStep==1}" verticalAlign="middle" includeInLayout="{extensiveStep==1}">
-							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="autoLabelMovesAction();" />
-							<s:Label styleName="mxLabels" text="Auto Label Moves"  />
-						</s:HGroup>
+
 
 						<s:VGroup visible="{extensiveStep==1}" includeInLayout="{extensiveStep==1}">
 							<s:Label styleName="mxSmallLabels" text="Accept:Enter Cancel:Esc" verticalAlign="middle" />	
@@ -1156,20 +1162,26 @@
 						<!-- Infosets Step-->
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
 							<mx:Button id="ngInfosetsJoin" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/link.png')"  
-									   toggle="true" selected="true" click="ngInfosetsCut.selected=false;ngInfosetsDisjoin.selected=false;" />
-							<s:Label styleName="mxLabels" id="ngInfosetsJoin1" text="Merge Infosets"   />
+									   toggle="true" selected="true" click="ngInfosetsCut.selected=false;ngInfosetsDisjoin.selected=false;"
+									   toolTip="Select two or more nodes with the same number of children and the same player to merge them to an infoset"/>
+							<s:Label styleName="mxLabels" id="ngInfosetsJoin1" text="Merge Infosets"  
+									   toolTip="Select two or more nodes with the same number of children and the same player to merge them to an infoset"/>
 						</s:HGroup>	
 						
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
 							<mx:Button id="ngInfosetsDisjoin" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/link_break.png')"  
-									   toggle="true" selected="false" click="ngInfosetsCut.selected=false;ngInfosetsJoin.selected=false;" />
-							<s:Label styleName="mxLabels" id="ngInfosetsDisjoin1" text="Disolve Infosets" />
+									   toggle="true" selected="false" click="ngInfosetsCut.selected=false;ngInfosetsJoin.selected=false;" 
+									   toolTip="Select an infoset to disolve it and split it up"/>
+							<s:Label styleName="mxLabels" id="ngInfosetsDisjoin1" text="Disolve Infosets" 
+									 toolTip="Select an infoset to disolve it and split it up"/>
 						</s:HGroup>	
 						
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
 							<mx:Button id="ngInfosetsCut" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cut_red.png')"  
-									   toggle="true" selected="false" click="ngInfosetsDisjoin.selected=false;ngInfosetsJoin.selected=false;" />
-							<s:Label styleName="mxLabels" id="ngInfosetsCut1" text="Cut Infosets"  />
+									   toggle="true" selected="false" click="ngInfosetsDisjoin.selected=false;ngInfosetsJoin.selected=false;" 
+									   toolTip="Select an infoset to disolve it and split it up"/>
+							<s:Label styleName="mxLabels" id="ngInfosetsCut1" text="Cut Infosets" 
+									  toolTip="Select an infoset to disolve it and split it up"/>
 						</s:HGroup>
 						<!--
 						<s:HGroup  visible="{extensiveStep==2}" verticalAlign="middle" includeInLayout="{extensiveStep==2}">
@@ -1181,13 +1193,23 @@
 						<!-- moves Step-->
 						<s:HGroup visible="{extensiveStep==3}" verticalAlign="middle" includeInLayout="{extensiveStep==3}">
 							<mx:Button id="ngMovesPlayer1" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/font_add.png')"  
-									   click="ngMovesPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer),0,0,2);" />
-							<s:Label styleName="mxLabels" text="{_player1Name}"   />
+									   click="ngMovesPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer),0,0,2);"
+									   toolTip="Assign all move labels to the edges of the first player."/>
+							<s:Label styleName="mxLabels" text="{_player1Name}" 
+									 toolTip="Assign all move labels to the edges of the first player."/>
 						</s:HGroup>
 						<s:HGroup visible="{extensiveStep==3}" verticalAlign="middle" includeInLayout="{extensiveStep==3}">
 							<mx:Button id="ngMovesPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/font_add.png')"  
-									   click="ngMovesPlayer=2;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer.nextPlayer),0,0,2);" />
-							<s:Label styleName="mxLabels" text="{_player2Name}"   />
+									   click="ngMovesPlayer=2;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer.nextPlayer),0,0,2);"
+									   toolTip="Assign all move labels to the edges of the second player."/>
+							<s:Label styleName="mxLabels" text="{_player2Name}"  
+									 toolTip="Assign all move labels to the edges of the second player."/>
+						</s:HGroup>
+						<s:HGroup  visible="{extensiveStep==3}" verticalAlign="middle" includeInLayout="{extensiveStep==3}">
+							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="autoLabelMovesAction();" 
+									   toolTip="Assign automatic generated labels to all moves of all players."/>
+							<s:Label styleName="mxLabels" text="Auto Label Moves" 
+									 toolTip="Assign automatic generated labels to all moves of all players." />
 						</s:HGroup>
 						<s:VGroup visible="{extensiveStep==3}" includeInLayout="{extensiveStep==3}">
 							<s:Label styleName="mxSmallLabels" text="Click on a move-label to change it in place." verticalAlign="middle" />	
@@ -1196,24 +1218,31 @@
 						<!-- Payoffs Step-->
 						<s:HGroup  visible="{extensiveStep==4}" verticalAlign="middle" includeInLayout="{extensiveStep==4}">
 							<mx:Button id="ngPayoffsPlayer1" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/brick_go.png')"  
-									   click="ngPayoffsPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer),0,0,2);" />
-							<s:Label styleName="mxLabels" text="{_player1Name}"   />
+									   click="ngPayoffsPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer),0,0,2);"
+									   toolTip="Assign all payoffs of the first player to the leafs." />
+							<s:Label styleName="mxLabels" text="{_player1Name}"  
+									 toolTip="Assign all payoffs of the first player to the leafs." />
 						</s:HGroup>
 						
 						<s:HGroup  visible="{extensiveStep==4}" verticalAlign="middle" includeInLayout="{extensiveStep==4}">
 							<mx:Button id="ngPayoffsPlayer2" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/brick_go.png')"  
-									  
-									   click="ngPayoffsPlayer=2;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer.nextPlayer),0,0,2);" />
-							<s:Label styleName="mxLabels" text="{_player2Name}"   />
+									   click="ngPayoffsPlayer=2;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer.nextPlayer),0,0,2);" 
+									   toolTip="Assign all payoffs of the second player to the leafs."/>
+							<s:Label styleName="mxLabels" text="{_player2Name}"  
+									 toolTip="Assign all payoffs of the second player to the leafs."/>
 						</s:HGroup>
 						
 															
 						<s:VGroup visible="{extensiveStep==4}" includeInLayout="{extensiveStep==4}">
 							<s:HGroup>
-								<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   click="controller.doAction(actions.randomPayoffs)" />
-								<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')"   click="controller.doAction(actions.randomPayoffs);setAutoPayoffs();" />
-								<mx:Button id="ngToggleZeroSum" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
-										   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
+								<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   
+										   click="controller.doAction(actions.randomPayoffs)" toolTip="Assign random payoffs to all leafs of all players." />
+								<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')"   
+										   click="controller.doAction(actions.randomPayoffs);setAutoPayoffs();" toolTip="Assign numbered payoffs to all leafs of all players." />
+								<mx:Button id="ngToggleZeroSum" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')"  
+										   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  
+										   overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"
+										   toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}"/>
 							</s:HGroup>
 							<s:Label styleName="mxSmallLabels" text="Click on a payoff-label to change it in place." verticalAlign="middle" />
 						</s:VGroup>
@@ -1233,12 +1262,12 @@
 						
 						
 						<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}">
-							<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Clear [Ctrl+c]" click="setExtensiveStep(0);" />
-							<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Open [Ctrl+o]" click="setExtensiveStep(1);" />	
-							<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(2);" />	
-							<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(3);" />
-							<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(4);" />
-							<mx:Button id="ngFinalizeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngFinalizeIcon}" overIcon="{ngFinalizeHoverIcon}" toolTip="Save [Ctrl+s]" click="setExtensiveStep(-1);" />
+							<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Add and delete tree node" click="setExtensiveStep(0);" />
+							<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Assign players to tree nodes" click="setExtensiveStep(1);" />	
+							<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Merge node to infosets and disolve/cut infosets" click="setExtensiveStep(2);" />	
+							<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Assign move labels to tree edges" click="setExtensiveStep(3);" />
+							<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Assign player payoffs to leafs" click="setExtensiveStep(4);" />
+							<mx:Button id="ngFinalizeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngFinalizeIcon}" overIcon="{ngFinalizeHoverIcon}" toolTip="Finish the guided tree creation process and switch to normal mode" click="setExtensiveStep(-1);" />
 						</s:HGroup>
 						
 						

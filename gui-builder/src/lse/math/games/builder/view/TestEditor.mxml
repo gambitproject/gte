@@ -561,7 +561,7 @@
 						s=s+n as String;
 						if (j<ms-1)
 							s=s+delimeter;
-						pb.label="j";
+						//pb.label="j";
 					}
 					if (i<ms-1)
 						s=s+"\n";
