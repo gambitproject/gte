@@ -250,7 +250,7 @@
 						log.add(Log.HINT,"Choose an option below to add or delete a node by clicking on a black square. Click on PLAYERS and move to the next step.");
 						ngTreeStep.setStyle("icon",ngTreeHoverIcon);
 						controller.getClickAction = getClickCallback(1);
-
+						ngTreeAdd.selected=true;ngTreeDelete.selected=false;
 						break ;
 					case 1:
 						log.add(Log.HINT,"Choose a player and click on a square to assign this player to the node. After all nodes are assigned to a player click on INFOSETS and move to the next step.");
@@ -260,10 +260,12 @@
 						_player1Name=ngPlayer1Input.text
 						_player2Name=ngPlayer2Input.text
 						controller.getClickAction = getClickCallback(9);
+						ngPlayer1.selected=true;ngPlayer2.selected=false;ngChance.selected=false;
 						break ;
 					case 2:
 						ngInfosetsStep.setStyle("icon",ngInfosetsHoverIcon);
 						controller.getClickAction = getClickCallback(5);
+						ngInfosetsJoin.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsCut.selected=false;
 						break ;
 					case 3:
 						ngMovesStep.setStyle("icon",ngMovesHoverIcon);
@@ -397,14 +399,13 @@
 					}
 					
 					
-					if (controller.treeMode) { 
-						controller.clear();
-						
+					if (controller.treeMode) {
 						if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
 							setExtensiveStep(0);
 						} else {
 							turnOffNewGUI();
 						}
+						controller.clear();
 					} else {
 						controller.clear();
 					}
