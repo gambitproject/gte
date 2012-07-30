@@ -244,8 +244,12 @@ package lse.math.games.builder.viewmodel
 				
 				
 			    //if ((father.iset.player == Player.CHANCE) && (text=="NaN")) {
+				if ((n.parent.iset.player==Player.CHANCE) && (n.reachedby.label=="NaN")) {
+					// do nothing
+				} else {
 					var key:String = getMoveLabelKey(n);
 					registerLabel(key, text, color, grid.fontFamily, styleNode);
+				}
 				
 			}
 			assignOutcomeLabel(n, grid);
@@ -273,7 +277,12 @@ package lse.math.games.builder.viewmodel
 				
 				registerLabel(getOutcomeLabelKey(node, p1), pay1Str, grid.player1Color, grid.fontFamily, styleOutcome);
 				registerLabel(getOutcomeLabelKey(node, p2), pay2Str, grid.player2Color, grid.fontFamily, styleOutcome);
-				registerLabel(getCommaLabelKey(node, p1), ",", 0x000000, grid.fontFamily, styleOutcome);
+				
+				if ((grid.rotate==1) || (grid.rotate==3)) {
+					registerLabel(getCommaLabelKey(node, p1), ",", 0x000000, grid.fontFamily, styleOutcome);
+				}
+				
+			
 			}
 		}
 		
@@ -302,7 +311,7 @@ package lse.math.games.builder.viewmodel
 		{			
 			if (n.reachedby != null) { 
 				if ((n.parent.iset.player==Player.CHANCE) && (n.reachedby.label=="NaN")) {
-					//Do nothing, don't show th label if NaN and Chance
+					//Do nothing, don't show the label if NaN and Chance
 				}
 				else {
 					var label:TextLine = this.labels[getMoveLabelKey(n)] as TextLine;
@@ -314,7 +323,10 @@ package lse.math.games.builder.viewmodel
 			{
 				var payoffLabel1:TextLine = this.labels[getOutcomeLabelKey(n, grid.firstPlayer)] as TextLine;				 
 				var payoffLabel2:TextLine = this.labels[getOutcomeLabelKey(n, grid.firstPlayer.nextPlayer)] as TextLine;
-				var commaLabel:TextLine = this.labels[getCommaLabelKey(n, grid.firstPlayer)] as TextLine;
+				var commaLabel:TextLine = null;
+				if ((grid.rotate==1) || (grid.rotate==3)) {
+					commaLabel = this.labels[getCommaLabelKey(n, grid.firstPlayer)] as TextLine;
+				}
 				positionOutcomeLabels(n, grid, payoffLabel1, payoffLabel2,commaLabel);
 			}			
 			

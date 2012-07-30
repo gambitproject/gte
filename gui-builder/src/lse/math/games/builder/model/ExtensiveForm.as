@@ -213,8 +213,12 @@ package lse.math.games.builder.model
 		
 		
 		public function treeHasOnlyRoot():Boolean {
-			if (root.numChildren==0) {
-				return true;
+			if (root.numChildren==2) {
+				if ((root.firstChild.isLeaf) && (root.firstChild.sibling.isLeaf)) {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}

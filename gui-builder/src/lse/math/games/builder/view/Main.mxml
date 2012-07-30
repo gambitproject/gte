@@ -312,12 +312,12 @@
 							ngPayoffsStep.enabled=false;
 							ngFinalizeStep.enabled=false;
 							
-							
+							/* No anymation anymore
 							btn.x=canvas.x+canvas.width/2 -130;
 							btn.y=canvas.y+canvas.height/2 -130;
 							showStartButton=true;
 							bounceEffect.play([btn]);
-							
+							*/
 							
 					}
 	
@@ -1129,13 +1129,17 @@
 									   toggle="true" selected="false" click="ngTreeAdd.selected=false;"  toolTip="Click on a black square to add a child node" />
 							<s:Label styleName="mxLabels" id="ngTreeDelete1" text="Delete node" toolTip="Click on a black square to add a child node"/>
 						</s:HGroup>
+						<s:VGroup visible="{extensiveStep==0}" verticalAlign="middle"  includeInLayout="{extensiveStep==0}">
+							<s:Label styleName="mxSmallLabels" text="Click on a black square to add or delete a node." verticalAlign="middle" />	
+						</s:VGroup>
 
-
+						<!-- No animation anymore
 						<s:HGroup  id="btn" visible="{showStartButton}" verticalAlign="middle"  includeInLayout="{showStartButton}">
 							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_down.png')" />
 							<s:Label styleName="mxLabel" text="Start here and click on the square." />
 							<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_down.png')" />
 						</s:HGroup>
+						-->
 						
 
 						<!-- Players Step-->

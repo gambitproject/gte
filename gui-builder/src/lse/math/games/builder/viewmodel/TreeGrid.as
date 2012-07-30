@@ -154,9 +154,36 @@ package lse.math.games.builder.viewmodel
 			
 			if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")){
 				this.root.iset.makeChance();
+				addChildTo(this.root.iset,this);
+				
 			}
 			
 		}
+		
+		private function addChildTo(parent:Iset, grid:TreeGrid):void
+		{			
+			var player:Player = null;
+			var lastPlayableNode:Node = parent.firstNode;
+			while (true) {
+				if (lastPlayableNode.iset.player != Player.CHANCE) {
+					player = lastPlayableNode.iset.player.nextPlayer;
+					break;
+				} else if (lastPlayableNode.parent == null) {
+					break;
+				}
+				lastPlayableNode = lastPlayableNode.parent;
+			}
+			if (player == null) {
+				player = grid.firstPlayer;
+			}
+			
+			
+			if (parent.isChildless)
+				parent.addMove(player);	
+			
+			parent.addMove(player);	
+		}	
+		
 		
 		// Creates a TreeGridNode with a determinate 'number' (id)
 		override protected function newNode(number:int):Node {			
