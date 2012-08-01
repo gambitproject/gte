@@ -414,7 +414,6 @@ package lse.math.games.builder.model
 						
 							var newLabel:String=payoffsToSet.substring(0,pos);
 							newLabel=StringUtil.trim(newLabel);
-							trace(newLabel);
 							if (y.outcome==null)
 								y.makeTerminal();
 							y.outcome.setPay(value,Rational.parse(newLabel));
@@ -435,7 +434,7 @@ package lse.math.games.builder.model
 		
 		
 		var autoLabel:Number=0;
-		public function setPlayerPayoffsAuto(zeroSum:Boolean,firstPlayer:Player):void
+		public function setPlayerPayoffsAuto(zeroSum:Boolean,firstPlayer:Player,reset:Boolean):void
 		{
 			
 			autoLabel=0;
@@ -443,12 +442,16 @@ package lse.math.games.builder.model
 				//Exit if we only have a root node
 				return
 			} else {
-				iterateTreePayoffsAndSetAuto(root,zeroSum,firstPlayer);
+				if (reset) {
+					iterateTreePayoffsAndSetAutoFull(root,zeroSum,firstPlayer);
+				} else {
+					iterateTreePayoffsAndSetAuto(root,zeroSum,firstPlayer);
+				}
 			}
 			
 		}
 		
-		private function iterateTreePayoffsAndSetAuto(x:Node,zeroSum:Boolean,firstPlayer:Player):void  
+		private function iterateTreePayoffsAndSetAutoFull(x:Node,zeroSum:Boolean,firstPlayer:Player):void  
 		{
 			//Preorder
 			var y:Node = x.firstChild;
@@ -468,6 +471,33 @@ package lse.math.games.builder.model
 							payoff=payoff * (-1)
 					}
 					autoLabel++;
+				}
+				iterateTreePayoffsAndSetAutoFull(y,zeroSum,firstPlayer);
+				y = y.sibling;
+			}	
+		}
+		
+		private function iterateTreePayoffsAndSetAuto(x:Node,zeroSum:Boolean,firstPlayer:Player):void  
+		{
+			//Preorder
+			var y:Node = x.firstChild;
+			
+			while (y != null)
+			{
+				if (y.isLeaf) {
+					if (y.outcome==null) {
+						y.makeTerminal();
+						var p:Player=firstPlayer;
+						
+						var payoff:Number=autoLabel;
+						while (p!=null) {
+							y.outcome.setPay(p,Rational.parse(String(payoff)));
+							p=p.nextPlayer;
+							if (zeroSum)
+								payoff=payoff * (-1)
+						}
+						autoLabel++;
+					}
 				}
 				iterateTreePayoffsAndSetAuto(y,zeroSum,firstPlayer);
 				y = y.sibling;

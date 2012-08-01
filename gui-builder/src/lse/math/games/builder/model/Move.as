@@ -20,7 +20,7 @@ package lse.math.games.builder.model
 	public class Move
 	{
 		private var _iset:Iset;		
-		private var _label:String;
+		private var _label:String=" ";
 	
 		private var log:Log = Log.instance;
 		private var settings:UserSettings = UserSettings.instance;	
@@ -53,6 +53,10 @@ package lse.math.games.builder.model
 	    /** If the move has a label defined */
 		public function get hasLabel():Boolean {
 			return _label != null;
+		}
+		
+		public function get hasLabelEmpty():Boolean {
+			return _label != " ";
 		}
 		
 		/** Set either the name of the move, or the probability of it, if the player is CHANCE */

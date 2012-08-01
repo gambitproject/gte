@@ -91,11 +91,16 @@ package lse.math.games.builder.viewmodel.action
 				player = grid.firstPlayer;
 			}
 			
+			//we are in tree mode
+			if (parent.isChildless) 
+				parent.makeChance();
 			
 			if (parent.isChildless)
 				parent.addMove(player);	
 			
 			parent.addMove(player);	
+			
+			
 		}	
 		
 		public function get changesData():Boolean {

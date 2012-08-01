@@ -207,7 +207,14 @@ package lse.math.games.builder.viewmodel
 				if (n.mode==0) {
 					g.fillCircle(n.xpos, n.ypos, this.scale * grid.nodeDiameter / 2);
 				} else if (n.iset.player == Player.CHANCE) {	
-					g.fillRect(n.xpos - this.scale * grid.nodeDiameter/2, n.ypos - scale * grid.nodeDiameter/2, scale * grid.nodeDiameter, scale * grid.nodeDiameter);
+					if (((glbSettings.getValue("SYSTEM_ENABLE_GUIDANCE")) &&
+						(glbSettings.getValue("SYSTEM_MODE_GUIDANCE")>0)) &&
+						(n.isLeaf)
+					   ) {
+						
+					} else {
+							g.fillRect(n.xpos - this.scale * grid.nodeDiameter/2, n.ypos - scale * grid.nodeDiameter/2, scale * grid.nodeDiameter, scale * grid.nodeDiameter);
+					}
 				} else {	
 					g.fillCircle(n.xpos, n.ypos, this.scale * grid.nodeDiameter / 2);
 				}

@@ -51,7 +51,7 @@ package lse.math.games.builder.viewmodel.action
 					if (node != null) {
 						iset = node.makeNonTerminal();
 						
-						labeler.autoLabelTree(grid,false);
+						labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
 					} else
 						log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "ChangePlayerAction");
 				} else
@@ -60,7 +60,8 @@ package lse.math.games.builder.viewmodel.action
 				if (_player!=null) {
 					iset.changeToSpecificPlayer(_player);
 					
-					labeler.autoLabelTree(grid,false);
+					//labeler.autoLabelTree(grid,false);
+					labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
 				}
 			}
 			

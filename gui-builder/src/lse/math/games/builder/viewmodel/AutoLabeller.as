@@ -9,6 +9,7 @@ package lse.math.games.builder.viewmodel
 	public class AutoLabeller
 	{
 		import lse.math.games.builder.model.*;
+		import lse.math.games.builder.settings.UserSettings;
 		
 
 		
@@ -19,7 +20,7 @@ package lse.math.games.builder.viewmodel
 		private var inUse:Vector.<String> = new Vector.<String>();		
 		private var log:Log = Log.instance;
 		
-		
+		private var settings:UserSettings = UserSettings.instance;
 		
 		public function AutoLabeller(alpha:Vector.<String> =  null)
 		{
@@ -116,7 +117,13 @@ package lse.math.games.builder.viewmodel
 		public function autoLabelTree(grid:TreeGrid, reset:Boolean):void
 		{										
 			initFromTree(grid,reset);
-			recLabelTree(grid.root, grid,reset);
+			recLabelTree(grid.root, grid,reset,null);
+		}
+		
+		public function autoLabelTreeSetEmptyMoves(grid:TreeGrid, reset:Boolean,specificIset:Iset):void
+		{										
+			initFromTree(grid,reset);
+			recLabelTree(grid.root, grid,reset,specificIset);
 		}
 		
 		private function initFromTree(tree:ExtensiveForm,reset:Boolean):void
@@ -128,9 +135,9 @@ package lse.math.games.builder.viewmodel
 			initCounts();		
 		}
 		
-		private function recLabelTree(x:Node, tree:ExtensiveForm,reset:Boolean):void
+		private function recLabelTree(x:Node, tree:ExtensiveForm,reset:Boolean,specificIset:Iset):void
 		{			
-			if (x.parent != null && (!x.reachedby.hasLabel || reset ))    // if father exists and I am not assigned, then label
+			if (x.parent != null && (!x.reachedby.hasLabel || reset || !x.reachedby.hasLabelEmpty))    // if father exists and I am not assigned, then label
 			{	
 				var labGen:Boolean = true;						
 				var player:Player = x.parent.iset.player;
@@ -163,19 +170,29 @@ package lse.math.games.builder.viewmodel
 					else 
 					{
 						var autoLabel:String = null;
-						while (true) {
-							autoLabel = getNextAutoLabel(player, tree);
-							if (inUse.indexOf(autoLabel.toLowerCase()) < 0) {
-								break;
+
+						if ((specificIset!=null) && (x.parent.iset==specificIset)) {
+								x.reachedby.label = " ";
+							
+						} else {
+							if (settings.getValue("SYSTEM_MODE_GUIDANCE")==3) {
+								while (true) {
+									autoLabel = getNextAutoLabel(player, tree);
+									if (inUse.indexOf(autoLabel.toLowerCase()) < 0) {
+										break;
+									}
+								}
+								x.reachedby.label = autoLabel;
 							}
-						}						
-						x.reachedby.label = autoLabel;					}
+							
+						}
+					}
 				}
 			}
 			
 			var y:Node = x.firstChild;
 			while (y != null) {
-				recLabelTree(y, tree,reset);
+				recLabelTree(y, tree,reset,specificIset);
 				y = y.sibling;
 			}
 		}

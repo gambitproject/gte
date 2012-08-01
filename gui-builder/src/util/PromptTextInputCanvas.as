@@ -26,7 +26,7 @@ package util
 	public class PromptTextInputCanvas
 	{		
 		private static var ti:TextInput;
-		private static var ta:TextArea;
+		private static var ta:TextInput;
 		private static var vg:VGroup;
 		private static var mode:int;
 		private static var _onReturn:Function;
@@ -40,7 +40,7 @@ package util
 		 * @param onReturn: Function to execute after the user has pressed one of the buttons and closed the popup
 		 * @param text: Text to show the user 
 		 */
-		public static function show(onReturn:Function, text:String, x:Number, y:Number,type:int):void {
+		public static function show(onReturn:Function, text:String, x:Number, y:Number,type:int,color:uint):void {
 			vg=new VGroup();
 			vg.x=x;
 			vg.y=y;
@@ -55,11 +55,12 @@ package util
 				ti.selectAll();
 				vg.addElement(ti);
 			} else if (mode==2) {
-				ta=new TextArea();
+				ta=new TextInput();
+				ta.height=20;
+				ta.width=300;
+				ta.setStyle("borderStyle","solid");
+				ta.setStyle("borderColor",String(color));
 				ta.text=text;
-				ta.setStyle("lineBreak","toFit");
-				ta.setStyle("focusSkin","null");
-				ta.setStyle("focusColor","#aa0000"); 
 				ta.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedEnter);	
 				vg.addElement(ta);
 				ta.selectAll();
