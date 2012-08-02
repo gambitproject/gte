@@ -265,7 +265,8 @@ package lse.math.games.builder.model
 				//Exit if we only have a root node
 				return null;
 			} else {
-				iterateTreeMoves(root,value);
+				//iterateTreeMoves(root,value);
+				iterateTreeMovesOverIsets(root,value);
 			}
 			return playerMoves;
 		}
@@ -284,6 +285,34 @@ package lse.math.games.builder.model
 			}	
 		}
 		
+		private function iterateTreeMovesOverIsets(x:Node,value:Player):void  
+		{
+			//It looks through all isets of the tree, seacrhing for those whose nodes have different move sequences
+			for (var h:Iset = _root.iset; h != null; h = h.nextIset) {
+				
+				if (h.player==value) {
+					var node=h.firstNode;
+					//Only First Node of an Isset, because all children have same labels
+					var x:Node=node.firstChild;
+					while (x!=null) {
+						playerMoves = playerMoves+x.reachedby.label+" ";
+						x=x.sibling;	
+					}
+					
+					/*
+					for (var node:Node = h.firstNode; node != null; node = node.nextInIset) {
+					var x:Node=node.firstChild;
+					while (x!=null) {
+					trace(x.reachedby.label);
+					x=x.sibling;	
+					}
+					
+					}	*/	
+				}
+			}
+			
+		}
+		
 		private var movesToSet:String="";
 		
 		public function setPlayerMoves(value:Player,moves:String):void
@@ -293,7 +322,51 @@ package lse.math.games.builder.model
 				//Exit if we only have a root node
 				return
 			} else {
-				iterateTreeMovesAndSet(root,value);
+				//iterateTreeMovesAndSet(root,value);
+				iterateTreeMovesOverIsetsanSet(root,value);
+			}
+			
+		}
+		
+		private function iterateTreeMovesOverIsetsanSet(x:Node,value:Player):void  
+		{
+			//It looks through all isets of the tree, seacrhing for those whose nodes have different move sequences
+			for (var h:Iset = _root.iset; h != null; h = h.nextIset) {
+				
+				if (h.player==value) {
+					//Holds all labels from the first Iset
+					var s:Array=new Array();
+					var node=h.firstNode;
+					//Only First Node of an Isset, because all children have same labels
+					var x:Node=node.firstChild;
+					while (x!=null) {
+						var pos:int=movesToSet.indexOf(" ")
+						var setLabel:String=null;	
+						if (pos>=0){
+							var newLabel:String=movesToSet.substring(0,pos);
+							newLabel=StringUtil.trim(newLabel);
+							setLabel=newLabel;
+							movesToSet=movesToSet.substring(pos+1);
+						} else if (movesToSet!=""){
+							if (StringUtil.trim(movesToSet)!="") {
+								setLabel=StringUtil.trim(movesToSet);
+								movesToSet=""
+							}
+						}			
+						if (setLabel!=null) {
+							s.push(setLabel);
+							x.reachedby.label=setLabel;
+						}
+						x=x.sibling;	
+					}
+					for (var node:Node = h.firstNode; node != null; node = node.nextInIset) {
+						var x:Node=node.firstChild;
+						for (var j:int=0;j<s.length;j++) {
+							x.reachedby.label=s[j];	
+							x=x.sibling;	
+						}
+					}
+				}
 			}
 			
 		}
@@ -302,7 +375,7 @@ package lse.math.games.builder.model
 		{
 			//Preorder
 			var y:Node = x.firstChild;
-			
+				
 			while (y != null)
 			{
 				if (x.iset.player==value) {

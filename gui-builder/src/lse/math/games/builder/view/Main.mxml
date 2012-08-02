@@ -197,20 +197,19 @@
 			private function resetNewGuiButtons():void {
 				ngTreeAdd.selected=true;ngTreeDelete.selected=false;
 				ngPlayer1.selected=true;ngPlayer2.selected=false;ngChance.selected=false;
-				Player1InputVisible=true;Player2InputVisible=false;
+				Player1InputVisible=false;Player2InputVisible=false;
 				ngInfosetsJoin.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsCut.selected=false;
 			}
 			
-			private function turnOffNewGUI():void{
-				setExtensiveStep(-1);
+			private function resetNewGUI():void{
+				setExtensiveStep(0);
 				resetNewGuiButtons();
 				
-				
-				if (controller.treeMode) {
-					//opModeBar2.selectedIndex = 0;
-					//controller.getClickAction = getClickCallback(opModeBar2.selectedIndex);
-				}
-				
+			}
+			
+			private function resetAndCheck():void {
+				resetNewGuiButtons();
+				checkExtensiveStep(0);
 			}
 			
 			/**
@@ -220,15 +219,8 @@
 			 */		
 			private function init():void{
 				
-				controller.getControllNewGuiMode=turnOffNewGUI;
-				
-				if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
-					setExtensiveStep(0);
-					
-				} else {
-					//Turn newGUI off
-					turnOffNewGUI();
-				}
+				controller.getControllNewGuiMode=resetAndCheck;
+				resetNewGUI();
 			}
 			
 			/* <--- --- Mode related functions --- ---> */
@@ -401,18 +393,11 @@
 					
 					
 					if (controller.treeMode) {
-						if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
-							setExtensiveStep(0);
-							resetNewGuiButtons();
-						} else {
-							turnOffNewGUI();
-						}
+						
+						resetNewGUI();
 						controller.clear();
 						//Set it again, to update the step buttons (arrows)
-						if (settings.getValue("SYSTEM_ENABLE_GUIDANCE")) {
-							setExtensiveStep(0);
-						}
-						
+						setExtensiveStep(0);
 					} else {
 						controller.clear();
 					}
