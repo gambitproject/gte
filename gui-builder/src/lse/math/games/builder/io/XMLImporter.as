@@ -618,7 +618,12 @@ package lse.math.games.builder.io
 				for (i=0; i<remainingStrats; i++)
 				{
 					st = new Strategy(pl);
-					st.name = labeller.getNextAutoLabel(pl, matrix);
+					if (pl==matrix.firstPlayer) {
+						st.name = labeller.getNextAutoLabel_Player1(matrix);
+					} else if (pl==matrix.firstPlayer.nextPlayer) {
+						st.name = labeller.getNextAutoLabel_Player2(matrix);
+					}
+
 					matrix.addStrategy(st);
 				}				
 			}

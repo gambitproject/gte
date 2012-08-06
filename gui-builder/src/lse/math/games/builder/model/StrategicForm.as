@@ -106,11 +106,11 @@ package lse.math.games.builder.model
 			al.uniqueLabelNum = 2;
 			
 			var st1:Strategy = new Strategy(pl1);
-			st1.name = al.getNextAutoLabel(pl1, this);
+			st1.name = al.getNextAutoLabel_Player1(this);
 			addStrategy(st1);
 			
 			var st2:Strategy = new Strategy(pl2);
-			st2.name = al.getNextAutoLabel(pl2, this);
+			st2.name = al.getNextAutoLabel_Player2(this);
 			addStrategy(st2);	
 			
 			addPayoff([st1, st2], null, Rational.ONE);

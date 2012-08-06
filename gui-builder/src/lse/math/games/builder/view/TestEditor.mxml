@@ -168,7 +168,7 @@
 						stratName = strVec1[i].toString()
 					else {
 						while(true){
-							stratName = al.getNextAutoLabel(_matrix.firstPlayer, _matrix);
+							stratName = al.getNextAutoLabel_Player1(_matrix);
 							if(inUse.indexOf(stratName.toLowerCase())<0)
 								break;
 						}
@@ -183,7 +183,7 @@
 						stratName = strVec2[i].toString()
 					else {
 						while(true){
-							stratName = al.getNextAutoLabel(_matrix.firstPlayer.nextPlayer, _matrix);
+							stratName = al.getNextAutoLabel_Player2(_matrix);
 							if(inUse.indexOf(stratName.toLowerCase())<0)
 								break;
 						}

@@ -48,7 +48,7 @@ package lse.math.games.builder.viewmodel
 		private var _mergeBase:Iset = null;
 		private var _selectedNodeId:int = -1;
 		
-		private var _isZeroSum:Boolean = true;
+		private var _isZeroSum:Boolean = false;
 		private var _isStrategicReduced:Boolean = true;
 		
 		

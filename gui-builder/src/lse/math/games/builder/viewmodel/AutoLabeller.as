@@ -14,8 +14,12 @@ package lse.math.games.builder.viewmodel
 
 		
 		private var _alpha:Vector.<String> = new Vector.<String>();	
-		private var count1:int;
-		private var count2:int;
+		private var _beta:Vector.<String> = new Vector.<String>();	
+		private var count1_p1:int;
+		private var count2_p1:int;
+		private var count1_p2:int;
+		private var count2_p2:int;
+		
 		private var _uniqueLabelNum:int;
 		private var inUse:Vector.<String> = new Vector.<String>();		
 		private var log:Log = Log.instance;
@@ -54,21 +58,56 @@ package lse.math.games.builder.viewmodel
 				_alpha.push("X");
 				_alpha.push("Y");
 				_alpha.push("Z");
+				
+				
+				_beta.push("a");
+				_beta.push("b");
+				_beta.push("c");
+				_beta.push("d");
+				_beta.push("e");
+				_beta.push("f");
+				_beta.push("g");
+				_beta.push("h");
+				_beta.push("i");
+				_beta.push("j");
+				_beta.push("k");
+				_beta.push("l");
+				_beta.push("m");
+				_beta.push("n");
+				_beta.push("o");
+				_beta.push("p");
+				_beta.push("q");
+				_beta.push("r");
+				_beta.push("s");
+				_beta.push("t");
+				_beta.push("u");
+				_beta.push("v");
+				_beta.push("w");
+				_beta.push("x");
+				_beta.push("y");
+				_beta.push("z");
 			}
 		}
 		
 		/** Next label from an auto-label sequence */		
-		public function getNextAutoLabel(player:Player, game:Game):String
+		public function getNextAutoLabel_Player1(game:Game):String
 		{
-			var label:String = _alpha[count1] + (count2 != _alpha.length ? _alpha[count2] : "");
-			if (player != game.firstPlayer) {
-				label = label.toLowerCase();
-			}
+			var label:String = _alpha[count1_p1] + (count2_p1 != _alpha.length ? _alpha[count2_p1] : "");
 			
-			incrementCounts();
+			incrementCountsPlayer1();
 			
 			return label;
 		}
+		
+		public function getNextAutoLabel_Player2(game:Game):String
+		{
+			var label:String = _beta[count1_p2] + (count2_p2 != _beta.length ? _beta[count2_p2] : "");
+			
+			incrementCountsPlayer2();
+			
+			return label;
+		}
+		
 		
 		/** Number of unique labels needed */
 		public function set uniqueLabelNum(value:int):void
@@ -82,34 +121,62 @@ package lse.math.games.builder.viewmodel
 		//Reset the counters accordingly to the number of unique labels needed
 		private function initCounts():void
 		{
-			count1 = 0;
+			count1_p1 = 0;
 			if(_uniqueLabelNum < _alpha.length) {
-				count2 = _alpha.length;
+				count2_p1 = _alpha.length;
 			} else {
-				count2 = 0;
+				count2_p1 = 0;
+			}
+			
+			count1_p2 = 0;
+			if(_uniqueLabelNum < _beta.length) {
+				count2_p2 = _beta.length;
+			} else {
+				count2_p2 = 0;
 			}	
 		}
 		
 		// Increment the counters
-		private function incrementCounts():void
+		private function incrementCountsPlayer1():void
 		{
-			if (count2 < _alpha.length) {
-				++count2;
-				if (count2 == _alpha.length) {
-					++count1;
-					count2 = 0;
-					if (count1 == _alpha.length) {
+			if (count2_p1 < _alpha.length) {
+				++count2_p1;
+				if (count2_p1 == _alpha.length) {
+					++count1_p1;
+					count2_p1 = 0;
+					if (count1_p1 == _alpha.length) {
 						log.add(Log.ERROR_THROW, "Ran out of auto labels");
 					}
 				}
 			} else {				
-				++count1;
-				if (count1 == _alpha.length) {
-					count2 = 0;
-					count1 = 0;
+				++count1_p1;
+				if (count1_p1 == _alpha.length) {
+					count2_p1 = 0;
+					count1_p1 = 0;
 				}
 			}
 		}
+		
+		private function incrementCountsPlayer2():void
+		{
+			if (count2_p2 < _beta.length) {
+				++count2_p2;
+				if (count2_p2 == _beta.length) {
+					++count1_p2;
+					count2_p2 = 0;
+					if (count1_p2 == _beta.length) {
+						log.add(Log.ERROR_THROW, "Ran out of auto labels");
+					}
+				}
+			} else {				
+				++count1_p2;
+				if (count1_p2 == _beta.length) {
+					count2_p2 = 0;
+					count1_p2 = 0;
+				}
+			}
+		}
+		
 		
 		/* <--- --- TREE AUTO LABELLING --- ---> */
 		
@@ -177,7 +244,11 @@ package lse.math.games.builder.viewmodel
 						} else {
 							if (settings.getValue("SYSTEM_MODE_GUIDANCE")==3) {
 								while (true) {
-									autoLabel = getNextAutoLabel(player, tree);
+									if (player==tree.firstPlayer) {
+										autoLabel = getNextAutoLabel_Player1(tree);
+									} else if (player==tree.firstPlayer.nextPlayer) {
+										autoLabel = getNextAutoLabel_Player2(tree);
+									}
 									if (inUse.indexOf(autoLabel.toLowerCase()) < 0) {
 										break;
 									}
