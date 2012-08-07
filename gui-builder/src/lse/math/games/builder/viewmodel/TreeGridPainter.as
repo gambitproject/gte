@@ -561,7 +561,7 @@ package lse.math.games.builder.viewmodel
 //				this.moveLabel(comma(grid), xpos1, xpos2);
 		}		
 		
-		function roundTodecimal(n:Number, p:int = 0):Number
+		private function roundTodecimal(n:Number, p:int = 0):Number
 		{
 			var dp:Number = Math.pow(10, p);
 			return Math.round(dp * n) / dp;

@@ -344,7 +344,7 @@
 				while ( line != null ) {
 					var columns:Array = line.split(delimeter);
 					var column:String = columns.shift() as String;
-					var matrixRow=new Array();
+					var matrixRow:Array=new Array();
 					while (column != null) {
 						if (trim(column) !="") {
 							matrixRow.push(column);
@@ -389,7 +389,7 @@
 						for (var i:int=0;i<pm.length;i++){
 							var l:int=pm[i].length;
 							if (l<pm.length) {
-								for (var k:int=0;k<pm.length-l;k++) {
+								for (var m:int=0;m<pm.length-l;m++) {
 									pm[i].push("0");
 								}
 							}

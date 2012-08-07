@@ -291,7 +291,7 @@ package lse.math.games.builder.model
 			for (var h:Iset = _root.iset; h != null; h = h.nextIset) {
 				
 				if (h.player==value) {
-					var node=h.firstNode;
+					var node:Node=h.firstNode;
 					//Only First Node of an Isset, because all children have same labels
 					var x:Node=node.firstChild;
 					while (x!=null) {
@@ -336,7 +336,7 @@ package lse.math.games.builder.model
 				if (h.player==value) {
 					//Holds all labels from the first Iset
 					var s:Array=new Array();
-					var node=h.firstNode;
+					var node:Node=h.firstNode;
 					//Only First Node of an Isset, because all children have same labels
 					var x:Node=node.firstChild;
 					while (x!=null) {
@@ -360,10 +360,10 @@ package lse.math.games.builder.model
 						x=x.sibling;	
 					}
 					for (var node:Node = h.firstNode; node != null; node = node.nextInIset) {
-						var x:Node=node.firstChild;
+						var y:Node=node.firstChild;
 						for (var j:int=0;j<s.length;j++) {
-							x.reachedby.label=s[j];	
-							x=x.sibling;	
+							y.reachedby.label=s[j];	
+							y=y.sibling;	
 						}
 					}
 				}
@@ -506,7 +506,7 @@ package lse.math.games.builder.model
 		}
 		
 		
-		var autoLabel:Number=0;
+		private var autoLabel:Number=0;
 		public function setPlayerPayoffsAuto(zeroSum:Boolean,firstPlayer:Player,reset:Boolean):void
 		{
 			
