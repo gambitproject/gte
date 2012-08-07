@@ -359,8 +359,8 @@ package lse.math.games.builder.model
 						}
 						x=x.sibling;	
 					}
-					for (var node:Node = h.firstNode; node != null; node = node.nextInIset) {
-						var y:Node=node.firstChild;
+					for (var inode:Node = h.firstNode; inode != null; inode = inode.nextInIset) {
+						var y:Node=inode.firstChild;
 						for (var j:int=0;j<s.length;j++) {
 							y.reachedby.label=s[j];	
 							y=y.sibling;	

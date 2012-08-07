@@ -293,7 +293,7 @@
 						</mx:FormItem>
 						<mx:FormItem label="Tree orientation">
 							<mx:ToggleButtonBar id="orientationBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" 
-												selectedIndex="{fileSettings.getValue(SCodes.TREE_ORIENTATION) as Number}" 
+												
 												valueCommit="changeOrientation(orientationBar.selectedIndex)">
 								<mx:dataProvider>	
 									<mx:ArrayCollection>
