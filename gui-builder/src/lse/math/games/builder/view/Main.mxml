@@ -974,7 +974,7 @@
 			}
 			
 			
-			private function autoLabelMovesAction(){
+			private function autoLabelMovesAction():void{
 				PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
 			}
 			
