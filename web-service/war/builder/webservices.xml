@@ -7,6 +7,7 @@
     <Type>nf</Type>
     <Directory>native-algo/lrslib-042c/</Directory>
     <Estimate>1</Estimate>
+    <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
 
@@ -18,6 +19,7 @@
     <Directory>native-algo/myNative/</Directory>
     <BinaryWindows>test.bat</BinaryWindows>
     <BinaryLinux>test.sh</BinaryLinux>
+    <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
   <Servlet Name="NativeServlet2">
@@ -28,6 +30,7 @@
     <Directory>native-algo/myNative/</Directory>
     <BinaryWindows>test.bat</BinaryWindows>
     <BinaryLinux>test.sh</BinaryLinux>
+    <MaxSeconds>600</MaxSeconds>
   </Servlet>
   
   <Servlet Name="Lrs Find All Eq">
@@ -36,6 +39,7 @@
     <Url>/gte/matrix/</Url>
     <Type>nf</Type>
     <Directory></Directory>
+    <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
 
@@ -45,6 +49,7 @@
     <Url>/gte/matrix/</Url>
     <Type>nf</Type>
     <Directory></Directory>
+    <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
   
@@ -54,6 +59,7 @@
     <Url>/gte/tree/</Url>
     <Type>xf</Type>
     <Directory></Directory>
+    <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
   

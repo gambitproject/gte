@@ -50,7 +50,8 @@
 			var bw=$(this).find("BinaryWindows").text();	
 			var bl=$(this).find("BinaryLinux").text();	
 			var es=$(this).find("Estimate").text();
-			var s="label="+name+";toolTip="+tooltip+";type="+type+";url="+url+";dir="+directory+";bw="+bw+";bl="+bl+";es="+es;
+			var ms=$(this).find("MaxSeconds").text();
+			var s="label="+name+";toolTip="+tooltip+";type="+type+";url="+url+";dir="+directory+";bw="+bw+";bl="+bl+";es="+es+";ms="+ms;
 			flashvars[i]=s;
 			i++;
 		  });

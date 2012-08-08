@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 
 import java.util.Arrays;
+import java.util.Vector;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,6 +88,7 @@ public class LrsCServlet extends AbstractRESTServlet
 		String[] colNames = request.getParameter("c") != null ? request.getParameter("c").split(" ") : null;
 		String algo =  request.getParameter("algo");
 		String pathToAlgo=request.getParameter("d");
+		String maxSeconds=request.getParameter("m");
 		int nrows = 0;
 		int ncols = 0;
 
@@ -186,6 +188,10 @@ public class LrsCServlet extends AbstractRESTServlet
 							response.getWriter().println(game.printFormat());
 							response.getWriter().println("From C Algo:");
 							response.getWriter().println(consoleOutput);
+							response.getWriter().println("Rational:");
+							response.getWriter().println(formatOutput(processOutput(consoleOutput,true)));
+							response.getWriter().println("Decimal:");
+							response.getWriter().println(formatOutput(processOutput(consoleOutput,false)));
 						}
 					} catch (Exception ex) {
 						response.getWriter().println(ex.getMessage());
@@ -287,6 +293,7 @@ public class LrsCServlet extends AbstractRESTServlet
 						}
 						
 						consoleOutput+=lineSeparator+esTimeText;
+						consoleOutput+=lineSeparator+"MaxSeconds:"+maxSeconds;
 						log.log(Level.SEVERE,consoleOutput);
 					
 					} catch (IOException e1){
@@ -310,6 +317,7 @@ public class LrsCServlet extends AbstractRESTServlet
 						if (game != null) {
 							response.getWriter().println("STEP");
 							response.getWriter().println(consoleOutput);
+						
 						}
 						
 					} catch (Exception ex) {
@@ -371,6 +379,103 @@ public class LrsCServlet extends AbstractRESTServlet
 	public static void printRow(String name, Rational value, ColumnTextWriter colpp, boolean excludeZero)
 	{					
 		Rational.printRow(name, value, colpp, excludeZero);	
+	}
+	
+	private String processOutput(String s,Boolean rational){
+		String lines[] = s.split("\\r?\\n");
+		Boolean start=false;
+		int eq=0;
+		String ret="";
+		for (int i=0;i<lines.length;i++){
+			if ((lines[i]!=null) && (lines[i].length()>=5) && (lines[i].substring(0,4).equals("*Num"))) {
+				start=false;
+			}	
+			
+			if (start) {
+				if ((lines[i]!=null) && (lines[i].length()>=1)) {
+					eq++;
+					String p1[] = lines[i].split("\\s+");
+					i++;
+					String p2[] = lines[i].split("\\s+");
+					
+					ret+="E "+eq+" P1: ("+eq+") ";
+					
+					for (int j=1;j<p2.length-1;j++){
+						if (rational) {
+							ret+=p2[j]+" ";
+						}else {
+							ret+=Rational.valueOf(p2[j]).doubleValue()+" ";
+						}
+					}
+					
+					if (rational) {
+						ret+="EP= "+p1[p1.length-1]+" ";
+					} else {
+						ret+="EP= "+Rational.valueOf(p1[p1.length-1]).doubleValue()+" ";
+					}
+					
+					ret+="P2: ("+eq+") ";
+
+					for (int j=1;j<p1.length-1;j++){
+						if (rational) {
+							ret+=p1[j]+" ";
+						} else {
+							ret+=Rational.valueOf(p1[j]).doubleValue()+" ";
+						}
+					}
+					
+					if (rational) {
+						ret+="EP= "+p2[p2.length-1]+System.getProperty("line.separator") ;
+					} else {
+						ret+="EP= "+Rational.valueOf(p2[p2.length-1]).doubleValue()+System.getProperty("line.separator") ;
+					}
+				}
+				
+			}
+			
+				
+			if ((lines[i]!=null) && (lines[i].length()>=5) && (lines[i].substring(0,4).equals("****"))) {
+				start=true;
+			}
+			
+			
+		}
+		
+		return ret;
+	}
+	
+	private String formatOutput(String s){
+		String lines[] = s.split("\\r?\\n");
+		Vector<Integer> l=new Vector<Integer>();
+		for (int i=0;i<lines.length;i++){
+			String p1[] = lines[i].split("\\s+");
+			if (i==0) {
+				for (int j=0;j<p1.length;j++) {
+					l.add(p1[j].length());	
+				}
+			} else {
+				for (int j=0;j<p1.length;j++) {
+					if (((int)l.get(j)) < p1[j].length()) {
+						l.setElementAt(p1[j].length(), j);
+					}
+				}
+			}
+			
+		}
+		String ret="";
+		for (int i=0;i<lines.length;i++){
+			String p1[] = lines[i].split("\\s+");
+			for (int j=0;j<p1.length;j++) {
+				int k=(int)l.get(j)-p1[j].length();
+				for (int n=0;n<k;n++){
+					ret+=" ";
+				}
+				ret+=p1[j]+" ";
+			}
+			ret+=System.getProperty("line.separator") ;
+		}
+		
+		return ret;
 	}
 
 	
