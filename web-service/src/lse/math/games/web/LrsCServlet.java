@@ -88,7 +88,7 @@ public class LrsCServlet extends AbstractRESTServlet
 		String[] colNames = request.getParameter("c") != null ? request.getParameter("c").split(" ") : null;
 		String algo =  request.getParameter("algo");
 		String pathToAlgo=request.getParameter("d");
-		String maxSeconds=request.getParameter("m");
+		String maxSeconds=request.getParameter("ms");
 		int nrows = 0;
 		int ncols = 0;
 

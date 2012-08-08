@@ -458,9 +458,9 @@
 				var i:int=text.indexOf("STEP");
 				if (i!= -1){
 					i=text.indexOf("Estimation:");
-					var seconds:String=text.substring(i+11,text.indexOf("maxSeconds:"))
+					var seconds:String=text.substring(i+11,text.indexOf("MaxSeconds:"))
 						
-					i=text.indexOf("maxSeconds:");	
+					i=text.indexOf("MaxSeconds:");	
 					var maxSeconds:String=text.substring(i+11,text.length)
 						
 					seconds.replace( /^([\s|\t|\n]+)?(.*)([\s|\t|\n]+)?$/gm, "" );
@@ -474,7 +474,7 @@
 						
 					} else if (Number(seconds)>Number(maxSeconds)) {
 						var s1:String="This process will take approx. "+Number(seconds)+" seconds, but the server allows only a computation time of "+Number(maxSeconds)+" seconds. Your request is denied.";
-						Alert.show('s1','Execute algorithm');
+						Alert.show(s1,'Execute algorithm');
 					} else {
 						var s:String="This process will take approx. "+Number(seconds)+" seconds ("+Math.round(Number(seconds)/60)+" minutes). Do you want to wait?"
 						PromptTwoButtons.show(resultFromHTTPService,s );
