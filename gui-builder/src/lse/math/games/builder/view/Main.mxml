@@ -460,10 +460,12 @@
 					i=text.indexOf("Estimation:");
 					var seconds:String=text.substring(i+11,text.indexOf("MaxSeconds:"))
 						
+					seconds.replace( /^([\s|\t|\n]+)?(.*)([\s|\t|\n]+)?$/gm, "" );
+					
 					i=text.indexOf("MaxSeconds:");	
 					var maxSeconds:String=text.substring(i+11,text.length)
 						
-					seconds.replace( /^([\s|\t|\n]+)?(.*)([\s|\t|\n]+)?$/gm, "" );
+					maxSeconds.replace( /^([\s|\t|\n]+)?(.*)([\s|\t|\n]+)?$/gm, "" );
 					
 					if (seconds=="") {
 						seconds="0";
