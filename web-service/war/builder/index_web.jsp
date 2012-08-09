@@ -201,10 +201,10 @@ such as calculation and enumeration of Nash-Equilibria.
 <table border="0" width="300" style="margin-left: auto; margin-right: auto;">
 <tr>
 <td>
-<a href="gte.war"><img src="download.png"/><br/>War file</a>
+<a href="gte.war"><img src="../../gte-downloads/download.png"/><br/>War file</a>
 </td>
 <td>
-<a href="gte.zip"><img src="download.png"/><br/>Jetty file</a>
+<a href="gte.zip"><img src="../../gte-downloads/download.png"/><br/>Jetty file</a>
 </td>
 <td>
 <a href="http://trobar.github.com/gte"><img src="download.png"/><br/>Github</a>
