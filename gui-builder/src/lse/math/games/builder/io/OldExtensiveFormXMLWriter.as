@@ -118,7 +118,7 @@ package lse.math.games.builder.io
 
 						var parameter2Elem:XML = <parameter/>;
 						if (child.parameterPlayer2!=null) {
-							parameter2Elem.@player =  tree.firstPlayer.nextPlayer();
+							parameter2Elem.@player =  tree.firstPlayer.nextPlayer;
 							parameter2Elem.@value = child.parameterPlayer2; 
 							outcomeElem.appendChild(parameter2Elem);
 						}
