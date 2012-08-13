@@ -581,6 +581,7 @@ package lse.math.games.builder.presenter
 			XML.prettyPrinting = false;
 			var value:String = treeXML.toXMLString();
 			XML.prettyPrinting = true;
+			trace(value);
 			return value;
 		}
 		

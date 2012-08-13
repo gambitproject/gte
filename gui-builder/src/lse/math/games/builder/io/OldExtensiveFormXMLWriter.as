@@ -54,6 +54,21 @@ package lse.math.games.builder.io
 					payoffElem.@value = n.outcome.pay(player); // TODO: write out as fraction?					
 					nodeElem.appendChild(payoffElem);
 				}
+				
+				var parameter1Elem:XML = <parameter/>;
+				if (n.parameterPlayer1!=null) {
+					parameter1Elem.@player =  tree.firstPlayer;
+					parameter1Elem.@value = n.parameterPlayer1;
+					nodeElem.appendChild(parameter1Elem);
+				}
+				
+				var parameter2Elem:XML = <parameter/>;
+				if (n.parameterPlayer2!=null) {
+					parameter2Elem.@player =  tree.firstPlayer.nextPlayer;
+					parameter2Elem.@value = n.parameterPlayer2; 
+					nodeElem.appendChild(parameter2Elem);
+				}
+				
 			}
 			
 			if (n.reachedby != null && n.parent.iset.player == Player.CHANCE) {
@@ -108,23 +123,22 @@ package lse.math.games.builder.io
 						payoffElem.@player = player.name;
 						payoffElem.@value = child.outcome.pay(player); // TODO: write out as fraction?
 						outcomeElem.appendChild(payoffElem);
-						
-						var parameter1Elem:XML = <parameter/>;
-						if (child.parameterPlayer1!=null) {
-							parameter1Elem.@player =  tree.firstPlayer;
-							parameter1Elem.@value = child.parameterPlayer1;
-							outcomeElem.appendChild(parameter1Elem);
-						}
-
-						var parameter2Elem:XML = <parameter/>;
-						if (child.parameterPlayer2!=null) {
-							parameter2Elem.@player =  tree.firstPlayer.nextPlayer;
-							parameter2Elem.@value = child.parameterPlayer2; 
-							outcomeElem.appendChild(parameter2Elem);
-						}
-
-						
-					}					
+					}		
+					
+					var parameter1Elem:XML = <parameter/>;
+					if (child.parameterPlayer1!=null) {
+						parameter1Elem.@player =  tree.firstPlayer;
+						parameter1Elem.@value = child.parameterPlayer1;
+						outcomeElem.appendChild(parameter1Elem);
+					}
+					
+					var parameter2Elem:XML = <parameter/>;
+					if (child.parameterPlayer2!=null) {
+						parameter2Elem.@player =  tree.firstPlayer.nextPlayer;
+						parameter2Elem.@value = child.parameterPlayer2; 
+						outcomeElem.appendChild(parameter2Elem);
+					}
+					
 					nodeElem.appendChild(outcomeElem);
 				}
 			}			

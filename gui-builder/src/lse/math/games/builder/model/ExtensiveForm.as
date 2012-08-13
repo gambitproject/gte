@@ -60,6 +60,7 @@ package lse.math.games.builder.model
 			lastNodeNumber = 0;
 			lastOrderedIsetNumber = 0;
 			lastOrderedNodeNumber = 0;
+			_hasParameters=0;
 		}
 		
 		/** Creates a new player, assigning it as moving next of the last one currently existing in this tree */

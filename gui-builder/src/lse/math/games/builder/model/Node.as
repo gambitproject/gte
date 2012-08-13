@@ -290,6 +290,11 @@ package lse.math.games.builder.model
 		{
 			if (outcome != null) {
 				_outcome = null;
+				if ((_parameterPlayer1!=null) || (_parameterPlayer2!=null)) { 
+					_parameterPlayer1=null;
+					_parameterPlayer2=null;
+					_tree.parameters=0;
+				}
 			}
 			if (_iset == null) {
 				if (_father != null) {

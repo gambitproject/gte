@@ -18,6 +18,10 @@
 			import lse.math.games.builder.viewmodel.AutoLabeller;
 			import lse.math.games.builder.viewmodel.TreeGrid;
 			
+			import lse.math.games.builder.io.OldExtensiveFormXMLWriter;
+			import lse.math.games.builder.io.XMLExporter;
+			import lse.math.games.builder.io.XMLImporter;
+			
 			import mx.controls.Alert;
 			import mx.controls.ProgressBar;
 			import mx.core.FlexGlobals;
@@ -983,7 +987,17 @@
 			
 			
 			private function autoLabelMovesAction():void{
-				PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
+				
+				var xmlWriter:OldExtensiveFormXMLWriter = new OldExtensiveFormXMLWriter();
+				var treeXML:XML = xmlWriter.write(grid);
+				XML.prettyPrinting = false;
+				var value:String = treeXML.toXMLString();
+				XML.prettyPrinting = true;
+				trace(value);
+				
+				
+				
+				//PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
 			}
 			
 			private function resultFromAutoLabelMoves():void {
