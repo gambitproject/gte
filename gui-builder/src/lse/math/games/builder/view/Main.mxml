@@ -988,16 +988,15 @@
 			
 			private function autoLabelMovesAction():void{
 				
+				/* Test purpose
 				var xmlWriter:OldExtensiveFormXMLWriter = new OldExtensiveFormXMLWriter();
 				var treeXML:XML = xmlWriter.write(grid);
 				XML.prettyPrinting = false;
 				var value:String = treeXML.toXMLString();
 				XML.prettyPrinting = true;
 				trace(value);
-				
-				
-				
-				//PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
+				*/
+				PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
 			}
 			
 			private function resultFromAutoLabelMoves():void {
