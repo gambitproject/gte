@@ -31,6 +31,8 @@ package lse.math.games.builder.model
 		private var _reachedby:Move;
 		private var _depth:int = 0;
 		private var _outcome:Outcome;
+		private var _parameterPlayer1:String=null;
+		private var _parameterPlayer2:String=null;
 		
 		private var log:Log = Log.instance;
 		
@@ -42,8 +44,17 @@ package lse.math.games.builder.model
 		{
 			_tree = extensiveForm;
 			_number = number;
+			
 		}
 
+		/** Determines a range parameter of the node */
+		public function get parameterPlayer1():String { return _parameterPlayer1; }
+		public function set parameterPlayer1(value:String):void { _parameterPlayer1 = value; }
+
+		public function get parameterPlayer2():String { return _parameterPlayer2; }
+		public function set parameterPlayer2(value:String):void { _parameterPlayer2 = value; }
+
+		
 		/** Determines the mode of the node */
 		public function get mode():int { return _mode; }
 		public function set mode(value:int):void { _mode = value; }

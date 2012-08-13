@@ -18,11 +18,11 @@ package lse.math.games.builder.viewmodel.action
 	 * <li>Changes Display</li>
 	 * @author Mark Egesdal
 	 */
-	public class PayChangeAction implements IAction
+	public class ParameterChangeAction implements IAction
 	{
 		private var _nodeId:int;
-		private var _pay1:Rational;
-		private var _pay2:Rational;
+		private var _param1:String;
+		private var _param2:String;
 		private var log:Log = Log.instance;
 		
 		private var _timeElapsed:int = 0;
@@ -31,11 +31,11 @@ package lse.math.games.builder.viewmodel.action
 		
 		public function get timeElapsed():int {return _timeElapsed; }
 		
-		public function PayChangeAction(nodeId:int, pay1:Rational, pay2:Rational)
+		public function ParameterChangeAction(nodeId:int, player1:String, player2:String)
 		{
 			_nodeId = nodeId;
-			_pay1 = pay1;
-			_pay2 = pay2;
+			_param1 = player1;
+			_param2 = player2;
 		}
 		
 		public function doAction(grid:TreeGrid):void 		
@@ -46,14 +46,14 @@ package lse.math.games.builder.viewmodel.action
 		
 			if (node != null && node.isLeaf) 
 			{	
-				var outcome:Outcome = (node.outcome == null ? node.makeTerminal() : node.outcome);	
-				if(_pay1!=null) {
-					outcome.setPay(grid.firstPlayer, _pay1);
-					node.parameterPlayer1=null;
-				}
-				if(_pay2!=null) {
-					outcome.setPay(grid.firstPlayer.nextPlayer, _pay2);
-					node.parameterPlayer2=null;
+				var outcome:Outcome = (node.outcome == null ? node.makeTerminal() : node.outcome);
+				if(_param1!=null) {
+					node.parameterPlayer1=_param1;
+					outcome.setPay(grid.firstPlayer, Rational.ZERO);
+				} 
+				if(_param2!=null) {
+					node.parameterPlayer2=_param2;
+					outcome.setPay(grid.firstPlayer.nextPlayer, Rational.ZERO);
 				}
 			} else
 				log.add(Log.ERROR, "Couldn't find any suitable node with idx "+_nodeId, "PayChangeAction");

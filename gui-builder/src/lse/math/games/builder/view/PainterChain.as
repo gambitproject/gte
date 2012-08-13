@@ -9,6 +9,7 @@ package lse.math.games.builder.view
 	import lse.math.games.builder.viewmodel.TreeGrid;
 	import lse.math.games.builder.viewmodel.action.LabelChangeAction;
 	import lse.math.games.builder.viewmodel.action.PayChangeAction;
+	import lse.math.games.builder.viewmodel.action.ParameterChangeAction;
 	
 	import mx.controls.Alert;
 	
@@ -124,15 +125,6 @@ package lse.math.games.builder.view
 			{
 				_controller = controller;
 				
-				/*ti=new TextInput();
-				ti.x=300;
-				ti.y=300;
-				ti.width=100;
-				ti.height=30;
-				ti.depth=1;
-				ti.setFocus();
-				ti.text="sd";
-				_controller.canvas.addChild(ti);*/
 				_selectedLabelKey = null;
 				for (var labelKey:String in labels)
 				{
@@ -182,30 +174,65 @@ package lse.math.games.builder.view
 			{
 				var id:int = parseInt(_selectedLabelKey.split("_")[1]);
 				action = new LabelChangeAction(id, PromptTextInputCanvas.lastEnteredText);
-			} else if(_selectedLabelKey.indexOf("outcome_")==0)
-			{
+			} else if(_selectedLabelKey.indexOf("outcome_")==0) {
 				var payCode:String = (_selectedLabelKey.split("_")[1]);
 				id = parseInt(payCode.split(":")[0]);
 				var playerName:String = payCode.split(":")[1];
 					
 				var pay:Rational = Rational.parse(PromptTextInputCanvas.lastEnteredText);
-				if(pay==Rational.NaN)
-				{
-					log.add(Log.ERROR, "Bad number format, please use just numbers and '/' '.' characters for decimals");
-					return null;
-				}
+				var s:String=PromptTextInputCanvas.lastEnteredText;
+				
+					
+					var pattern:RegExp = /\d*\...\d*/;
+					if (pattern.test(s)) {
+		
+						
+						if (grid.parameters==0) { 
+							
+							grid.parameters++;
+							if (playerName == grid.firstPlayer.name) {
+								action = new ParameterChangeAction(id, PromptTextInputCanvas.lastEnteredText, null);
+							} else if(playerName == grid.firstPlayer.nextPlayer.name) {
+								action = new ParameterChangeAction(id, null, PromptTextInputCanvas.lastEnteredText);
+							}
+							return	action;					
+							
+						} else {
+							
+							log.add(Log.ERROR, "Only one parameter is allowed until now.");
+							return null;
+						}
+						
+					
+					} else {
+						if(pay==Rational.NaN) {
+							log.add(Log.ERROR, "Bad number format, please use just numbers and '/' '.' characters for decimals");
+							return null;
+						}	
+					}
+				
 				if(grid.isZeroSum)
 				{
-					if(playerName == grid.firstPlayer.name)
+					if(playerName == grid.firstPlayer.name) {
 						action = new PayChangeAction(id, pay, pay.negate());
-					else if(playerName == grid.firstPlayer.nextPlayer.name)
+						if (grid.parameters==1)
+							grid.parameters--;
+					} else if(playerName == grid.firstPlayer.nextPlayer.name) {
 						action = new PayChangeAction(id, pay.negate(), pay);
+						if (grid.parameters==1)
+							grid.parameters--;
+					}
 				}else
 				{
-					if(playerName == grid.firstPlayer.name)
+					if(playerName == grid.firstPlayer.name) {
 						action = new PayChangeAction(id, pay, null);
-					else if(playerName == grid.firstPlayer.nextPlayer.name)
+						if (grid.parameters==1)
+							grid.parameters--;
+					} else if(playerName == grid.firstPlayer.nextPlayer.name) {
 						action = new PayChangeAction(id, null, pay);
+						if (grid.parameters==1)
+							grid.parameters--;
+					}
 				}
 			}else
 				log.add(Log.ERROR_THROW, "ERROR: Unknown type of Label being modified");

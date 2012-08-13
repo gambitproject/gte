@@ -108,6 +108,22 @@ package lse.math.games.builder.io
 						payoffElem.@player = player.name;
 						payoffElem.@value = child.outcome.pay(player); // TODO: write out as fraction?
 						outcomeElem.appendChild(payoffElem);
+						
+						var parameter1Elem:XML = <parameter/>;
+						if (child.parameterPlayer1!=null) {
+							parameter1Elem.@player =  tree.firstPlayer;
+							parameter1Elem.@value = child.parameterPlayer1;
+							outcomeElem.appendChild(parameter1Elem);
+						}
+
+						var parameter2Elem:XML = <parameter/>;
+						if (child.parameterPlayer2!=null) {
+							parameter2Elem.@player =  tree.firstPlayer.nextPlayer();
+							parameter2Elem.@value = child.parameterPlayer2; 
+							outcomeElem.appendChild(parameter2Elem);
+						}
+
+						
 					}					
 					nodeElem.appendChild(outcomeElem);
 				}

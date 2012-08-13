@@ -26,7 +26,11 @@ package lse.math.games.builder.model
 		
 		private var log:Log = Log.instance;
 		
+		private var _hasParameters:int=0;
 		
+		/** Are there any leafs with parameters */
+		public function get parameters():int { return _hasParameters; }
+		public function set parameters(value:int):void { _hasParameters = value; }
 			
 		/** First node of the tree */
 		public function get root():Node { return _root; }

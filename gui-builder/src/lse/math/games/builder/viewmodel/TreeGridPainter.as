@@ -299,6 +299,14 @@ package lse.math.games.builder.viewmodel
 					pay2Str=String(roundTodecimal(pay2.floatValue,dp));
 				}					
 				
+				if (node.parameterPlayer1!=null) {
+					pay1Str=node.parameterPlayer1;
+				}
+				
+				if (node.parameterPlayer2!=null) {
+					pay2Str=node.parameterPlayer2;
+				}
+				
 				
 				registerLabel(getOutcomeLabelKey(node, p1), pay1Str, grid.player1Color, grid.fontFamily, styleOutcome);
 				registerLabel(getOutcomeLabelKey(node, p2), pay2Str, grid.player2Color, grid.fontFamily, styleOutcome);
