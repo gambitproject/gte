@@ -77,7 +77,8 @@ public class TreeServlet extends AbstractRESTServlet
 					DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 					Document doc = builder.parse(new InputSource(new StringReader(xmlStr)));
 					ExtensiveFormXMLReader reader = new ExtensiveFormXMLReader();
-					tree = reader.load(doc);			
+					tree = reader.load(doc);
+					
 				} catch (ParserConfigurationException ex) {
 					this.addError(request, "unable to configure xml parser");			
 				} catch (SAXException ex) {
@@ -86,63 +87,143 @@ public class TreeServlet extends AbstractRESTServlet
 
 				if (tree != null) 
 				{
-					// 3. Convert to SequenceForm returning any errors			
-					try {
-						seqForm = new SequenceForm(tree, seed);	
-					} catch (ImperfectRecallException ex) {
-						this.addError(request, ex.getMessage());
-					}
-
-					if (seqForm != null) 
-					{
-						// 4. Retrieve LCP and run through Lemke
-						Rational[] z = null;
-						try {			
-							LCP lcp = seqForm.getLemkeLCP();
-							log.info(lcp.toString());
-
-							LemkeAlgorithm lemke = new LemkeAlgorithm();
-							//lemke.init(lcp);
-							z = lemke.run(lcp);
-						} catch (InvalidPlayerException ex) {
-							this.addError(request, ex.getMessage());
-						} catch (RayTerminationException ex) {
-							//TODO: give special treatment
-							this.addError(request, ex.getMessage());			
-						} catch (LemkeException ex) {
+					String parameters=tree.getParameter();
+					if (parameters==null) {
+						
+						System.out.println("Without parameters");
+						// 3. Convert to SequenceForm returning any errors			
+						try {
+							seqForm = new SequenceForm(tree, seed);	
+						} catch (ImperfectRecallException ex) {
 							this.addError(request, ex.getMessage());
 						}
-
-						if (z != null) 
-						{	
-							// 5. Parse Lemke solution into behavior strategy equilibrium
-							Map<Player,Map<Move,Rational>> plProbs = seqForm.parseLemkeSolution(z);
-							Map<Player,Rational> epayoffs = SequenceForm.expectedPayoffs(plProbs, tree);
-
-							ColumnTextWriter colpp = new ColumnTextWriter();
-							colpp.writeCol("Equilibrium");
-							colpp.endRow();
-							boolean firsttime = true;
-							for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
-								if (firsttime) {
-									firsttime = false;
-								} else {
-									colpp.endRow();
+	
+						if (seqForm != null) 
+						{
+							// 4. Retrieve LCP and run through Lemke
+							Rational[] z = null;
+							try {			
+								LCP lcp = seqForm.getLemkeLCP();
+								log.info(lcp.toString());
+	
+								LemkeAlgorithm lemke = new LemkeAlgorithm();
+								//lemke.init(lcp);
+								z = lemke.run(lcp);
+							} catch (InvalidPlayerException ex) {
+								this.addError(request, ex.getMessage());
+							} catch (RayTerminationException ex) {
+								//TODO: give special treatment
+								this.addError(request, ex.getMessage());			
+							} catch (LemkeException ex) {
+								this.addError(request, ex.getMessage());
+							}
+	
+							if (z != null) 
+							{	
+								// 5. Parse Lemke solution into behavior strategy equilibrium
+								Map<Player,Map<Move,Rational>> plProbs = seqForm.parseLemkeSolution(z);
+								Map<Player,Rational> epayoffs = SequenceForm.expectedPayoffs(plProbs, tree);
+	
+								ColumnTextWriter colpp = new ColumnTextWriter();
+								colpp.writeCol("Equilibrium");
+								colpp.endRow();
+								boolean firsttime = true;
+								for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
+									if (firsttime) {
+										firsttime = false;
+									} else {
+										colpp.endRow();
+									}
+									for (Entry<Move,Rational> entry : plProbs.get(pl).entrySet()) {
+										colpp.writeCol(entry.getKey().toString());							
+										colpp.writeCol(entry.getValue().toString());
+										colpp.endRow();
+									}					
 								}
-								for (Entry<Move,Rational> entry : plProbs.get(pl).entrySet()) {
-									colpp.writeCol(entry.getKey().toString());							
-									colpp.writeCol(entry.getValue().toString());
+								colpp.endRow();
+								for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
+									colpp.writeCol("\u00A3" + pl.toString());						
+									colpp.writeCol(epayoffs.get(pl).toString());
+									colpp.endRow();						
+								}
+								colpp.alignLeft(0);
+								solutionStr = colpp.toString();
+							}
+						}
+					} else {
+						
+						System.out.println("Iterate over parameters");
+						
+						double start=Double.parseDouble((parameters.substring(0, parameters.indexOf("..."))));
+						double end=Double.parseDouble((parameters.substring(parameters.indexOf("...")+3,parameters.length())));
+						solutionStr="";
+						while (start<end) {
+							
+							tree.setTreeParameter(String.valueOf(start));
+							solutionStr +=System.getProperty("line.separator")+"Parameter: "+start+System.getProperty("line.separator");
+							solutionStr +=tree.toString();
+							solutionStr +=System.getProperty("line.separator");
+							// 3. Convert to SequenceForm returning any errors			
+							try {
+								seqForm = new SequenceForm(tree, seed);	
+							} catch (ImperfectRecallException ex) {
+								this.addError(request, ex.getMessage());
+							}
+		
+							if (seqForm != null) 
+							{
+								// 4. Retrieve LCP and run through Lemke
+								Rational[] z = null;
+								try {			
+									LCP lcp = seqForm.getLemkeLCP();
+									log.info(lcp.toString());
+		
+									LemkeAlgorithm lemke = new LemkeAlgorithm();
+									//lemke.init(lcp);
+									z = lemke.run(lcp);
+								} catch (InvalidPlayerException ex) {
+									this.addError(request, ex.getMessage());
+								} catch (RayTerminationException ex) {
+									//TODO: give special treatment
+									this.addError(request, ex.getMessage());			
+								} catch (LemkeException ex) {
+									this.addError(request, ex.getMessage());
+								}
+		
+								if (z != null) 
+								{	
+									// 5. Parse Lemke solution into behavior strategy equilibrium
+									Map<Player,Map<Move,Rational>> plProbs = seqForm.parseLemkeSolution(z);
+									Map<Player,Rational> epayoffs = SequenceForm.expectedPayoffs(plProbs, tree);
+		
+									ColumnTextWriter colpp = new ColumnTextWriter();
+									colpp.writeCol("Equilibrium");
 									colpp.endRow();
-								}					
+									boolean firsttime = true;
+									for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
+										if (firsttime) {
+											firsttime = false;
+										} else {
+											colpp.endRow();
+										}
+										for (Entry<Move,Rational> entry : plProbs.get(pl).entrySet()) {
+											colpp.writeCol(entry.getKey().toString());							
+											colpp.writeCol(entry.getValue().toString());
+											colpp.endRow();
+										}					
+									}
+									colpp.endRow();
+									for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
+										colpp.writeCol("\u00A3" + pl.toString());						
+										colpp.writeCol(epayoffs.get(pl).toString());
+										colpp.endRow();						
+									}
+									colpp.alignLeft(0);
+									solutionStr += colpp.toString();
+								}
 							}
-							colpp.endRow();
-							for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
-								colpp.writeCol("\u00A3" + pl.toString());						
-								colpp.writeCol(epayoffs.get(pl).toString());
-								colpp.endRow();						
-							}
-							colpp.alignLeft(0);
-							solutionStr = colpp.toString();
+							
+							start=start+1;
 						}
 					}
 				}

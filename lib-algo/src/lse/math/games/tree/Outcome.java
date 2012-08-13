@@ -10,6 +10,7 @@ public class Outcome
 {
     private Node node;
     private Map<Player,Rational> pay;
+    private Map<Player,String> parameter;
     private int _uid;
     
     Outcome(int uid, Node wrapNode)
@@ -18,7 +19,8 @@ public class Outcome
         this.node = wrapNode;
         wrapNode.terminal = true;
         wrapNode.outcome = this;
-        pay = new HashMap<Player,Rational>();            
+        pay = new HashMap<Player,Rational>();    
+        parameter = new HashMap<Player,String>();    
     }
     
     public int uid() { return _uid; }
@@ -27,6 +29,7 @@ public class Outcome
     public int idx;
     
     public Set<Player> players() { return pay.keySet(); }
+
     
     public Rational pay(Player pl) {
     	return pay.get(pl);
@@ -34,6 +37,15 @@ public class Outcome
     
     public void setPay(Player pl, Rational value) {
     	pay.put(pl, value);
+    }
+    
+    
+    public String parameter(Player pl) {
+    	return parameter.get(pl);
+    }
+    
+    public void setParameter(Player pl, String value) {
+    	parameter.put(pl, value);
     }
     
     @Override

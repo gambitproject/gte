@@ -35,7 +35,8 @@ public class SequenceForm
     private Map<Iset,Integer> isetsIdxMap = new HashMap<Iset,Integer>();
     
     private Map<Move,Rational> randomPriors = new HashMap<Move,Rational>();
-        
+    
+          
     
     //static int oldnseqs1 = 0;
     //static int[] oldconstrows = new int[] {0, 0, 0};
@@ -51,7 +52,7 @@ public class SequenceForm
     {    	
     	_seed = seed;
     	firstPlayer = tree.firstPlayer();
-    	    	
+    	
     	seqsIdxMap.put(null, 0);
     	for (Player pl = firstPlayer; pl != null; pl = pl.next) {
 	    	List<Move> plMoves = new ArrayList<Move>();
@@ -76,7 +77,7 @@ public class SequenceForm
         	int row = seqsIdxMap.get(udefseq.get(firstPlayer));
         	int col = seqsIdxMap.get(udefseq.get(firstPlayer.next));
             for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
-                Rational pay = u.outcome.pay(pl).add(payAdjust.get(pl));                
+                Rational pay = u.outcome.pay(pl).add(payAdjust.get(pl));
                 Rational prob = realprob(udefseq.get(Player.CHANCE)); // get probability of reaching this node even if both players trying to get here                
                 payoffs.get(pl)[row][col] = payoffs.get(pl)[row][col].add(prob.multiply(pay));
             }

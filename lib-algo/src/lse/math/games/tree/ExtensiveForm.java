@@ -1,5 +1,9 @@
 package lse.math.games.tree;
 
+import java.util.Iterator;
+import java.util.Set;
+
+import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
 
 public class ExtensiveForm 
@@ -186,4 +190,62 @@ public class ExtensiveForm
 			recToString(child, colpp);
 		}
 	}
+
+	
+	private String parameter=null;
+	public String getParameter(){
+		parameter=null;
+		iterateParameter(this.root());
+		return parameter;
+	}
+	
+	private void iterateParameter(Node n){
+
+		if (n!=null) {
+			if (n.outcome!=null){
+				Set<Player> s=n.outcome.players();
+				Iterator<Player> it = s.iterator();
+				while (it.hasNext()) {
+				    Player p = it.next();
+				    if (n.outcome.parameter(p)!=null) {
+				    	parameter=n.outcome.parameter(p);
+				    }
+				}
+			}
+		}
+		
+		for (Node child = n.firstChild(); child != null; child = child.sibling()) {
+			iterateParameter(child);
+		}
+		
+	}
+	
+	
+	public void setTreeParameter(String param){
+		iterateTreeParameter(this.root(),param);
+	}
+	
+	private void iterateTreeParameter(Node n,String param){
+
+		if (n!=null) {
+			if (n.outcome!=null){
+				Set<Player> s=n.outcome.players();
+				Iterator<Player> it = s.iterator();
+				while (it.hasNext()) {
+				    Player p = it.next();
+				    if (n.outcome.parameter(p)!=null) {
+				    	n.outcome.setPay(p, Rational.valueOf(param));
+				    }
+				}
+			}
+		}
+		
+		for (Node child = n.firstChild(); child != null; child = child.sibling()) {
+			iterateTreeParameter(child,param);
+		}
+		
+	}
+	
+	
+	
 }

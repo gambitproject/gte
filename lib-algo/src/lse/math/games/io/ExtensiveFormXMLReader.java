@@ -328,6 +328,16 @@ public class ExtensiveFormXMLReader
 					players.put(playerId, player);
 				}
 				outcome.setPay(player, payoff);
+			} else if ("parameter".equals(child.getNodeName())) {
+				String playerId = getAttribute(child, "player");
+				String parameter = getAttribute(child, "value");
+				
+				Player player = players.get(playerId);
+				if (player == null) {
+					player = tree.createPlayer(playerId);
+					players.put(playerId, player);
+				}
+				outcome.setParameter(player, parameter); 
 			} else {
 				log.warning("Ignoring unknown element:\r\n" + child);
 			}
