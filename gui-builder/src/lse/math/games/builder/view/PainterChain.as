@@ -183,7 +183,7 @@ package lse.math.games.builder.view
 				var s:String=PromptTextInputCanvas.lastEnteredText;
 				
 					
-					var pattern:RegExp = /\d*\...\d*/;
+					var pattern:RegExp = /\d+...\d+/;
 					if (pattern.test(s)) {
 		
 						
