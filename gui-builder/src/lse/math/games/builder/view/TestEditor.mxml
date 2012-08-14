@@ -3,7 +3,7 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:local="."
-			   title="Test editor - Under heavy construction"
+			   title="Test editor"
 			   close="promptExit()">
 	<fx:Script>
 		<![CDATA[

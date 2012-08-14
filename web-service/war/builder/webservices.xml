@@ -10,19 +10,7 @@
     <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
-
   <Servlet Name="NativeServlet">
-    <Active>1</Active>
-    <Tooltip>NativeServlet</Tooltip>
-    <Url>/gte/native/servlet</Url>
-    <Type>nf</Type>
-    <Directory>native-algo/myNative/</Directory>
-    <BinaryWindows>test.bat</BinaryWindows>
-    <BinaryLinux>test.sh</BinaryLinux>
-    <MaxSeconds>600</MaxSeconds>
-  </Servlet>
-
-  <Servlet Name="NativeServlet2">
     <Active>1</Active>
     <Tooltip>NativeServlet</Tooltip>
     <Url>/gte/native/servlet</Url>
