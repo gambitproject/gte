@@ -289,8 +289,8 @@ package lse.math.games.builder.viewmodel
 				var p2:Player = grid.firstPlayer.nextPlayer;
 				var pay1:Rational = node.outcome.pay(p1);
 				var pay2:Rational = node.outcome.pay(p2);
-				var pay1Str:String = pay1.isNaN ? "?" : pay1.toString();
-				var pay2Str:String = pay2.isNaN ? "?" : pay2.toString();
+				var pay1Str:String = pay1.isNaN ? " " : pay1.toString();
+				var pay2Str:String = pay2.isNaN ? " " : pay2.toString();
 				
 				
 				if (glbSettings.getValue("SYSTEM_DECIMAL_LAYOUT")){

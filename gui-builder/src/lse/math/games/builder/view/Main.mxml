@@ -18,10 +18,6 @@
 			import lse.math.games.builder.viewmodel.AutoLabeller;
 			import lse.math.games.builder.viewmodel.TreeGrid;
 			
-			import lse.math.games.builder.io.OldExtensiveFormXMLWriter;
-			import lse.math.games.builder.io.XMLExporter;
-			import lse.math.games.builder.io.XMLImporter;
-			
 			import mx.controls.Alert;
 			import mx.controls.ProgressBar;
 			import mx.core.FlexGlobals;
@@ -39,12 +35,24 @@
 			import util.PromptTextInputCanvas;
 			import util.PromptTwoButtons;
 						
+			
+			// ------------------------------------
+			// START: Bindable propert
+			// ------------------------------------
+
+			
 			[Bindable]
 			public var seed:String;
 			
+			/**
+			 * Array of algorithms for the strategic form
+			 */
 			[Bindable]
 			public var nfalgos:Array = new Array();
 			
+			/**
+			 * Array of algorithms for the extended form
+			  */
 			[Bindable]
 			public var xfalgos:Array = new Array();
 			
@@ -97,14 +105,40 @@
 			 */
 			[Bindable]
 			private var extensiveStep:int=-1;
+			
+			
+			/**
+			 * Binable property shows if NEWGUI is in tree stage.
+			 *@default false
+			 */
 			[Bindable]
-			private var eStep0:Boolean=false;			
+			private var eStep0:Boolean=false;
+			
+			/**
+			 * Binable property shows if NEWGUI is in players stage.
+			 *@default false
+			 */
 			[Bindable]
-			private var eStep1:Boolean=false;			
+			private var eStep1:Boolean=false;
+			
+			/**
+			 * Binable property shows if GUI is in infosets stage.
+			 *@default false
+			 */
 			[Bindable]
-			private var eStep2:Boolean=false;	
+			private var eStep2:Boolean=false;
+			
+			/**
+			 * Binable property shows if GUI is in moves stage.
+			 *@default false
+			 */
 			[Bindable]
-			private var eStep3:Boolean=false;			
+			private var eStep3:Boolean=false;
+			
+			/**
+			 * Binable property shows if GUI is in payoffs stage.
+			 *@default false
+			 */
 			[Bindable]
 			private var eStep4:Boolean=false;	
 			
@@ -136,20 +170,48 @@
 			[Bindable]
 			private var _player2Name:String="";
 
+			/**
+			 * Indicates which player's payoffs are active in the menu bar
+			 *@default 1
+			 *@author Martin  
+			 */
 			private var ngPayoffsPlayer:int=1;
+			
+			/**
+			 * Bindable property indicates which player's moves are active in the menu bar
+			 *@default 1
+			 *@author Martin  
+			 */
 			private var ngMovesPlayer:int=1;
 			
 		
+			/**
+			 * Bindable property indicates if numbers are displayed in decimal or rational layout
+			 *@default false - rational layout active
+			 *@author Martin  
+			 */
 			[Bindable]
 			private var decimalLayout:Boolean=false;
 			
+			/**
+			 * Bindable property indicates if the TexInput for player1 is visible
+			 *@default false
+			 *@author Martin  
+			 */
 			[Bindable]
 			private var Player1InputVisible:Boolean=false;
+			
+			/**
+			 * Bindable property indicates if the TexInput for player2 is visible
+			 *@default false
+			 *@author Martin  
+			*/
 			[Bindable]
 			private var Player2InputVisible:Boolean=false;
-			
-			
-			//Embeed icons for NEWGUI
+
+			// ------------------------------------
+			// START: Icon Definitions
+			// ------------------------------------
 			
 			[Embed(source='../../../../../../assets/icons/decimal.png')]
 			[Bindable]
@@ -207,7 +269,15 @@
 			[Bindable]
 			public var ngFinalizeHoverIcon:Class; 
 
+
+			// ------------------------------------
+			// START: Toolbar related function
+			// ------------------------------------
 			
+			/**
+			 * Resets all NEWGUI Buttons 
+			 *@author Martin  
+			 */	
 			private function resetNewGuiButtons():void {
 				ngTreeAdd.selected=true;ngTreeDelete.selected=false;
 				ngPlayer1.selected=true;ngPlayer2.selected=false;ngChance.selected=false;
@@ -215,12 +285,20 @@
 				ngInfosetsJoin.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsCut.selected=false;
 			}
 			
+			/**
+			 * Resets all NEWGUI Buttons and switches to tree stage 
+			 *@author Martin  
+			 */	
 			private function resetNewGUI():void{
 				setExtensiveStep(0);
 				resetNewGuiButtons();
 				
 			}
-			
+
+			/**
+			 * Resets all NEWGUI Buttons and checks the current stage 
+			 *@author Martin  
+			 */	
 			private function resetAndCheck():void {
 				resetNewGuiButtons();
 				checkExtensiveStep(0);
@@ -237,7 +315,6 @@
 				resetNewGUI();
 			}
 			
-			/* <--- --- Mode related functions --- ---> */
 
 			/**
 			 * Sets the stage of the NEWGUI (0,1,2,3,4) or turns it off (-1)
@@ -273,14 +350,12 @@
 			
 				switch (extensiveStep) {
 					case 0:
-						log.add(Log.HINT,"Choose an option below to add or delete a node by clicking on a black square. Click on PLAYERS and move to the next step.");
 						ngTreeStep.setStyle("icon",ngTreeHoverIcon);
 						controller.getClickAction = getClickCallback(1);
 						controller.invalidate(true,true,true);
 						eStep0=true;
 						break ;
 					case 1:
-						log.add(Log.HINT,"Choose a player and click on a square to assign this player to the node. After all nodes are assigned to a player click on INFOSETS and move to the next step.");
 						ngPlayersStep.setStyle("icon",ngPlayersHoverIcon);
 						ngPlayer1Input.text=controller.grid.firstPlayer.name;
 						ngPlayer2Input.text=controller.grid.firstPlayer.nextPlayer.name;
@@ -313,7 +388,6 @@
 						break ;
 				} 
 			}
-			
 			
 			/**
 			 * Controlls the Icons of the NEWGUI wether they are enabled or disabled and alpha blended. 
@@ -390,62 +464,6 @@
 					//turnOffNewGUI();				
 				} else	if (value==1) {
 					PromptTwoButtons.show(resultFromSwitchStrategic, "If you edit the game in strategic form the game tree form will be reinitialized from the matrix. Do you want to continue?");					
-				}
-			}
-			
-			/**
-			 * Callback function from the Popup that appears if you switch from extensive form to strategic form and you want to edit the strategic form.
-			 *@see changeEditMode
-			 *@author Martin  
-			 */	
-			private function resultFromSwitchStrategic():void {
-				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
-					editMode=1;
-					controller.toggleMatrixMode();
-					//Turn off NEWGUI
-					//turnOffNewGUI();
-				}
-			}
-
-			
-
-			/* <--- --- TOOLBARS-RELATED FUNCTIONS --- ---> */
-			
-			/**
-			 * Callback function from the Popup that appears if you create a new game
-			 *@author Martin  
-			 */	
-			private function clearDependingOnPromptResult():void
-			{
-				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
-				{
-					if(mouseScrollingEnabled) {
-						disableMouseScrolling();
-					}
-					
-					
-					if (controller.treeMode) {
-						
-						resetNewGUI();
-						controller.clear();
-						//Set it again, to update the step buttons (arrows)
-						setExtensiveStep(0);
-					} else {
-						controller.clear();
-					}
-				}
-			}
-			
-			
-			
-			/**
-			 * Callback function from the Popup that appears if the calculation (estimation) of the native algorithm takes a long time and 
-			 * the user is asked wether toproceeed or stop.
-			 *@author Martin  
-			 */	
-			private function resultFromHTTPService():void {
-				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
-					runAlgorithm(1);
 				}
 			}
 			
@@ -538,8 +556,6 @@
 					}
 				}
 			}
-			
-			
 			
 			/**
 			 * Pops up the settings edition window
@@ -635,8 +651,10 @@
 				PopUpManager.centerPopUp(te);
 			}			
 			
-			/* <--- --- TABS & CANVAS-RELATED FUNCTIONS --- ---> */
 			
+			/**
+			 * Sets tab selecttion to the current controller state
+			 */
 			private function updateSelectedTab(evt:Event):void
 			{
 				tabNavigator.selectedIndex = controller.currentState;
@@ -900,9 +918,11 @@
 			}
 			
 			
-
-			
-			//Calls controller.runAlgorithm but captures the type of Algo before, to do some additional stuff depending on the algo.
+			/**
+			 * Runs the algorithm selected in the ddlb
+			 *@see autoLabelMovesAction
+			 *@author Martin  
+			 */
 			private function runAlgorithm(m:int):void {
 				var a:Object=algoComboBox.selectedItem;
 				var s:String=seed;
@@ -924,6 +944,10 @@
 				}
 			}
 			
+			/**
+			 * Handels Enter and ESC events if the user changes the player 1 name
+			 *@author Martin  
+			 */
 			private function keyDownNGPlayer1(event:KeyboardEvent):void{
 				if (event.keyCode==Keyboard.ENTER) {
 					controller.setPlayerName(controller.grid.firstPlayer,ngPlayer1Input.text);
@@ -932,6 +956,10 @@
 					ngPlayer1Input.text=controller.grid.firstPlayer.name;
 				}
 			}
+			/**
+			 * Handels Enter and ESC events if the user changes the player 2 name
+			 *@author Martin  
+			 */
 
 			private function keyDownNGPlayer2(event:KeyboardEvent):void{
 				if (event.keyCode==Keyboard.ENTER) {
@@ -942,23 +970,48 @@
 				}
 			}
 
+			/**
+			 * Handels focus loose event if the user changes the player 1 name
+			 *@author Martin  
+			 */
 			private function focusOutNGPlayer1(eventObj:Event):void {
 				controller.setPlayerName(controller.grid.firstPlayer,ngPlayer1Input.text);
 				_player1Name=ngPlayer1Input.text;
 			}
 			
+			/**
+			 * Handels focus loose event if the user changes the player 2 name
+			 *@author Martin  
+			 */
 			private function focusOutNGPlayer2(eventObj:Event):void {
 				controller.setPlayerName(controller.grid.firstPlayer.nextPlayer,ngPlayer2Input.text);
 				_player2Name=ngPlayer2Input.text;
 			}
 			
+			
+			/**
+			 * Sets payoffs automaticalls. If reset==true it overrides the payoffs else it only assigns payoffs to unset leaves.
+			 *@param reset:Boolean
+			 *@author Martin  
+			 */
 			private function setAutoPayoffs(reset:Boolean):void {
 				controller.grid.setPlayerPayoffsAuto(controller.isZeroSum,controller.grid.firstPlayer,reset);
 				controller.invalidate(true,false,true);
 			}
-			
 
-			//Executes the edit action
+			/**
+			 * Asks, if you want to override your move labels with autolabelling
+			 *@author Martin  
+			 */
+			private function autoLabelMovesAction():void{
+				
+				PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
+			}
+			
+			/**
+			 * Callback function from the Popup that appears if you cange Player moves on the canvas
+			 *@author Martin  
+			 */
 			private function onReturnFromPromptMoves():void
 			{
 				if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
@@ -972,6 +1025,10 @@
 				}
 			}
 		
+			/**
+			 * Callback function from the Popup that appears if you cange Player payoffs on the canvas
+			 *@author Martin  
+			 */
 			private function onReturnFromPromptPayoffs():void
 			{
 				if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
@@ -986,22 +1043,60 @@
 			}
 			
 			
-			private function autoLabelMovesAction():void{
-				
-				/* Test purpose
-				var xmlWriter:OldExtensiveFormXMLWriter = new OldExtensiveFormXMLWriter();
-				var treeXML:XML = xmlWriter.write(grid);
-				XML.prettyPrinting = false;
-				var value:String = treeXML.toXMLString();
-				XML.prettyPrinting = true;
-				trace(value);
-				*/
-				PromptTwoButtons.show(resultFromAutoLabelMoves, "Autolabeling will override all customized move labels. Do you want to continue?");
-			}
-			
+
+			/**
+			 * Callback function from the Popup that appears if click on Autolabelling.
+			 *@see autoLabelMovesAction
+			 *@author Martin  
+			 */
 			private function resultFromAutoLabelMoves():void {
 				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
 					controller.doAction(actions.autoLabelMoves);
+				}
+			}
+			
+			/**
+			 * Callback function from the Popup that appears if you switch from extensive form to strategic form and you want to edit the strategic form.
+			 *@see changeEditMode
+			 *@author Martin  
+			 */	
+			private function resultFromSwitchStrategic():void {
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
+					editMode=1;
+					controller.toggleMatrixMode();
+				}
+			}
+			
+			/**
+			 * Callback function from the Popup that appears if you create a new game
+			 *@author Martin  
+			 */	
+			private function clearDependingOnPromptResult():void
+			{
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK)
+				{
+					if(mouseScrollingEnabled) {
+						disableMouseScrolling();
+					}
+					if (controller.treeMode) {
+						resetNewGUI();
+						controller.clear();
+						//Set it again, to update the step buttons (arrows)
+						setExtensiveStep(0);
+					} else {
+						controller.clear();
+					}
+				}
+			}
+			
+			/**
+			 * Callback function from the Popup that appears if the calculation (estimation) of the native algorithm takes a long time and 
+			 * the user is asked wether toproceeed or stop.
+			 *@author Martin  
+			 */	
+			private function resultFromHTTPService():void {
+				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
+					runAlgorithm(1);
 				}
 			}
 			
@@ -1020,10 +1115,7 @@
 			skin: ClassReference("mx.skins.ProgrammaticSkin");
 			cornerRadius:0;
 		}
-		
-		/*
-		* Changed from Helvetica to Times
-		*/
+
 		.mxTabLabels {
 			textFieldClass: ClassReference("mx.core.UIFTETextField");
 			fontFamily: Helvetica; 

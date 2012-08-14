@@ -232,6 +232,7 @@
 			// Save the changes into the new matrix
 			private function saveChanges():void 
 			{
+			
 				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
 				updateAlphabets();
 				
@@ -262,58 +263,63 @@
 					}
 				}
 				
-				var lines1:Array = pl1PayMapStr.split("\n");
-				var lines2:Array = pl2PayMapStr.split("\n");
-				
-				for each(strat in rows)
-				{
-					var columns1:Array = new Array();
-					var line:String = lines1.shift() as String;
-					if(line != null)
-						columns1 = line.split(delimeter);
+				if ((pl1PayMapStr!=null) && (pl1PayMapStr.length>0) &&
+					(pl2PayMapStr!=null) && (pl2PayMapStr.length>0)) {
+		
+					var lines1:Array = pl1PayMapStr.split("\n");
+					var lines2:Array = pl2PayMapStr.split("\n");
 					
-					var columns2:Array = new Array();
-					line = lines2.shift() as String;
-					if(line != null)
-						columns2 = line.split(delimeter);
-					
-					for each(var strat2:Strategy in cols)
+					for each(strat in rows)
 					{
-						var payStr1:String;
-						var payStr2:String;
-						var outcome:Outcome = new Outcome();
+						var columns1:Array = new Array();
+						var line:String = lines1.shift() as String;
+						if(line != null)
+							columns1 = line.split(delimeter);
 						
-						while(true) {
-							payStr1 = trim(columns1.shift() as String);
-							if(payStr1 != null && Rational.parse(payStr1) != Rational.NaN){
-								outcome.setPay(firstPl, Rational.parse(payStr1));
-								break;
-							} else if(columns1.length==0){
-								outcome.setPay(firstPl, Rational.NaN);
-								break;
-							}
-						}
+						var columns2:Array = new Array();
+						line = lines2.shift() as String;
+						if(line != null)
+							columns2 = line.split(delimeter);
 						
-						while(true) {
-							payStr2 = trim(columns2.shift() as String);
-							if(payStr2 != null && Rational.parse(payStr2) != Rational.NaN){
-								outcome.setPay(firstPl.nextPlayer, Rational.parse(payStr2));
-								break;
-							} else if(columns2.length==0) {
-								outcome.setPay(firstPl.nextPlayer, Rational.NaN);
-								break;
+						for each(var strat2:Strategy in cols)
+						{
+							var payStr1:String;
+							var payStr2:String;
+							var outcome:Outcome = new Outcome();
+							
+							while(true) {
+								payStr1 = trim(columns1.shift() as String);
+								if(payStr1 != null && Rational.parse(payStr1) != Rational.NaN){
+									outcome.setPay(firstPl, Rational.parse(payStr1));
+									break;
+								} else if(columns1.length==0){
+									outcome.setPay(firstPl, Rational.NaN);
+									break;
+								}
 							}
+							
+							while(true) {
+								payStr2 = trim(columns2.shift() as String);
+								if(payStr2 != null && Rational.parse(payStr2) != Rational.NaN){
+									outcome.setPay(firstPl.nextPlayer, Rational.parse(payStr2));
+									break;
+								} else if(columns2.length==0) {
+									outcome.setPay(firstPl.nextPlayer, Rational.NaN);
+									break;
+								}
+							}
+							_matrix.addPayoff([strat, strat2], outcome, Rational.ONE);
 						}
-						_matrix.addPayoff([strat, strat2], outcome, Rational.ONE);
 					}
+					
+					//invalidate display
+					if(_controller != null)
+						_controller.invalidate(false, true, true); 
+					else
+						log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
+					
 				}
-				
-				//invalidate display
-				if(_controller != null)
-					_controller.invalidate(false, true, true); 
-				else
-					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
-				
+						
 				exit();
 			}
 			
@@ -669,6 +675,7 @@
 					</s:HGroup>
 				</s:VGroup>	
 			</s:NavigatorContent>
+			<!--
 			<s:NavigatorContent width="100%" height="100%" label="Formular">
 				<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 					<s:HGroup  width="100%" verticalAlign="middle">
@@ -690,6 +697,7 @@
 					</s:HGroup>
 				</s:VGroup> 
 			</s:NavigatorContent>
+			-->
 		</mx:TabNavigator>
 		<s:HGroup width="100%" gap="0">	
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
