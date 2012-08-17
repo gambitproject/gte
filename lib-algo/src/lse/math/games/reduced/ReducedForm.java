@@ -1,11 +1,21 @@
 package lse.math.games.reduced;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import lse.math.games.Rational;
@@ -54,6 +64,8 @@ public class ReducedForm
 	RationalMatrix F;
 	RationalMatrix e;
 	RationalMatrix f;
+	int _nSizeForPlayer1;
+	int _nSizeForPlayer2;
 	
 	/* REDUCED SYSTEM */
 	RationalMatrix p;
@@ -64,6 +76,11 @@ public class ReducedForm
 	RationalMatrix b_;
 	RationalMatrix A_;
 	RationalMatrix B_;
+	
+	RationalMatrix p2;
+	RationalMatrix P2;  
+	RationalMatrix q2;
+	RationalMatrix Q2; 
     /* < **** FOR 2-PERSON EXTENSIVE GAME IN REDUCED FORM **** < */
     
     
@@ -232,6 +249,7 @@ public class ReducedForm
 //	    printConstraintMatrices();
 	    	   	    
 	    makeReducedSystem();
+	    lrs();
 	}
 
 	void makeReducedSystem() {
@@ -253,7 +271,28 @@ public class ReducedForm
 		/* Make vector f */
 		f = new RationalMatrix(F.getRowSize(), 1);
 		f.setElement(0, 0, Rational.ONE);
-				
+		
+		/* Nonterminals for Player1 */
+		_nSizeForPlayer1 = 0;
+		for (int i = 0; i < E.getColumnSize(); i++) {
+			for (int j = 0; j < E.getRowSize(); j++) {
+				if (E.getElement(j,  i).negate().isOne()) {
+					_nSizeForPlayer1++;
+					break;
+				}
+			}			
+		}
+		
+		_nSizeForPlayer2 = 0;
+		for (int i = 0; i < F.getColumnSize(); i++) {
+			for (int j = 0; j < F.getRowSize(); j++) {
+				if (F.getElement(j,  i).negate().isOne()) {
+					_nSizeForPlayer2++;
+					break;
+				}
+			}			
+		}
+		
 		{
 			RationalMatrix t1 = E.copy();
 			t1 = t1.appendAfter(e);
@@ -265,9 +304,9 @@ public class ReducedForm
 			RationalMatrix E_I = E_I0.getSubmatrix(0, 0, E_I0.getRowSize(), E_I0.getColumnSize()-1);
 			RationalMatrix e_  = E_I0.getSubmatrix(0, E_I0.getColumnSize()-1, E_I0.getRowSize(), E_I0.getColumnSize());
 
-			logi("E_b:\n%s", E_B.toString());
-			logi("E_i:\n%s", E_I.toString());
-			logi("e_:\n%s", e_.toString());
+//			logi("E_b:\n%s", E_B.toString());
+//			logi("E_i:\n%s", E_I.toString());
+//			logi("e_:\n%s", e_.toString());
 			
 			RationalMatrix t2 = F.copy();
 			t2 = t2.appendAfter(f);
@@ -277,9 +316,9 @@ public class ReducedForm
 			RationalMatrix F_I = F_I0.getSubmatrix(0, 0, F_I0.getRowSize(), F_I0.getColumnSize()-1);
 			RationalMatrix f_  = F_I0.getSubmatrix(0, F_I0.getColumnSize()-1, F_I0.getRowSize(), F_I0.getColumnSize());
 			
-			logi("F_b:\n%s", F_B.toString());
-			logi("F_i:\n%s", F_I.toString());
-			logi("f_:\n%s", f_.toString());
+//			logi("F_b:\n%s", F_B.toString());
+//			logi("F_i:\n%s", F_I.toString());
+//			logi("f_:\n%s", f_.toString());
 			
 			p = E_B.inverse().multiply(e_);
 			P = E_B.inverse().multiply(Rational.NEGONE).multiply(E_I);
@@ -319,7 +358,180 @@ public class ReducedForm
 			
 			B_ = P.appendBelow(t1).transpose().multiply(B).multiply(Q.appendBelow(t2));
 		}
+		
+		{
+			p2 = p.getSubmatrix(_nSizeForPlayer1, 0, p.getRowSize(), p.getColumnSize());
+			P2 = P.getSubmatrix(_nSizeForPlayer1, 0, P.getRowSize(), P.getColumnSize());
+			
+			q2 = q.getSubmatrix(_nSizeForPlayer2, 0, q.getRowSize(), q.getColumnSize());
+			Q2 = Q.getSubmatrix(_nSizeForPlayer2, 0, Q.getRowSize(), Q.getColumnSize());
+		}
 	}
+
+	private void lrs() {
+		{
+			String input = makeHRepForLrs1();
+			String output = runLrs(input);
+			makeVRepFromLrs(output);
+		}
+		{
+			String input = makeHRepForLrs2();
+			String output = runLrs(input);
+			makeVRepFromLrs(output);
+		}
+	}
+	
+	private String makeHRepForLrs1() {
+		
+		logi("Make H representation for lrs1!");
+		
+		int m = b_.getColumnSize() + p2.getRowSize() + B_.getRowSize() + Q2.getRowSize();
+		int n = 1 + B_.getRowSize() + Q2.getRowSize();
+		
+		String constraints = "";
+		RationalMatrix constraintsUpper = b_.transpose().appendAfter(B_.transpose()).appendAfter(Q2.transpose());
+		RationalMatrix constraintsMiddle = p2.appendAfter(P2).appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));
+		RationalMatrix constraintsLower = new RationalMatrix(n-1,1, false).appendAfter(new RationalMatrix(n-1, n-1, true));
+		
+		RationalMatrix constraintsMatrix = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle);
+		constraints = constraintsMatrix.appendBelow(constraintsLower).toString();
+		
+		return makeHOutput(m, n, constraints);
+	}
+
+	private String makeHRepForLrs2() {
+		
+		logi("Make H representation for lrs2!");
+		
+		int m = a_.getRowSize() + q2.getRowSize() + A_.getColumnSize() + P2.getRowSize();
+		int n = 1 + A_.getColumnSize() + P2.getRowSize();
+		
+		String constraints = "";
+		RationalMatrix constraintsUpper = a_.appendAfter(A_).appendAfter(P2.transpose());
+		RationalMatrix constraintsMiddle = q2.appendAfter(Q2).appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));
+		RationalMatrix constraintsLower = new RationalMatrix(n-1,1, false).appendAfter(new RationalMatrix(n-1, n-1, true));
+		
+		RationalMatrix constraintsMatrix = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle);
+		constraints = constraintsMatrix.appendBelow(constraintsLower).toString();
+
+		return makeHOutput(m, n, constraints);
+	}
+	
+	private String makeHOutput(int m, int n, String constraints) {
+		String output = "";
+		output += "Temporary_problem\n";
+		output += "H-representation\n";
+		output += "begin\n"; 
+		output += m + " " + n + " rational\n";
+		output += constraints;
+		output += "end"; 
+		return output;		
+	}
+	
+	private String runLrs(String input) {
+		String output = "";
+		
+		logi("Create temp file for lrs");
+		logi("Dumping this:\n%s", input);
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter("temp.ine"));
+			out.write(input);
+			out.close();
+		}
+		catch (IOException e) {
+			logi("Error while writing the temporary output file.");		
+		}
+		
+		logi("Running lrs");
+		
+		ProcessBuilder pb = new ProcessBuilder("./lrs", "temp.ine");
+		Process p;
+		try {
+			p = pb.start();
+			p.waitFor();
+			
+			InputStream is = p.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+
+			String line;
+			while ((line = br.readLine()) != null || p.exitValue() != 0) {
+			    output += line + "\n";
+			}
+			
+			logi("Getting this:\n%s", output);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			File temp = new File("temp.ine");
+			temp.delete();
+		}
+		
+		
+		return output;
+	}
+
+	private RationalMatrix makeVRepFromLrs(String output) {
+		
+		int firstIdx = 0, lastIdx = 0;
+		
+		String[] lines = output.split("\n");
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			if (line.contains("rational") == true) {
+				firstIdx = i+1;
+			} else if (line.contains("end") == true) {
+				lastIdx = i-1;
+			}
+		}
+		
+		int n = 0;
+		RationalMatrix vertices = null;
+		
+		/* Process items */
+		for (int i = firstIdx; i <= lastIdx; i++) {
+			String line = lines[i];
+			String[] items = line.replaceFirst("^\\s+",  "").split("\\s+");
+			
+			if (n == 0) {
+				n = items.length - 1;
+			}
+			
+			/* Check row type */
+			if (items[0].equalsIgnoreCase("0")) {
+				continue;
+			}
+			
+			RationalMatrix row = new RationalMatrix(1, n);
+			for (int j = 1; j < n+1; j++) {
+				String[] item = items[j].split("/");
+				
+				BigInteger num = new BigInteger(item[0]);
+				BigInteger den = BigInteger.ONE;
+				if (item.length > 1) {
+					den = new BigInteger(item[1]);
+				}
+
+				Rational number = new Rational(num, den);
+				row.setElement(0, j-1, number);
+			}
+			
+			if (vertices == null) {
+				vertices = row;
+			} else {
+				vertices = vertices.appendBelow(row);
+			}
+		}
+		
+		logi("Vertices: \n%s", vertices.toString());
+		return vertices;
+	}
+	
 	
 	void testRationalMatrices() {
 		logi("Test rational matrices...");
