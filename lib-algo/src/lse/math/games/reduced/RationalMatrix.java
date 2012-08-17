@@ -1,6 +1,9 @@
 package lse.math.games.reduced;
 
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import lse.math.games.Rational;
@@ -13,6 +16,8 @@ public class RationalMatrix
 	private Rational[][] _matrix;
 	private int _row;
 	private int _column;
+	private int _basisSize;
+	private int _basisHead [];
 	
 	public RationalMatrix(int m, int n) {
 		this(m,n,false);
@@ -85,6 +90,20 @@ public class RationalMatrix
 			}
 		}
 		return result;
+	}
+	
+	public RationalMatrix getColumn(int idx) {
+		RationalMatrix vector = new RationalMatrix(_row, 1);
+		for (int i = 0; i < _row; i++) {
+			vector.setElement(i, 0, _matrix[i][idx]);
+		}
+		return vector;
+	}
+
+	public void setColumn(int idx, RationalMatrix vector) {
+		for (int i = 0; i < _row; i++) {
+			_matrix[i][idx] = vector._matrix[i][0];
+		}
 	}
 	
 	public RationalMatrix appendBelow(RationalMatrix other) {
@@ -239,32 +258,88 @@ public class RationalMatrix
 		}
 	}
 	
-	void gaussJordanElimination() {
+	public void makeBasisForm() {
+		gaussJordanElimination();
+	}
+	
+	public RationalMatrix getBasis() {
+		RationalMatrix B = new RationalMatrix(_basisSize, _basisSize);
+		for (int i = 0; i < _basisSize; i++) {
+			B.setColumn(i, this.getColumn(_basisHead[i]));
+		}
+		return B;
+	}
+	
+	public RationalMatrix getNonBasis() {
+		RationalMatrix R = new RationalMatrix(_basisSize, _column - _basisSize);
+		
+		Set<Integer> basisIdx = new HashSet<Integer>();
+		for (int i = 0; i < _basisSize; i++) {
+			basisIdx.add(_basisHead[i]);
+		}
+		
+		for (int i = 0, j = 0; i < _column; i++) {
+			if (basisIdx.contains(i) == false) {
+				R.setColumn(j, this.getColumn(i));
+				j++;
+			}
+		}
+		
+		return R;		
+	}
+
+	private void gaussJordanElimination() {
+		
+//		logi("Making basis... from \n%s", this.toString());
+		
+		_basisSize = _column < _row ? _column : _row;
+		_basisHead = new int [ _basisSize ];
+		int [] columnState = new int [ _column ];
 		
 		int size = 0;
-		for (int k = 0; k < _column && size < _row; k++ ) {
-			if (_matrix[k][k].isZero()) {
+		for (int k = 0; k < _column && size < _basisSize; k++ ) {
+			
+			/* Find pivot column */
+			
+			/* If the pivot element is zero,
+			 *  then skip this column */
+			if (_matrix[size][k].isZero()) {
 				continue;
 			}
-			
-			size++;
-			
+						
 			for (int i = 0; i < _row; i++) {
-				if (i != k) {
-					Rational sum = _matrix[i][k].divide(_matrix[k][k]);
-					for (int j = k; j < _column; j++) {
-						_matrix[i][j] = _matrix[i][j].subtract(sum.multiply(_matrix[k][j]));
+				if (i != size) {
+					Rational sum = _matrix[i][k].divide(_matrix[size][k]);
+					for (int j = 0; j < _column; j++) {
+						if (columnState[j] == 0) {
+							_matrix[i][j] = _matrix[i][j].subtract(sum.multiply(_matrix[size][j]));
+						}
 					}
 				}
 			}
+			
+			/* Choose current column into the basis */
+			columnState[k] = 1;
+			_basisHead[size] = k;
+			/* Increase the size of the basis */
+			size++;
+			
+//			logi("\t%d. step: \n%s", k, this.toString());
 		}
 		
+		/* Transform to ones in pivot positions */
 		for (int k = 0; k < _row; k++ ) {
-			for (int j = _row; j < _column; j++ ) {
-				_matrix[k][j] = _matrix[k][j].divide(_matrix[k][k]); 
+			int pivot = _basisHead[k];
+			for (int j = 0; j < _column; j++ ) {
+				if (j != pivot) {
+					_matrix[k][j] = _matrix[k][j].divide(_matrix[k][pivot]);
+				}
 			}
-			_matrix[k][k] = Rational.ONE;
+			_matrix[k][pivot] = Rational.ONE;
 		}
+		
+//		logi("Making basis... new form \n%s", this.toString());
+//		logi("Making basis... basis head %s", Arrays.toString(_basisHead));
 	}
 
 	@Override

@@ -257,18 +257,30 @@ public class ReducedForm
 		{
 			RationalMatrix t1 = E.copy();
 			t1 = t1.appendAfter(e);
-			t1.gaussJordanElimination();
-			RationalMatrix E_B = t1.getSubmatrix(0, 0, E.getRowSize(), E.getRowSize());
-			RationalMatrix E_I = t1.getSubmatrix(0, E.getRowSize(), E.getRowSize(), E.getColumnSize());
-			RationalMatrix e_ = t1.getSubmatrix(0, E.getColumnSize(), E.getRowSize(), E.getColumnSize()+1);
+//			logi("t1 before:\n%s", t1.toString());
+			t1.makeBasisForm();
+//			logi("t1 after:\n%s", t1.toString());
+			RationalMatrix E_B = t1.getBasis();
+			RationalMatrix E_I0 = t1.getNonBasis();
+			RationalMatrix E_I = E_I0.getSubmatrix(0, 0, E_I0.getRowSize(), E_I0.getColumnSize()-1);
+			RationalMatrix e_  = E_I0.getSubmatrix(0, E_I0.getColumnSize()-1, E_I0.getRowSize(), E_I0.getColumnSize());
+
+			logi("E_b:\n%s", E_B.toString());
+			logi("E_i:\n%s", E_I.toString());
+			logi("e_:\n%s", e_.toString());
 			
 			RationalMatrix t2 = F.copy();
 			t2 = t2.appendAfter(f);
-			t2.gaussJordanElimination();
-			RationalMatrix F_B = t2.getSubmatrix(0, 0, F.getRowSize(), F.getRowSize());
-			RationalMatrix F_I = t2.getSubmatrix(0, F.getRowSize(), F.getRowSize(), F.getColumnSize());
-			RationalMatrix f_ = t2.getSubmatrix(0, F.getColumnSize(), F.getRowSize(), F.getColumnSize()+1);
-		
+			t2.makeBasisForm();
+			RationalMatrix F_B = t2.getBasis();
+			RationalMatrix F_I0 = t2.getNonBasis();
+			RationalMatrix F_I = F_I0.getSubmatrix(0, 0, F_I0.getRowSize(), F_I0.getColumnSize()-1);
+			RationalMatrix f_  = F_I0.getSubmatrix(0, F_I0.getColumnSize()-1, F_I0.getRowSize(), F_I0.getColumnSize());
+			
+			logi("F_b:\n%s", F_B.toString());
+			logi("F_i:\n%s", F_I.toString());
+			logi("f_:\n%s", f_.toString());
+			
 			p = E_B.inverse().multiply(e_);
 			P = E_B.inverse().multiply(Rational.NEGONE).multiply(E_I);
 	
