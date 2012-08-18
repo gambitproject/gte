@@ -147,6 +147,16 @@
 			</batchtest>
 		</junit>
 	</target>
+
+        <target name="package-core" depends="compile-core">
+                <echo>Creating core library JAR file...</echo>
+                <mkdir dir="${war.dir}/WEB-INF/lib"/>
+                <jar
+                        destfile="${war.dir}/WEB-INF/lib/${lib.jar.name}.jar"
+                        basedir="${lib.build.dir}"
+                        update="true"
+                />
+	</target>
 	
 	<target name="package" depends="compile-core, compile-gui">
 		<echo>Building WAR directory...</echo>		

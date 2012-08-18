@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import lse.math.games.Rational;
@@ -55,6 +54,54 @@ public class ReducedForm
     private Map<Player,List<Iset>> isetsMap = new HashMap<Player,List<Iset>>();
     /* < **** FOR COMPATIBILITY **** < */   	
 	
+	private class Equilibria {
+		public RationalMatrix x;
+		public RationalMatrix y;
+		
+		public Equilibria(RationalMatrix tx, RationalMatrix ty) {
+			x = tx;
+			y = ty;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((x == null) ? 0 : x.hashCode());
+			result = prime * result + ((y == null) ? 0 : y.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Equilibria other = (Equilibria) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (x == null) {
+				if (other.x != null)
+					return false;
+			} else if (!x.equals(other.x))
+				return false;
+			if (y == null) {
+				if (other.y != null)
+					return false;
+			} else if (!y.equals(other.y))
+				return false;
+			return true;
+		}
+
+		private ReducedForm getOuterType() {
+			return ReducedForm.this;
+		}		
+		
+	}
     
     /* > **** FOR 2-PERSON EXTENSIVE GAME IN REDUCED FORM **** > */
 	/* ORIGINAL SYSTEM */
@@ -77,12 +124,18 @@ public class ReducedForm
 	RationalMatrix A_;
 	RationalMatrix B_;
 	
+	RationalMatrix p1;
 	RationalMatrix p2;
-	RationalMatrix P2;  
+	RationalMatrix P1;
+	RationalMatrix P2;
+	RationalMatrix q1;
 	RationalMatrix q2;
-	RationalMatrix Q2; 
+	RationalMatrix Q1;
+	RationalMatrix Q2;
+	
+	List<Equilibria> equilibriums;
     /* < **** FOR 2-PERSON EXTENSIVE GAME IN REDUCED FORM **** < */
-    
+    	
     
 	/*// methods //*/
 	public ReducedForm(ExtensiveForm tree) throws ImperfectRecallException
@@ -249,7 +302,6 @@ public class ReducedForm
 //	    printConstraintMatrices();
 	    	   	    
 	    makeReducedSystem();
-	    lrs();
 	}
 
 	void makeReducedSystem() {
@@ -360,15 +412,22 @@ public class ReducedForm
 		}
 		
 		{
+			p1 = p.getSubmatrix(0, 0, _nSizeForPlayer1, p.getColumnSize());
 			p2 = p.getSubmatrix(_nSizeForPlayer1, 0, p.getRowSize(), p.getColumnSize());
+			P1 = P.getSubmatrix(0, 0, _nSizeForPlayer1, P.getColumnSize());
 			P2 = P.getSubmatrix(_nSizeForPlayer1, 0, P.getRowSize(), P.getColumnSize());
 			
+			q1 = q.getSubmatrix(0, 0, _nSizeForPlayer2, q.getColumnSize());
 			q2 = q.getSubmatrix(_nSizeForPlayer2, 0, q.getRowSize(), q.getColumnSize());
+			Q1 = Q.getSubmatrix(0, 0, _nSizeForPlayer2, Q.getColumnSize());
 			Q2 = Q.getSubmatrix(_nSizeForPlayer2, 0, Q.getRowSize(), Q.getColumnSize());
 		}
 	}
 
-	private void lrs() {
+	public void findEqLrs() {
+		
+		equilibriums = new LinkedList<ReducedForm.Equilibria>();
+		
 		RationalMatrix d1, d2;
 		{
 			String input = makeHRepForLrs1();
@@ -388,17 +447,49 @@ public class ReducedForm
 				
 		for (int i = 0; i < d1.getRowSize(); i++) {
 			Integer l1 = Integer.valueOf(labels1.getElement(i, 0).toString());
-			logi("X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
+//			logi("X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
 			
 			for (int j = 0; j < d2.getRowSize(); j++) {
 				Integer l2 = Integer.valueOf(labels2.getElement(j, 0).toString());
-				logi("Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
+//				logi("Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
 				
 				if ( (l1|l2) == Integer.MAX_VALUE) {
-					logi("EQUILIBRIUM at [X %s] and [Y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
+//					logi("EQUILIBRIUM at [X %s] and [Y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
+					
+					calculateEq(vertices1.getSubmatrix(i, 0, i+1, vertices1.getColumnSize() - Q2.getRowSize()),
+								vertices2.getSubmatrix(j, 0, j+1, vertices2.getColumnSize() - P2.getRowSize()));
 				}
 			}
 		}
+		
+		logi("===================================================");
+		logi("||             EQUILIBRIUMS                      ||");
+		logi("===================================================");
+		
+		for (int i = 0; i < equilibriums.size(); i++) {
+			logi("(%d) x: %s && y: %s", i, equilibriums.get(i).x.transpose().rowtoString(0), equilibriums.get(i).y.transpose().rowtoString(0));
+		}
+	}
+	
+	private void calculateEq(RationalMatrix xI, RationalMatrix yI) {
+		
+		xI = xI.transpose();
+		yI = yI.transpose();
+		
+		RationalMatrix xN = p1.add(P1.multiply(xI));
+		RationalMatrix xD = p2.add(P2.multiply(xI));
+		RationalMatrix yN = q1.add(Q1.multiply(yI));
+		RationalMatrix yD = q2.add(Q2.multiply(yI)); 
+	
+		RationalMatrix x = xN.appendBelow(xD).appendBelow(xI);
+		RationalMatrix y = yN.appendBelow(yD).appendBelow(yI); 
+		
+		Equilibria solution = new Equilibria(x,y);
+		if (equilibriums.contains(solution)) {
+			return;
+		}
+		
+		equilibriums.add(solution);
 	}
 	
 	private String makeHRepForLrs1() {
@@ -546,7 +637,7 @@ public class ReducedForm
 					label &= ~(1 << l);
 				}
 				
-				logi("\tSlack: %s = %s", Arrays.toString(items), Integer.toBinaryString(label));
+//				logi("\tSlack: %s = %s", Arrays.toString(items), Integer.toBinaryString(label));
 				
 				labels.add(label);
 				continue;

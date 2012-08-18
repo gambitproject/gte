@@ -359,6 +359,42 @@ public class RationalMatrix
 		return output.toString();
 	}
 	
+	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(_basisHead);
+		result = prime * result + _basisSize;
+		result = prime * result + _column;
+		result = prime * result + Arrays.hashCode(_matrix);
+		result = prime * result + _row;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RationalMatrix other = (RationalMatrix) obj;
+		if (!Arrays.equals(_basisHead, other._basisHead))
+			return false;
+		if (_basisSize != other._basisSize)
+			return false;
+		if (_column != other._column)
+			return false;
+		if (!Arrays.deepEquals(_matrix, other._matrix))
+			return false;
+		if (_row != other._row)
+			return false;
+		return true;
+	}
+
 	public 	String rowtoString(int i) {
 		ColumnTextWriter colpp = new ColumnTextWriter();
 		
