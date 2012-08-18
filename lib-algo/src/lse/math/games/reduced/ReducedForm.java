@@ -369,15 +369,38 @@ public class ReducedForm
 	}
 
 	private void lrs() {
+		RationalMatrix d1, d2;
 		{
 			String input = makeHRepForLrs1();
 			String output = runLrs(input);
-			makeVRepFromLrs(output);
+			d1 = makeVRepFromLrs(output);
 		}
 		{
 			String input = makeHRepForLrs2();
 			String output = runLrs(input);
-			makeVRepFromLrs(output);
+			d2 = makeVRepFromLrs(output);
+		}
+		
+		RationalMatrix vertices1 = d1.getSubmatrix(0, 0, d1.getRowSize(), d1.getColumnSize()-1);
+		RationalMatrix labels1  = d1.getSubmatrix(0, d1.getColumnSize()-1, d1.getRowSize(), d1.getColumnSize());
+		RationalMatrix vertices2 = d2.getSubmatrix(0, 0, d2.getRowSize(), d2.getColumnSize()-1);
+		RationalMatrix labels2  = d2.getSubmatrix(0, d2.getColumnSize()-1, d2.getRowSize(), d2.getColumnSize());
+		
+		logi("D1:\n%s", d1.toString());
+		logi("D2:\n%s", d2.toString());
+		
+		for (int i = 0; i < d1.getRowSize(); i++) {
+			Integer l1 = Integer.valueOf(labels1.getElement(i, 0).toString());
+			logi("X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
+			
+			for (int j = 0; j < d2.getRowSize(); j++) {
+				Integer l2 = Integer.valueOf(labels2.getElement(j, 0).toString());
+				logi("Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
+				
+				if ( (l1|l2) == Integer.MAX_VALUE) {
+					logi("EQUILIBRIUM at \n%s\n%s", vertices1.rowtoString(i), vertices2.rowtoString(j));
+				}
+			}
 		}
 	}
 	
@@ -385,16 +408,13 @@ public class ReducedForm
 		
 		logi("Make H representation for lrs1!");
 		
-		int m = b_.getColumnSize() + p2.getRowSize() + B_.getRowSize() + Q2.getRowSize();
+		int m = b_.getColumnSize() + p2.getRowSize();
 		int n = 1 + B_.getRowSize() + Q2.getRowSize();
 		
 		String constraints = "";
 		RationalMatrix constraintsUpper = b_.transpose().appendAfter(B_.transpose()).appendAfter(Q2.transpose());
-		RationalMatrix constraintsMiddle = p2.appendAfter(P2).appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));
-		RationalMatrix constraintsLower = new RationalMatrix(n-1,1, false).appendAfter(new RationalMatrix(n-1, n-1, true));
-		
-		RationalMatrix constraintsMatrix = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle);
-		constraints = constraintsMatrix.appendBelow(constraintsLower).toString();
+		RationalMatrix constraintsMiddle = p2.appendAfter(P2).appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));		
+		constraints = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle).toString();
 		
 		return makeHOutput(m, n, constraints);
 	}
@@ -403,16 +423,13 @@ public class ReducedForm
 		
 		logi("Make H representation for lrs2!");
 		
-		int m = a_.getRowSize() + q2.getRowSize() + A_.getColumnSize() + P2.getRowSize();
+		int m = a_.getRowSize() + q2.getRowSize();
 		int n = 1 + A_.getColumnSize() + P2.getRowSize();
 		
 		String constraints = "";
 		RationalMatrix constraintsUpper = a_.appendAfter(A_).appendAfter(P2.transpose());
-		RationalMatrix constraintsMiddle = q2.appendAfter(Q2).appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));
-		RationalMatrix constraintsLower = new RationalMatrix(n-1,1, false).appendAfter(new RationalMatrix(n-1, n-1, true));
-		
-		RationalMatrix constraintsMatrix = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle);
-		constraints = constraintsMatrix.appendBelow(constraintsLower).toString();
+		RationalMatrix constraintsMiddle = q2.appendAfter(Q2).appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));		
+		constraints = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle).toString();
 
 		return makeHOutput(m, n, constraints);
 	}
@@ -421,10 +438,12 @@ public class ReducedForm
 		String output = "";
 		output += "Temporary_problem\n";
 		output += "H-representation\n";
+		output += "nonnegative\n";
 		output += "begin\n"; 
 		output += m + " " + n + " rational\n";
 		output += constraints;
-		output += "end"; 
+		output += "end\n";
+		output += "printslack"; 
 		return output;		
 	}
 	
@@ -492,19 +511,33 @@ public class ReducedForm
 		
 		int n = 0;
 		RationalMatrix vertices = null;
+		List<Integer> labels = new LinkedList<Integer>();
 		
 		/* Process items */
 		for (int i = firstIdx; i <= lastIdx; i++) {
 			String line = lines[i];
 			String[] items = line.replaceFirst("^\\s+",  "").split("\\s+");
 			
-			if (n == 0) {
-				n = items.length - 1;
-			}
-			
 			/* Check row type */
 			if (items[0].equalsIgnoreCase("0")) {
+				labels.remove(labels.size()-1);
 				continue;
+			}
+			if (items[0].equalsIgnoreCase("slack")) {
+				Integer label = Integer.MAX_VALUE;
+				for (int j = 2; j < items.length; j++) {
+					int l = Integer.parseInt(items[j]);
+					label &= ~(1 << l);
+				}
+				
+				logi("\tSlack: %s = %s", Arrays.toString(items), Integer.toBinaryString(label));
+				
+				labels.add(label);
+				continue;
+			}
+			
+			if (n == 0) {
+				n = items.length - 1;
 			}
 			
 			RationalMatrix row = new RationalMatrix(1, n);
@@ -529,6 +562,14 @@ public class ReducedForm
 		}
 		
 		logi("Vertices: \n%s", vertices.toString());
+		logi("Labels: \n%s", labels.toString());
+		
+		RationalMatrix labelCol = new RationalMatrix(labels.size(), 1);
+		for (int i = 0; i < labels.size(); i++) {
+			labelCol.setElement(i, 0, new Rational(labels.get(i)));
+		}
+		vertices = vertices.appendAfter(labelCol);
+		
 		return vertices;
 	}
 	

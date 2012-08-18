@@ -359,6 +359,18 @@ public class RationalMatrix
 		return output.toString();
 	}
 	
+	public 	String rowtoString(int i) {
+		ColumnTextWriter colpp = new ColumnTextWriter();
+		
+		for (int j = 0; j < _column; j++) {
+			colpp.writeCol(_matrix[i][j].toString());
+		}
+		
+		StringWriter output = new StringWriter();
+		output.write(colpp.toString());
+		return output.toString();
+	}
+	
 	/*// utils //*/
 	private void logi(String format, Object... args) {
 		log.info(String.format(format, args));

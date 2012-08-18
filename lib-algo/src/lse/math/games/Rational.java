@@ -121,7 +121,7 @@ public class Rational
     	else return new Rational(value);
     }
        
-    private Rational(long value)
+    public Rational(long value)
     {
         this(value, 1);
     }
