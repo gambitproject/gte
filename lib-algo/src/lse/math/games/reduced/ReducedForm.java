@@ -408,14 +408,18 @@ public class ReducedForm
 		
 		logi("Make H representation for lrs1!");
 		
-		int m = b_.getColumnSize() + p2.getRowSize();
+		int m = b_.getColumnSize() + p2.getRowSize() + B_.getRowSize() + Q2.getRowSize();
 		int n = 1 + B_.getRowSize() + Q2.getRowSize();
 		
 		String constraints = "";
-		RationalMatrix constraintsUpper = b_.transpose().appendAfter(B_.transpose()).appendAfter(Q2.transpose());
-		RationalMatrix constraintsMiddle = p2.appendAfter(P2).appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));		
-		constraints = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle).toString();
+		RationalMatrix ineqN = b_.transpose().appendAfter(B_.transpose()).appendAfter(Q2.transpose()).multiply(Rational.NEGONE);
+		RationalMatrix ineqS = p2.appendAfter(P2).appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));
+		RationalMatrix ineqT = new RationalMatrix(Q2.getRowSize(), n - Q2.getRowSize(), false).appendAfter(new RationalMatrix(Q2.getRowSize(), Q2.getRowSize(), true));
+		RationalMatrix ineqM = new RationalMatrix(B_.getRowSize(), b_.getColumnSize(), false).
+									appendAfter(new RationalMatrix(B_.getRowSize(), B_.getRowSize(), true)).
+									appendAfter(new RationalMatrix(B_.getRowSize(), Q2.getRowSize(), false));
 		
+		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
 		return makeHOutput(m, n, constraints);
 	}
 
@@ -423,14 +427,18 @@ public class ReducedForm
 		
 		logi("Make H representation for lrs2!");
 		
-		int m = a_.getRowSize() + q2.getRowSize();
+		int m = a_.getRowSize() + q2.getRowSize() + A_.getColumnSize() + P2.getRowSize();
 		int n = 1 + A_.getColumnSize() + P2.getRowSize();
 		
 		String constraints = "";
-		RationalMatrix constraintsUpper = a_.appendAfter(A_).appendAfter(P2.transpose());
-		RationalMatrix constraintsMiddle = q2.appendAfter(Q2).appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));		
-		constraints = constraintsUpper.multiply(Rational.NEGONE).appendBelow(constraintsMiddle).toString();
-
+		RationalMatrix ineqM = a_.appendAfter(A_).appendAfter(P2.transpose()).multiply(Rational.NEGONE);
+		RationalMatrix ineqT = q2.appendAfter(Q2).appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));		
+		RationalMatrix ineqS = new RationalMatrix(P2.getRowSize(), n - P2.getRowSize(), false).appendAfter(new RationalMatrix(P2.getRowSize(), P2.getRowSize(), true));
+		RationalMatrix ineqN = new RationalMatrix(A_.getColumnSize(), a_.getColumnSize(), false).
+									appendAfter(new RationalMatrix(A_.getColumnSize(), A_.getColumnSize(), true)).
+									appendAfter(new RationalMatrix(A_.getColumnSize(), P2.getRowSize(), false));
+		
+		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
 		return makeHOutput(m, n, constraints);
 	}
 	
@@ -438,7 +446,7 @@ public class ReducedForm
 		String output = "";
 		output += "Temporary_problem\n";
 		output += "H-representation\n";
-		output += "nonnegative\n";
+//		output += "nonnegative\n";
 		output += "begin\n"; 
 		output += m + " " + n + " rational\n";
 		output += constraints;
