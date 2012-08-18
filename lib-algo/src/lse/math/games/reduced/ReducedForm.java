@@ -385,10 +385,7 @@ public class ReducedForm
 		RationalMatrix labels1  = d1.getSubmatrix(0, d1.getColumnSize()-1, d1.getRowSize(), d1.getColumnSize());
 		RationalMatrix vertices2 = d2.getSubmatrix(0, 0, d2.getRowSize(), d2.getColumnSize()-1);
 		RationalMatrix labels2  = d2.getSubmatrix(0, d2.getColumnSize()-1, d2.getRowSize(), d2.getColumnSize());
-		
-		logi("D1:\n%s", d1.toString());
-		logi("D2:\n%s", d2.toString());
-		
+				
 		for (int i = 0; i < d1.getRowSize(); i++) {
 			Integer l1 = Integer.valueOf(labels1.getElement(i, 0).toString());
 			logi("X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
@@ -398,7 +395,7 @@ public class ReducedForm
 				logi("Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
 				
 				if ( (l1|l2) == Integer.MAX_VALUE) {
-					logi("EQUILIBRIUM at \n%s\n%s", vertices1.rowtoString(i), vertices2.rowtoString(j));
+					logi("EQUILIBRIUM at [X %s] and [Y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
 				}
 			}
 		}
@@ -409,16 +406,22 @@ public class ReducedForm
 		logi("Make H representation for lrs1!");
 		
 		int m = b_.getColumnSize() + p2.getRowSize() + B_.getRowSize() + Q2.getRowSize();
-		int n = 1 + B_.getRowSize() + Q2.getRowSize();
+		int n = b_.getRowSize() + B_.getRowSize() + Q2.getRowSize();
 		
 		String constraints = "";
-		RationalMatrix ineqN = b_.transpose().appendAfter(B_.transpose()).appendAfter(Q2.transpose()).multiply(Rational.NEGONE);
-		RationalMatrix ineqS = p2.appendAfter(P2).appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));
-		RationalMatrix ineqT = new RationalMatrix(Q2.getRowSize(), n - Q2.getRowSize(), false).appendAfter(new RationalMatrix(Q2.getRowSize(), Q2.getRowSize(), true));
-		RationalMatrix ineqM = new RationalMatrix(B_.getRowSize(), b_.getColumnSize(), false).
+		RationalMatrix ineqN = b_.transpose().
+									appendAfter(B_.transpose()).
+									appendAfter(Q2.transpose()).multiply(Rational.NEGONE);
+		
+		RationalMatrix ineqS = p2.	appendAfter(P2).
+									appendAfter(new RationalMatrix(p2.getRowSize(), Q2.getRowSize(), false));
+		RationalMatrix ineqT = new RationalMatrix(Q2.getRowSize(), n - Q2.getRowSize(), false).
+									appendAfter(new RationalMatrix(Q2.getRowSize(), Q2.getRowSize(), true));
+
+		RationalMatrix ineqM = new RationalMatrix(B_.getRowSize(), b_.getRowSize(), false).
 									appendAfter(new RationalMatrix(B_.getRowSize(), B_.getRowSize(), true)).
 									appendAfter(new RationalMatrix(B_.getRowSize(), Q2.getRowSize(), false));
-		
+
 		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
 		return makeHOutput(m, n, constraints);
 	}
@@ -428,12 +431,18 @@ public class ReducedForm
 		logi("Make H representation for lrs2!");
 		
 		int m = a_.getRowSize() + q2.getRowSize() + A_.getColumnSize() + P2.getRowSize();
-		int n = 1 + A_.getColumnSize() + P2.getRowSize();
+		int n = a_.getColumnSize() + A_.getColumnSize() + P2.getRowSize();
 		
 		String constraints = "";
-		RationalMatrix ineqM = a_.appendAfter(A_).appendAfter(P2.transpose()).multiply(Rational.NEGONE);
-		RationalMatrix ineqT = q2.appendAfter(Q2).appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));		
-		RationalMatrix ineqS = new RationalMatrix(P2.getRowSize(), n - P2.getRowSize(), false).appendAfter(new RationalMatrix(P2.getRowSize(), P2.getRowSize(), true));
+		RationalMatrix ineqM = a_.	appendAfter(A_).
+									appendAfter(P2.transpose()).multiply(Rational.NEGONE);
+		
+		RationalMatrix ineqT = q2.	appendAfter(Q2).
+									appendAfter(new RationalMatrix(q2.getRowSize(), P2.getRowSize(), false));
+		
+		RationalMatrix ineqS = new RationalMatrix(P2.getRowSize(), n - P2.getRowSize(), false).
+									appendAfter(new RationalMatrix(P2.getRowSize(), P2.getRowSize(), true));
+		
 		RationalMatrix ineqN = new RationalMatrix(A_.getColumnSize(), a_.getColumnSize(), false).
 									appendAfter(new RationalMatrix(A_.getColumnSize(), A_.getColumnSize(), true)).
 									appendAfter(new RationalMatrix(A_.getColumnSize(), P2.getRowSize(), false));
@@ -446,7 +455,6 @@ public class ReducedForm
 		String output = "";
 		output += "Temporary_problem\n";
 		output += "H-representation\n";
-//		output += "nonnegative\n";
 		output += "begin\n"; 
 		output += m + " " + n + " rational\n";
 		output += constraints;
