@@ -15,6 +15,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import lse.math.games.LogUtils;
+import lse.math.games.LogUtils.LogLevel;
 import lse.math.games.Rational;
 import lse.math.games.tree.ExtensiveForm;
 import lse.math.games.tree.Iset;
@@ -43,7 +45,8 @@ public class ExtensiveFormXMLReader
 	
 	public ExtensiveForm load(Document xml)
 	{
-		//this.xml = xml;
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Reading the XML >>> ~~~~~");
+		
 		tree = new ExtensiveForm();
 		
 		nodes = new HashMap<String,Node>();
@@ -52,7 +55,8 @@ public class ExtensiveFormXMLReader
 		moves = new HashMap<String,Move>();
 		players = new HashMap<String,Player>();			
 		
-		writeXmlFile(xml, "test.xml");
+//		Just for testing purpose	
+//		writeXmlFile(xml, "test.xml");
 		
 		org.w3c.dom.Node root = xml.getFirstChild();
 		if ("extensiveForm".equals(xml.getFirstChild().getNodeName())) {			
@@ -64,15 +68,18 @@ public class ExtensiveFormXMLReader
 				} else if ("outcome".equals(child.getNodeName())) {
 					processOutcome(child, null);
 				} else {
-					log.warning("Ignoring unknown element:\r\n" + child);
+//					log.warning("Ignoring unknown element:\r\n" + child);
 				}
 			}
 			hookupAndVerifyMoves();
 		} else {
 			log.warning("Unregonized root elem" + xml.getFirstChild());
 		}
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Reading the XML ~~~~~\n");
 		
-		log.info(tree.toString());		
+		/* Just for testing purpose */
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Extensive form >>> ~~~~~\n%s~~~~~ <<< Extensive form ~~~~~\n", tree.toString());
+		
 		return tree;
 	}	
 	
@@ -91,7 +98,7 @@ public class ExtensiveFormXMLReader
 	        xformer.transform(source, result);
 	        
 	        String xmlString = result.getWriter().toString();
-	        log.info(xmlString);
+	        LogUtils.logi(LogLevel.DETAILED, xmlString);
 	        
 	    } catch (TransformerConfigurationException e) {
 	    } catch (TransformerException e) {
@@ -314,7 +321,7 @@ public class ExtensiveFormXMLReader
 			} else if ("outcome".equals(child.getNodeName())) {
 				processOutcome(child, node);
 			} else {
-				log.warning("Ignoring unknown element:\r\n" + child);
+//				log.warning("Ignoring unknown element:\r\n" + child);
 			}
 		}
 	}
@@ -362,7 +369,7 @@ public class ExtensiveFormXMLReader
 				}
 				outcome.setPay(player, payoff);
 			} else {
-				log.warning("Ignoring unknown element:\r\n" + child);
+//				log.warning("Ignoring unknown element:\r\n" + child);
 			}
 		}
 		log.fine("outcome: " + wrapNode + ", by move: " + (wrapNode.reachedby != null ? wrapNode.reachedby.uid() : "null"));
@@ -401,4 +408,5 @@ public class ExtensiveFormXMLReader
 		}
 		return value;
 	}
+	
 }

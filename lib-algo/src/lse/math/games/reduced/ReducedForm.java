@@ -7,16 +7,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
+import lse.math.games.LogUtils;
+import lse.math.games.LogUtils.LogLevel;
 import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
 import lse.math.games.tree.ExtensiveForm;
@@ -28,8 +27,8 @@ import lse.math.games.tree.SequenceForm.ImperfectRecallException;
 
 public class ReducedForm
 {
-	/*// variables //*/
-	private static final Logger log = Logger.getLogger(ReducedForm.class.getName());
+	/*// variables //*/	
+	private String lrsPath = ".";
 	
 	/* > **** FOR COMPATIBILITY **** > */
 	/* Pointer to the head of the player list */
@@ -145,14 +144,15 @@ public class ReducedForm
 	
 	public ReducedForm(SequenceForm seq)
 	{
-		logi("Making reduced form...");
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Reduced form >>> ~~~~~");
+		LogUtils.logi(LogLevel.DEBUG, "Making reduced form...");
 		
 		/* Make deep copy from sequence form */
 		/* Temporary dictionary about players */
 		Map<Player, Player> oldNewPlayers = new HashMap<Player, Player>();
 		
 		/* Clone players */
-		logi("Clone players...");
+		LogUtils.logi(LogLevel.DEBUG, "Clone players...");
 		firstPlayer = new Player(seq.getFirstPlayer().toString());
 		oldNewPlayers.put(seq.getFirstPlayer(), firstPlayer);
 		
@@ -163,8 +163,8 @@ public class ReducedForm
 		}
 		
 		/* Clone pay adjust */
-		logi("Clone pay adjust...");
-		logi("Orig pay adjust: %s", seq.getPayAdjust());
+		LogUtils.logi(LogLevel.DEBUG, "Clone pay adjust...");
+		LogUtils.logi(LogLevel.DEBUG, "Orig pay adjust: %s", seq.getPayAdjust());
 		payAdjust = new HashMap<Player,Rational>();
 		for (Player pl : seq.getPayAdjust().keySet()) {
 			/* Look up our player from the dictionary
@@ -176,8 +176,8 @@ public class ReducedForm
 		Map<Move, Move> oldNewMoves = new HashMap<Move, Move>();
 		
 		/* Clone sequences map */
-		logi("Clone seqsmap...");
-		logi("Orig seqs map: %s", seq.getSeqsMap());
+		LogUtils.logi(LogLevel.DEBUG, "Clone seqsmap...");
+		LogUtils.logi(LogLevel.DEBUG, "Orig seqs map: %s", seq.getSeqsMap());
 	    seqsMap = new HashMap<Player,List<Move>>();
 		/*  Fill in seqsMap */
     	for (Player orig : seq.getSeqsMap().keySet()) {
@@ -207,8 +207,8 @@ public class ReducedForm
     	Map<Iset,Iset> oldNewIsets = new HashMap<Iset,Iset>();
 		
 		/* Clone information sets */
-    	logi("Clone isetsMap...");
-    	logi("Orig isetsMap: %s", seq.getIsetsMap());
+    	LogUtils.logi(LogLevel.DEBUG, "Clone isetsMap...");
+    	LogUtils.logi(LogLevel.DEBUG, "Orig isetsMap: %s", seq.getIsetsMap());
 		isetsMap = new HashMap<Player,List<Iset>>();
 		for (Player orig : seq.getIsetsMap().keySet()) {
 			Player pl = oldNewPlayers.get(orig);
@@ -219,7 +219,7 @@ public class ReducedForm
 				iset.setName(origIset.name());
 				
 				if (origIset.moves != null) {
-					logi("\tOrig iset: %s %s", origIset, origIset.moves);
+					LogUtils.logi(LogLevel.DEBUG, "\tOrig iset: %s %s", origIset, origIset.moves);
 					
 					iset.moves = new Move[origIset.moves.length];
 					for (int i = 0; i < origIset.moves.length; i++) {
@@ -241,8 +241,8 @@ public class ReducedForm
 		}
 		
 		/* Clone moves leading to information sets */
-		logi("Clone seqin...");
-		logi("Orig seqin: %s", seq.getSeqin());
+		LogUtils.logi(LogLevel.DEBUG, "Clone seqin...");
+		LogUtils.logi(LogLevel.DEBUG, "Orig seqin: %s", seq.getSeqin());
 		seqin = new HashMap<Iset,Move>();	    
 	    for (Iset origIset : seq.getSeqin().keySet()) {
 	    	Iset iset = oldNewIsets.get(origIset);
@@ -251,8 +251,8 @@ public class ReducedForm
 	    }
 		
 		/* Clone payoffs */
-	    logi("Clone payoffs...");
-	    logi("Orig payoffs: %s", seq.getPayoffs());
+	    LogUtils.logi(LogLevel.DEBUG, "Clone payoffs...");
+	    LogUtils.logi(LogLevel.DEBUG, "Orig payoffs: %s", seq.getPayoffs());
 		payoffs = new HashMap<Player,Rational[][]>();
 		for (Player orig : seq.getPayoffs().keySet()) {
 			Player pl = oldNewPlayers.get(orig);
@@ -275,8 +275,8 @@ public class ReducedForm
 		}
 		
 		/* Clone constraints */
-		logi("Clone constraintsMap...");
-		logi("Orig constraint map: %s", seq.getConstraintsMap());
+		LogUtils.logi(LogLevel.DEBUG, "Clone constraintsMap...");
+		LogUtils.logi(LogLevel.DEBUG, "Orig constraint map: %s", seq.getConstraintsMap());
 		constraintsMap = new HashMap<Player,Integer[][]>();
 		for (Player orig : seq.getConstraintsMap().keySet()) {
 			Player pl = oldNewPlayers.get(orig);
@@ -302,6 +302,8 @@ public class ReducedForm
 //	    printConstraintMatrices();
 	    	   	    
 	    makeReducedSystem();
+	    
+	    LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Reduced form ~~~~~\n");
 	}
 
 	void makeReducedSystem() {
@@ -348,17 +350,17 @@ public class ReducedForm
 		{
 			RationalMatrix t1 = E.copy();
 			t1 = t1.appendAfter(e);
-//			logi("t1 before:\n%s", t1.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "t1 before:\n%s", t1.toString());
 			t1.makeBasisForm();
-//			logi("t1 after:\n%s", t1.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "t1 after:\n%s", t1.toString());
 			RationalMatrix E_B = t1.getBasis();
 			RationalMatrix E_I0 = t1.getNonBasis();
 			RationalMatrix E_I = E_I0.getSubmatrix(0, 0, E_I0.getRowSize(), E_I0.getColumnSize()-1);
 			RationalMatrix e_  = E_I0.getSubmatrix(0, E_I0.getColumnSize()-1, E_I0.getRowSize(), E_I0.getColumnSize());
 
-//			logi("E_b:\n%s", E_B.toString());
-//			logi("E_i:\n%s", E_I.toString());
-//			logi("e_:\n%s", e_.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "E_b:\n%s", E_B.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "E_i:\n%s", E_I.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "e_:\n%s", e_.toString());
 			
 			RationalMatrix t2 = F.copy();
 			t2 = t2.appendAfter(f);
@@ -368,9 +370,9 @@ public class ReducedForm
 			RationalMatrix F_I = F_I0.getSubmatrix(0, 0, F_I0.getRowSize(), F_I0.getColumnSize()-1);
 			RationalMatrix f_  = F_I0.getSubmatrix(0, F_I0.getColumnSize()-1, F_I0.getRowSize(), F_I0.getColumnSize());
 			
-//			logi("F_b:\n%s", F_B.toString());
-//			logi("F_i:\n%s", F_I.toString());
-//			logi("f_:\n%s", f_.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "F_b:\n%s", F_B.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "F_i:\n%s", F_I.toString());
+//			LogUtils.logi(LOGLEVEL.DETAILED, "f_:\n%s", f_.toString());
 			
 			p = E_B.inverse().multiply(e_);
 			P = E_B.inverse().multiply(Rational.NEGONE).multiply(E_I);
@@ -447,14 +449,14 @@ public class ReducedForm
 				
 		for (int i = 0; i < d1.getRowSize(); i++) {
 			Integer l1 = Integer.valueOf(labels1.getElement(i, 0).toString());
-//			logi("X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
+//			LogUtils.logi(LOGLEVEL.DETAILED, "X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
 			
 			for (int j = 0; j < d2.getRowSize(); j++) {
 				Integer l2 = Integer.valueOf(labels2.getElement(j, 0).toString());
-//				logi("Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
+//				LogUtils.logi(LOGLEVEL.DETAILED, "Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
 				
 				if ( (l1|l2) == Integer.MAX_VALUE) {
-//					logi("EQUILIBRIUM at [X %s] and [Y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
+//					LogUtils.logi(LOGLEVEL.DETAILED, "EQUILIBRIUM at [X %s] and [Y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
 					
 					calculateEq(vertices1.getSubmatrix(i, 0, i+1, vertices1.getColumnSize() - Q2.getRowSize()),
 								vertices2.getSubmatrix(j, 0, j+1, vertices2.getColumnSize() - P2.getRowSize()));
@@ -462,12 +464,12 @@ public class ReducedForm
 			}
 		}
 		
-		logi("===================================================");
-		logi("||             EQUILIBRIUMS                      ||");
-		logi("===================================================");
+		LogUtils.logi(LogLevel.MINIMAL, "===================================================");
+		LogUtils.logi(LogLevel.MINIMAL, "||             EQUILIBRIUMS                      ||");
+		LogUtils.logi(LogLevel.MINIMAL, "===================================================");
 		
 		for (int i = 0; i < equilibriums.size(); i++) {
-			logi("(%d) x: %s && y: %s", i, equilibriums.get(i).x.transpose().rowtoString(0), equilibriums.get(i).y.transpose().rowtoString(0));
+			LogUtils.logi(LogLevel.MINIMAL, "(%d) x: %s && y: %s", i, equilibriums.get(i).x.transpose().rowtoString(0), equilibriums.get(i).y.transpose().rowtoString(0));
 		}
 	}
 	
@@ -494,7 +496,7 @@ public class ReducedForm
 	
 	private String makeHRepForLrs1() {
 		
-		logi("Make H representation for lrs1!");
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ 1st player: H representation for lrs >>> ~~~~~");
 		
 		int m = b_.getColumnSize() + p2.getRowSize() + B_.getRowSize() + Q2.getRowSize();
 		int n = b_.getRowSize() + B_.getRowSize() + Q2.getRowSize();
@@ -514,12 +516,16 @@ public class ReducedForm
 									appendAfter(new RationalMatrix(B_.getRowSize(), Q2.getRowSize(), false));
 
 		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
-		return makeHOutput(m, n, constraints);
+		
+		String ret = makeHOutput(m, n, constraints);
+		LogUtils.logi(LogLevel.DETAILED, "%s", ret);
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< 1st player: H representation for lrs ~~~~~\n");
+		return ret;
 	}
 
 	private String makeHRepForLrs2() {
 		
-		logi("Make H representation for lrs2!");
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ 2nd player: H representation for lrs >>> ~~~~~");
 		
 		int m = a_.getRowSize() + q2.getRowSize() + A_.getColumnSize() + P2.getRowSize();
 		int n = a_.getColumnSize() + A_.getColumnSize() + P2.getRowSize();
@@ -539,7 +545,11 @@ public class ReducedForm
 									appendAfter(new RationalMatrix(A_.getColumnSize(), P2.getRowSize(), false));
 		
 		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
-		return makeHOutput(m, n, constraints);
+		
+		String ret = makeHOutput(m, n, constraints);
+		LogUtils.logi(LogLevel.DETAILED, "%s", ret);
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< 2nd player: H representation for lrs ~~~~~\n");
+		return ret;
 	}
 	
 	private String makeHOutput(int m, int n, String constraints) {
@@ -554,23 +564,26 @@ public class ReducedForm
 		return output;		
 	}
 	
+	public void setLrsPath(String path) {
+		if (path.isEmpty() == false) {
+			lrsPath = path;
+		}
+	}
+	
 	private String runLrs(String input) {
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Output of the lrs binary >>> ~~~~~");
+
 		String output = "";
-		
-		logi("Create temp file for lrs");
-		logi("Dumping this:\n%s", input);
 		try {
 			BufferedWriter out = new BufferedWriter(new FileWriter("temp.ine"));
 			out.write(input);
 			out.close();
 		}
 		catch (IOException e) {
-			logi("Error while writing the temporary output file.");		
+			LogUtils.logi(LogLevel.DETAILED, "Error while writing the temporary output file.");		
 		}
-		
-		logi("Running lrs");
-		
-		ProcessBuilder pb = new ProcessBuilder("./lrs", "temp.ine");
+				
+		ProcessBuilder pb = new ProcessBuilder(lrsPath + "/lrs", "temp.ine");
 		Process p;
 		try {
 			p = pb.start();
@@ -582,10 +595,10 @@ public class ReducedForm
 
 			String line;
 			while ((line = br.readLine()) != null || p.exitValue() != 0) {
-			    output += line + "\n";
+			    output += "\t" + line + "\n";
 			}
 			
-			logi("Getting this:\n%s", output);
+			LogUtils.logi(LogLevel.DETAILED, "%s", output);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -598,12 +611,12 @@ public class ReducedForm
 			temp.delete();
 		}
 		
-		
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Output of the lrs binary ~~~~~\n");
 		return output;
 	}
 
 	private RationalMatrix makeVRepFromLrs(String output) {
-		
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Processing vertex representation from lrs >>> ~~~~~");
 		int firstIdx = 0, lastIdx = 0;
 		
 		String[] lines = output.split("\n");
@@ -637,7 +650,7 @@ public class ReducedForm
 					label &= ~(1 << l);
 				}
 				
-//				logi("\tSlack: %s = %s", Arrays.toString(items), Integer.toBinaryString(label));
+//				LogUtils.logi(LOGLEVEL.DETAILED, "\tSlack: %s = %s", Arrays.toString(items), Integer.toBinaryString(label));
 				
 				labels.add(label);
 				continue;
@@ -668,21 +681,25 @@ public class ReducedForm
 			}
 		}
 		
-		logi("Vertices: \n%s", vertices.toString());
-		logi("Labels: \n%s", labels.toString());
+		LogUtils.logi(LogLevel.SHORT, "Vertices: \n%s", vertices.toString());
+		String labelStr = "";
 		
 		RationalMatrix labelCol = new RationalMatrix(labels.size(), 1);
 		for (int i = 0; i < labels.size(); i++) {
 			labelCol.setElement(i, 0, new Rational(labels.get(i)));
+			labelStr += "\n\t" + Integer.toBinaryString(labels.get(i));
 		}
 		vertices = vertices.appendAfter(labelCol);
+		
+		LogUtils.logi(LogLevel.SHORT, "Labels: %s\n", labelStr);
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Processing vertex representation from lrs ~~~~~\n");
 		
 		return vertices;
 	}
 	
 	
 	void testRationalMatrices() {
-		logi("Test rational matrices...");
+		LogUtils.logi(LogLevel.DETAILED, "Test rational matrices...");
 		
 		Rational[][] other = {	{	Rational.valueOf(1.),
 									Rational.valueOf(0.),
@@ -695,14 +712,14 @@ public class ReducedForm
 									Rational.valueOf(-1.)} };
 		
 		RationalMatrix matrix = new RationalMatrix(other);
-		logi("\tORIG matrix:\n%s", matrix.toString());
+		LogUtils.logi(LogLevel.DETAILED, "\tORIG matrix:\n%s", matrix.toString());
 		matrix.invert();
-		logi("\tINVE matrix:\n%s", matrix.toString());
+		LogUtils.logi(LogLevel.DETAILED, "\tINVE matrix:\n%s", matrix.toString());
 		
 	}
 	
 	void printPayoffMatrices() {
-		logi("Payoff matrices:");
+		LogUtils.logi(LogLevel.DETAILED, "Payoff matrices:");
 		ColumnTextWriter colpp = new ColumnTextWriter();
 
 		for (Player pl = firstPlayer; pl != null; pl = pl.next) {
@@ -750,11 +767,11 @@ public class ReducedForm
 			colpp.endRow();
 		}
 		
-		logi(colpp);
+		LogUtils.logi(LogLevel.DETAILED, colpp);
 	}
 	
 	void printConstraintMatrices() {
-		logi("Constraint matrices:");
+		LogUtils.logi(LogLevel.DETAILED, "Constraint matrices:");
 		ColumnTextWriter colpp = new ColumnTextWriter();
 		
 		for (Player pl = firstPlayer; pl != null; pl = pl.next) {
@@ -803,44 +820,35 @@ public class ReducedForm
 			colpp.endRow();
 		}
 		
-		logi(colpp);
+		LogUtils.logi(LogLevel.DETAILED, colpp);
 	}
 
 	public void printOriginalSystem() {
-		logi("Original matrices:");
-		logi("A:\n%s", A.toString());
-		logi("B:\n%s", B.toString());
-		logi("E:\n%s", E.toString());
-		logi("F:\n%s", F.toString());
-		logi("e:\n%s", e.toString());
-		logi("f:\n%s", f.toString());
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Reduced form: ORIGINAL SYSTEM >>> ~~~~~");
+		LogUtils.logi(LogLevel.SHORT, "A:\n%s", A.toString());
+		LogUtils.logi(LogLevel.SHORT, "B:\n%s", B.toString());
+		LogUtils.logi(LogLevel.SHORT, "E:\n%s", E.toString());
+		LogUtils.logi(LogLevel.SHORT, "F:\n%s", F.toString());
+		LogUtils.logi(LogLevel.SHORT, "e:\n%s", e.toString());
+		LogUtils.logi(LogLevel.SHORT, "f:\n%s", f.toString());
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Reduced form: ORIGINAL SYSTEM ~~~~~\n");
 	}
 	
 	public void printReducedSystem() {
-		logi("Reduced matrices:");
-		logi("p:\n%s", p.toString());
-		logi("P:\n%s", P.toString());
-		logi("q:\n%s", q.toString());
-		logi("Q:\n%s", Q.toString());
-		logi("a_:\n%s", a_.toString());
-		logi("b_:\n%s", b_.toString());
-		logi("A_:\n%s", A_.toString());
-		logi("B_:\n%s", B_.toString());
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Reduced form: REDUCED SYSTEM >>> ~~~~~");
+		LogUtils.logi(LogLevel.SHORT, "p:\n%s", p.toString());
+		LogUtils.logi(LogLevel.SHORT, "P:\n%s", P.toString());
+		LogUtils.logi(LogLevel.SHORT, "q:\n%s", q.toString());
+		LogUtils.logi(LogLevel.SHORT, "Q:\n%s", Q.toString());
+		LogUtils.logi(LogLevel.SHORT, "a_:\n%s", a_.toString());
+		LogUtils.logi(LogLevel.SHORT, "b_:\n%s", b_.toString());
+		LogUtils.logi(LogLevel.SHORT, "A_:\n%s", A_.toString());
+		LogUtils.logi(LogLevel.SHORT, "B_:\n%s", B_.toString());
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Reduced form: REDUCED SYSTEM ~~~~~\n");
 	}
 	
 	/*// utils //*/
 	private static final String EMPTY = "\u00D8";
-	
-	private void logi(String format, Object... args) {
-		log.info(String.format(format, args));
-	}
-
-	private void logi(ColumnTextWriter colpp) {
-		StringWriter output = new StringWriter();
-		output.write(colpp.toString());
-		
-		log.info(String.format(output.toString()));
-	}
 	
     private int nseqs(Player pl) {    	
     	return seqsMap.get(pl).size();

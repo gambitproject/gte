@@ -4,15 +4,12 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
 
 public class RationalMatrix 
 {
-	private static final Logger log = Logger.getLogger(RationalMatrix.class.getName());
-	
 	private Rational[][] _matrix;
 	private int _row;
 	private int _column;
@@ -406,16 +403,5 @@ public class RationalMatrix
 		output.write(colpp.toString());
 		return output.toString();
 	}
-	
-	/*// utils //*/
-	private void logi(String format, Object... args) {
-		log.info(String.format(format, args));
-	}
-	
-	private void logi(ColumnTextWriter colpp) {
-		StringWriter output = new StringWriter();
-		output.write(colpp.toString());
-		
-		log.info(String.format(output.toString()));
-	}
+
 }

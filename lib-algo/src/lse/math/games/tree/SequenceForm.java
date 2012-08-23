@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import lse.math.games.LogUtils;
+import lse.math.games.LogUtils.LogLevel;
 import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
 import lse.math.games.lcp.LCP;
-import lse.math.games.reduced.ReducedForm;
 
 public class SequenceForm 
 {	
@@ -101,63 +102,66 @@ public class SequenceForm
 	public SequenceForm(ExtensiveForm tree, Long seed)
     	throws ImperfectRecallException
     {    	
-    	log.info("Making sequence form...");
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Sequence form >>> ~~~~~");
+    	LogUtils.logi(LogLevel.DEBUG, "Making sequence form...");
     	
     	_seed = seed;
     	
-    	log.info("\tSet players..");
+    	LogUtils.logi(LogLevel.DEBUG, "Set players..");
     	firstPlayer = tree.firstPlayer();
     	new String();
-		log.info(String.format("\t.. first player: %s", firstPlayer.toString()));
+		LogUtils.logi(LogLevel.DEBUG, String.format("\t.. first player: %s", firstPlayer.toString()));
     	
-		log.info("\tFill in seqsMap..");
+		LogUtils.logi(LogLevel.DEBUG, "Fill in seqsMap..");
     	seqsIdxMap.put(null, 0);
     	for (Player pl = firstPlayer; pl != null; pl = pl.next) {
 	    	List<Move> plMoves = new ArrayList<Move>();
 	    	plMoves.add(null);	    	
 	    	seqsMap.put(pl, plMoves);
-	    	log.info(String.format("\t.. add player: %s", pl.toString()));
+	    	LogUtils.logi(LogLevel.DEBUG, String.format("\t.. add player: %s", pl.toString()));
     	}  
     	
-    	log.info(String.format("\t.. add chance player"));
+    	LogUtils.logi(LogLevel.DEBUG, String.format("\t.. add chance player"));
     	List<Move> chanceMoves = new ArrayList<Move>();
     	chanceMoves.add(null);
     	seqsMap.put(Player.CHANCE, chanceMoves);
     	    	
-    	log.info(String.format("\tGen seq in"));
+    	LogUtils.logi(LogLevel.DEBUG, String.format("Gen seq in"));
     	genseqin(tree); // TODO: adjust max pay?
         allocsf();
         
-        log.info(String.format("\tSet pay adjust.."));
+        LogUtils.logi(LogLevel.DEBUG, String.format("Set pay adjust.."));
         payAdjust = getPayAdjust(tree);
         for (Player pl : payAdjust.keySet()) {
-        	log.info(String.format("\t.. player's (%s) payAdjust: %s", pl.toString(), payAdjust.get(pl).toString()));	
+        	LogUtils.logi(LogLevel.DEBUG, String.format("\t.. player's (%s) payAdjust: %s", pl.toString(), payAdjust.get(pl).toString()));	
         }
         
         // pre-process chance probs
         //behavtorealprob(Player.CHANCE);            
 
         /* sf payoff matrices                   */
-        log.info(String.format("\tSet payoff matrices.."));
+        LogUtils.logi(LogLevel.DEBUG, String.format("Set payoff matrices.."));
         for (Node u = tree.firstLeaf(); u != null; u = u.nextLeaf())
     	{        	
         	Map<Player,Move> udefseq = defseq.get(u);
-        	log.info(String.format("\t\tNode %s, Defseq: %s", u.toString(), udefseq.toString()));
+        	LogUtils.logi(LogLevel.DEBUG, String.format("\tNode %s, Defseq: %s", u.toString(), udefseq.toString()));
         	int row = seqsIdxMap.get(udefseq.get(firstPlayer));
         	int col = seqsIdxMap.get(udefseq.get(firstPlayer.next));
-        	log.info(String.format("\t\t.. row: %d, col: %d", row, col));
+        	LogUtils.logi(LogLevel.DEBUG, String.format("\t.. row: %d, col: %d", row, col));
             for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
                 Rational pay = u.outcome.pay(pl).add(payAdjust.get(pl));                
                 Rational prob = realprob(udefseq.get(Player.CHANCE)); // get probability of reaching this node even if both players trying to get here
-                log.info(String.format("\t\tPlayer: %s, [%d][%d] = pay: %s * prop: %s, (orig pay: %s)", pl.toString(), row, col, pay.toString(), prob.toString(), u.outcome.pay(pl).toString()));
+                LogUtils.logi(LogLevel.DEBUG, String.format("\tPlayer: %s, [%d][%d] = pay: %s * prop: %s, (orig pay: %s)", pl.toString(), row, col, pay.toString(), prob.toString(), u.outcome.pay(pl).toString()));
                 payoffs.get(pl)[row][col] = payoffs.get(pl)[row][col].add(prob.multiply(pay));
             }
     	}
         /* sf constraint matrices, sparse fill  */
-        log.info(String.format("\tSet constraint matrices.."));
+        LogUtils.logi(LogLevel.DEBUG, String.format("Set constraint matrices.."));
         for (Player pl = tree.firstPlayer(); pl != null; pl = pl.next) {
         	initConstraints(pl);
     	}
+        
+        LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Sequence form ~~~~~\n");
     }
     
     private void initConstraints(Player pl)
@@ -228,17 +232,17 @@ public class SequenceForm
         defseq.put(node, defseqMap);
 
         // update sequence triple, new only for move leading to  u
-        log.info(String.format("\tRec gen seq in.."));
+        LogUtils.logi(LogLevel.DEBUG, String.format("\tRec gen seq in.."));
         for (Player pl = firstPlayer; pl != null; pl = pl.next) {
-        	log.info(String.format("\tNode: %s, player: %s",  node.toString(), pl.toString()));
+        	LogUtils.logi(LogLevel.DEBUG, String.format("\tNode: %s, player: %s",  node.toString(), pl.toString()));
         	if (node.reachedby == null) {
-        		log.info(String.format("\t.. reached by null"));
+        		LogUtils.logi(LogLevel.DEBUG, String.format("\t.. reached by null"));
         		defseqMap.put(pl, null);
         	} else if (node.reachedby.iset().player() == pl) {
-        		log.info(String.format("\t.. reached by %s, iset %s", node.reachedby, node.reachedby.iset()));
+        		LogUtils.logi(LogLevel.DEBUG, String.format("\t.. reached by %s, iset %s", node.reachedby, node.reachedby.iset()));
         		defseqMap.put(pl, node.reachedby);
         	} else {
-        		log.info(String.format("\t.. reached by %s, parent node: %s", defseq.get(node.parent()).get(pl), node.parent()));
+        		LogUtils.logi(LogLevel.DEBUG, String.format("\t.. reached by %s, parent node: %s", defseq.get(node.parent()).get(pl), node.parent()));
         		defseqMap.put(pl, defseq.get(node.parent()).get(pl));
         	}
         }
@@ -313,12 +317,12 @@ public class SequenceForm
 	    }
     	
         for (Player pl = firstPlayer; pl != null; pl = pl.next) {                                     
-    	    log.info(String.format(
+    	    LogUtils.logi(LogLevel.DEBUG, String.format(
     	        "Player %s's maximum payoff is %s, normalize to -1.", pl.toString(), maxpay.get(pl).toString()));    	    
     	
-    	    log.info(String.format(".. ( %s + 1 ) * -1 =", maxpay.get(pl).toString()));
+    	    LogUtils.logi(LogLevel.DEBUG, String.format(".. ( %s + 1 ) * -1 =", maxpay.get(pl).toString()));
             maxpay.put(pl, (maxpay.get(pl).add(1)).negate());
-            log.info(String.format("\t=", maxpay.get(pl).toString()));
+            LogUtils.logi(LogLevel.DEBUG, String.format("\t=", maxpay.get(pl).toString()));
     	}
         return maxpay;
     }
@@ -593,7 +597,7 @@ public class SequenceForm
         Map<Move,Rational> moves2 = createMoveMap(probs2, firstPlayer.next);
         probs.put(firstPlayer.next, moves2);
         
-        //log.info("returning probs");
+        //LogUtils.logi(LogLevel.DEBUG, "returning probs");
         return probs;
     }
     
@@ -663,7 +667,7 @@ public class SequenceForm
     {
     	Map<Player,Rational> epayoffs = new HashMap<Player,Rational>();
     	recExpectedPayoffs(tree.root(), Rational.ONE, equilib, epayoffs);
-    	//log.info("returning payoffs");
+    	//LogUtils.logi(LogLevel.DEBUG, "returning payoffs");
     	return epayoffs;
     }
 
@@ -692,4 +696,5 @@ public class SequenceForm
 			}
 		}
 	}
+	
 }
