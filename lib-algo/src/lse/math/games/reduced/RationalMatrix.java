@@ -3,6 +3,8 @@ package lse.math.games.reduced;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import lse.math.games.Rational;
@@ -14,7 +16,7 @@ public class RationalMatrix
 	private int _row;
 	private int _column;
 	private int _basisSize;
-	private int _basisHead [];
+	private List<Integer> _basisHead;
 	
 	public RationalMatrix(int m, int n) {
 		this(m,n,false);
@@ -259,10 +261,14 @@ public class RationalMatrix
 		gaussJordanElimination();
 	}
 	
+	public List<Integer> getBasisHead() {
+		return _basisHead;
+	}
+	
 	public RationalMatrix getBasis() {
 		RationalMatrix B = new RationalMatrix(_basisSize, _basisSize);
 		for (int i = 0; i < _basisSize; i++) {
-			B.setColumn(i, this.getColumn(_basisHead[i]));
+			B.setColumn(i, this.getColumn(_basisHead.get(i)));
 		}
 		return B;
 	}
@@ -272,7 +278,7 @@ public class RationalMatrix
 		
 		Set<Integer> basisIdx = new HashSet<Integer>();
 		for (int i = 0; i < _basisSize; i++) {
-			basisIdx.add(_basisHead[i]);
+			basisIdx.add(_basisHead.get(i));
 		}
 		
 		for (int i = 0, j = 0; i < _column; i++) {
@@ -290,7 +296,7 @@ public class RationalMatrix
 //		logi("Making basis... from \n%s", this.toString());
 		
 		_basisSize = _column < _row ? _column : _row;
-		_basisHead = new int [ _basisSize ];
+		_basisHead = Arrays.asList(new Integer[_basisSize]);
 		int [] columnState = new int [ _column ];
 		
 		int size = 0;
@@ -317,7 +323,7 @@ public class RationalMatrix
 			
 			/* Choose current column into the basis */
 			columnState[k] = 1;
-			_basisHead[size] = k;
+			_basisHead.set(size, k);
 			/* Increase the size of the basis */
 			size++;
 			
@@ -326,7 +332,7 @@ public class RationalMatrix
 		
 		/* Transform to ones in pivot positions */
 		for (int k = 0; k < _row; k++ ) {
-			int pivot = _basisHead[k];
+			int pivot = _basisHead.get(k);
 			for (int j = 0; j < _column; j++ ) {
 				if (j != pivot) {
 					_matrix[k][j] = _matrix[k][j].divide(_matrix[k][pivot]);
@@ -355,14 +361,13 @@ public class RationalMatrix
 		output.write(colpp.toString());
 		return output.toString();
 	}
-	
-	
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(_basisHead);
+		result = prime * result
+				+ ((_basisHead == null) ? 0 : _basisHead.hashCode());
 		result = prime * result + _basisSize;
 		result = prime * result + _column;
 		result = prime * result + Arrays.hashCode(_matrix);
@@ -379,7 +384,10 @@ public class RationalMatrix
 		if (getClass() != obj.getClass())
 			return false;
 		RationalMatrix other = (RationalMatrix) obj;
-		if (!Arrays.equals(_basisHead, other._basisHead))
+		if (_basisHead == null) {
+			if (other._basisHead != null)
+				return false;
+		} else if (!_basisHead.equals(other._basisHead))
 			return false;
 		if (_basisSize != other._basisSize)
 			return false;

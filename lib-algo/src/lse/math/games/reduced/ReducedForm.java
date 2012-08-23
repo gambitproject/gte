@@ -7,8 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,8 +112,10 @@ public class ReducedForm
 	RationalMatrix F;
 	RationalMatrix e;
 	RationalMatrix f;
-	int _nSizeForPlayer1;
-	int _nSizeForPlayer2;
+	int nSizeForPlayer1;
+	int nSizeForPlayer2;
+	List<Integer> basisHeadT1;
+	List<Integer> basisHeadT2;
 	
 	/* REDUCED SYSTEM */
 	RationalMatrix p;
@@ -327,21 +331,21 @@ public class ReducedForm
 		f.setElement(0, 0, Rational.ONE);
 		
 		/* Nonterminals for Player1 */
-		_nSizeForPlayer1 = 0;
+		nSizeForPlayer1 = 0;
 		for (int i = 0; i < E.getColumnSize(); i++) {
 			for (int j = 0; j < E.getRowSize(); j++) {
 				if (E.getElement(j,  i).negate().isOne()) {
-					_nSizeForPlayer1++;
+					nSizeForPlayer1++;
 					break;
 				}
 			}			
 		}
 		
-		_nSizeForPlayer2 = 0;
+		nSizeForPlayer2 = 0;
 		for (int i = 0; i < F.getColumnSize(); i++) {
 			for (int j = 0; j < F.getRowSize(); j++) {
 				if (F.getElement(j,  i).negate().isOne()) {
-					_nSizeForPlayer2++;
+					nSizeForPlayer2++;
 					break;
 				}
 			}			
@@ -353,6 +357,8 @@ public class ReducedForm
 //			LogUtils.logi(LOGLEVEL.DETAILED, "t1 before:\n%s", t1.toString());
 			t1.makeBasisForm();
 //			LogUtils.logi(LOGLEVEL.DETAILED, "t1 after:\n%s", t1.toString());
+			basisHeadT1 = t1.getBasisHead();
+			
 			RationalMatrix E_B = t1.getBasis();
 			RationalMatrix E_I0 = t1.getNonBasis();
 			RationalMatrix E_I = E_I0.getSubmatrix(0, 0, E_I0.getRowSize(), E_I0.getColumnSize()-1);
@@ -365,6 +371,9 @@ public class ReducedForm
 			RationalMatrix t2 = F.copy();
 			t2 = t2.appendAfter(f);
 			t2.makeBasisForm();
+			
+			basisHeadT2 = t2.getBasisHead();
+			
 			RationalMatrix F_B = t2.getBasis();
 			RationalMatrix F_I0 = t2.getNonBasis();
 			RationalMatrix F_I = F_I0.getSubmatrix(0, 0, F_I0.getRowSize(), F_I0.getColumnSize()-1);
@@ -414,15 +423,15 @@ public class ReducedForm
 		}
 		
 		{
-			p1 = p.getSubmatrix(0, 0, _nSizeForPlayer1, p.getColumnSize());
-			p2 = p.getSubmatrix(_nSizeForPlayer1, 0, p.getRowSize(), p.getColumnSize());
-			P1 = P.getSubmatrix(0, 0, _nSizeForPlayer1, P.getColumnSize());
-			P2 = P.getSubmatrix(_nSizeForPlayer1, 0, P.getRowSize(), P.getColumnSize());
+			p1 = p.getSubmatrix(0, 0, nSizeForPlayer1, p.getColumnSize());
+			p2 = p.getSubmatrix(nSizeForPlayer1, 0, p.getRowSize(), p.getColumnSize());
+			P1 = P.getSubmatrix(0, 0, nSizeForPlayer1, P.getColumnSize());
+			P2 = P.getSubmatrix(nSizeForPlayer1, 0, P.getRowSize(), P.getColumnSize());
 			
-			q1 = q.getSubmatrix(0, 0, _nSizeForPlayer2, q.getColumnSize());
-			q2 = q.getSubmatrix(_nSizeForPlayer2, 0, q.getRowSize(), q.getColumnSize());
-			Q1 = Q.getSubmatrix(0, 0, _nSizeForPlayer2, Q.getColumnSize());
-			Q2 = Q.getSubmatrix(_nSizeForPlayer2, 0, Q.getRowSize(), Q.getColumnSize());
+			q1 = q.getSubmatrix(0, 0, nSizeForPlayer2, q.getColumnSize());
+			q2 = q.getSubmatrix(nSizeForPlayer2, 0, q.getRowSize(), q.getColumnSize());
+			Q1 = Q.getSubmatrix(0, 0, nSizeForPlayer2, Q.getColumnSize());
+			Q2 = Q.getSubmatrix(nSizeForPlayer2, 0, Q.getRowSize(), Q.getColumnSize());
 		}
 	}
 
@@ -442,21 +451,40 @@ public class ReducedForm
 			d2 = makeVRepFromLrs(output);
 		}
 		
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ Searching for completely labelled pairs >>> ~~~~~");
+		String xIString = "";
+		List<Move> xMoves = seqsMap.get(firstPlayer);
+		for (int i = 0; i < xMoves.size(); i++) {
+			if (basisHeadT1.contains(i) == false) {
+				xIString += " " + xMoves.get(i);
+			}
+		}
+		LogUtils.logi(LogLevel.DETAILED, "Independent x: " + xIString);
+		String yIString = "";
+		List<Move> yMoves = seqsMap.get(firstPlayer.next);
+		for (int i = 0; i < yMoves.size(); i++) {
+			if (basisHeadT2.contains(i) == false) {
+				yIString += " " + yMoves.get(i);
+			}
+		}
+		LogUtils.logi(LogLevel.DETAILED, "Independent y: " + yIString);
+		LogUtils.logi(LogLevel.DETAILED, "\n");
+		
 		RationalMatrix vertices1 = d1.getSubmatrix(0, 0, d1.getRowSize(), d1.getColumnSize()-1);
 		RationalMatrix labels1  = d1.getSubmatrix(0, d1.getColumnSize()-1, d1.getRowSize(), d1.getColumnSize());
 		RationalMatrix vertices2 = d2.getSubmatrix(0, 0, d2.getRowSize(), d2.getColumnSize()-1);
 		RationalMatrix labels2  = d2.getSubmatrix(0, d2.getColumnSize()-1, d2.getRowSize(), d2.getColumnSize());
 				
 		for (int i = 0; i < d1.getRowSize(); i++) {
-			Integer l1 = Integer.valueOf(labels1.getElement(i, 0).toString());
+			Integer l1 = Integer.parseInt(labels1.getElement(i, 0).toString());
 //			LogUtils.logi(LOGLEVEL.DETAILED, "X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
 			
 			for (int j = 0; j < d2.getRowSize(); j++) {
-				Integer l2 = Integer.valueOf(labels2.getElement(j, 0).toString());
+				Integer l2 = Integer.parseInt(labels2.getElement(j, 0).toString());
 //				LogUtils.logi(LOGLEVEL.DETAILED, "Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
 				
 				if ( (l1|l2) == Integer.MAX_VALUE) {
-//					LogUtils.logi(LOGLEVEL.DETAILED, "EQUILIBRIUM at [X %s] and [Y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
+					LogUtils.logi(LogLevel.DETAILED, "EQUILIBRIUM at [x %s] and [y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
 					
 					calculateEq(vertices1.getSubmatrix(i, 0, i+1, vertices1.getColumnSize() - Q2.getRowSize()),
 								vertices2.getSubmatrix(j, 0, j+1, vertices2.getColumnSize() - P2.getRowSize()));
@@ -464,10 +492,16 @@ public class ReducedForm
 			}
 		}
 		
+		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Searching for completely labelled pairs ~~~~~\n");
+		
 		LogUtils.logi(LogLevel.MINIMAL, "===================================================");
 		LogUtils.logi(LogLevel.MINIMAL, "||             EQUILIBRIUMS                      ||");
 		LogUtils.logi(LogLevel.MINIMAL, "===================================================");
 		
+		
+		LogUtils.logi(LogLevel.MINIMAL, "All x: %s", seqsMap.get(firstPlayer));
+		LogUtils.logi(LogLevel.MINIMAL, "All y: %s", seqsMap.get(firstPlayer.next));
+		LogUtils.logi(LogLevel.MINIMAL, "\n");
 		for (int i = 0; i < equilibriums.size(); i++) {
 			LogUtils.logi(LogLevel.MINIMAL, "(%d) x: %s && y: %s", i, equilibriums.get(i).x.transpose().rowtoString(0), equilibriums.get(i).y.transpose().rowtoString(0));
 		}
