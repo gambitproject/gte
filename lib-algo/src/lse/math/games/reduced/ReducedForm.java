@@ -435,6 +435,61 @@ public class ReducedForm
 		}
 	}
 
+	private void printIndependentVariables(LogLevel l, Player player) {
+		String iString = "";
+		List<Move> moves = seqsMap.get(player);
+		List<Integer> basisHead = (player == firstPlayer) ? basisHeadT1 : basisHeadT2; 
+		
+		for (int i = 0; i < moves.size(); i++) {
+			if (basisHead.contains(i) == false) {
+				iString += " " + moves.get(i);
+			}
+		}
+		LogUtils.logi(l, "Independent %s: %s", ((player == firstPlayer) ? "x" : "y"), iString );
+	}
+	
+	private void printAllVariables(LogLevel l, Player player) {
+		LogUtils.logi(l, "All %s: %s", ((player == firstPlayer) ? "x" : "y"), seqsMap.get(player));
+	}
+	
+	private void printAllVariableValues(LogLevel l, Player player, RationalMatrix valuesOfIndependents) {
+		ColumnTextWriter colpp = new ColumnTextWriter();
+		
+		List<Move> moves = seqsMap.get(player);
+ 		for (int i = 0; i < moves.size(); i++) {
+ 			Move m = moves.get(i);
+			colpp.writeCol((m==null)?"null":m.toString());
+		}
+		colpp.endRow();
+		
+		RationalMatrix allValues = calculateAllVariableValues(player, valuesOfIndependents);
+		for (int i = 0; i < allValues.getRowSize(); i++) {
+			colpp.writeCol(allValues.getElement(i, 0).toString());
+		}
+		
+		LogUtils.logi(l, "%s", colpp);
+	}
+	
+	private RationalMatrix calculateAllVariableValues(Player player, RationalMatrix valuesOfIndependents) {
+		
+		RationalMatrix ret;
+		if (player == firstPlayer) {
+			RationalMatrix xI = valuesOfIndependents.transpose();
+			RationalMatrix xN = p1.add(P1.multiply(xI));
+			RationalMatrix xD = p2.add(P2.multiply(xI));
+			RationalMatrix x = xN.appendBelow(xD).appendBelow(xI);
+			ret = x;
+		} else {
+			RationalMatrix yI = valuesOfIndependents.transpose();
+			RationalMatrix yN = q1.add(Q1.multiply(yI));
+			RationalMatrix yD = q2.add(Q2.multiply(yI)); 
+			RationalMatrix y = yN.appendBelow(yD).appendBelow(yI);
+			ret = y;
+		}
+		
+		return ret;
+	}
+
 	public void findEqLrs() {
 		
 		equilibriums = new LinkedList<ReducedForm.Equilibria>();
@@ -443,38 +498,21 @@ public class ReducedForm
 		{
 			String input = makeHRepForLrs1();
 			String output = runLrs(input);
-			d1 = makeVRepFromLrs(output);
+			d1 = makeVRepFromLrs(firstPlayer, output);
 		}
+		
 		{
 			String input = makeHRepForLrs2();
 			String output = runLrs(input);
-			d2 = makeVRepFromLrs(output);
+			d2 = makeVRepFromLrs(firstPlayer.next, output);
 		}
 		
 		LogUtils.logi(LogLevel.SHORT, "~~~~~ Searching for completely labelled pairs >>> ~~~~~");
-		String xIString = "";
-		List<Move> xMoves = seqsMap.get(firstPlayer);
-		for (int i = 0; i < xMoves.size(); i++) {
-			if (basisHeadT1.contains(i) == false) {
-				xIString += " " + xMoves.get(i);
-			}
-		}
-		LogUtils.logi(LogLevel.DETAILED, "Independent x: " + xIString);
-		String yIString = "";
-		List<Move> yMoves = seqsMap.get(firstPlayer.next);
-		for (int i = 0; i < yMoves.size(); i++) {
-			if (basisHeadT2.contains(i) == false) {
-				yIString += " " + yMoves.get(i);
-			}
-		}
-		LogUtils.logi(LogLevel.DETAILED, "Independent y: " + yIString);
-		LogUtils.logi(LogLevel.DETAILED, "\n");
-		
 		RationalMatrix vertices1 = d1.getSubmatrix(0, 0, d1.getRowSize(), d1.getColumnSize()-1);
 		RationalMatrix labels1  = d1.getSubmatrix(0, d1.getColumnSize()-1, d1.getRowSize(), d1.getColumnSize());
 		RationalMatrix vertices2 = d2.getSubmatrix(0, 0, d2.getRowSize(), d2.getColumnSize()-1);
 		RationalMatrix labels2  = d2.getSubmatrix(0, d2.getColumnSize()-1, d2.getRowSize(), d2.getColumnSize());
-				
+		
 		for (int i = 0; i < d1.getRowSize(); i++) {
 			Integer l1 = Integer.parseInt(labels1.getElement(i, 0).toString());
 //			LogUtils.logi(LOGLEVEL.DETAILED, "X #%d %s: %s", i, vertices1.rowtoString(i), Integer.toBinaryString(l1));
@@ -484,10 +522,16 @@ public class ReducedForm
 //				LogUtils.logi(LOGLEVEL.DETAILED, "Y #%d %s: %s", j, vertices2.rowtoString(j), Integer.toBinaryString(l2));
 				
 				if ( (l1|l2) == Integer.MAX_VALUE) {
-					LogUtils.logi(LogLevel.DETAILED, "EQUILIBRIUM at [x %s] and [y %s]", vertices1.rowtoString(i), vertices2.rowtoString(j));
 					
-					calculateEq(vertices1.getSubmatrix(i, 0, i+1, vertices1.getColumnSize() - Q2.getRowSize()),
-								vertices2.getSubmatrix(j, 0, j+1, vertices2.getColumnSize() - P2.getRowSize()));
+					RationalMatrix xRow = vertices1.getSubmatrix(i, 0, i+1, vertices1.getColumnSize() - Q2.getRowSize());
+					RationalMatrix yRow = vertices2.getSubmatrix(j, 0, j+1, vertices2.getColumnSize() - P2.getRowSize());
+					
+					LogUtils.logi(LogLevel.DETAILED, "EQUILIBRIUM at [x %s] and [y %s]", xRow.rowtoString(0), yRow.rowtoString(0));
+					printAllVariableValues(LogLevel.DETAILED, firstPlayer, xRow);
+					printAllVariableValues(LogLevel.DETAILED, firstPlayer.next, yRow);
+					LogUtils.logi(LogLevel.DETAILED, "\n");
+					
+					calculateEq(xRow, yRow);
 				}
 			}
 		}
@@ -499,26 +543,19 @@ public class ReducedForm
 		LogUtils.logi(LogLevel.MINIMAL, "===================================================");
 		
 		
-		LogUtils.logi(LogLevel.MINIMAL, "All x: %s", seqsMap.get(firstPlayer));
-		LogUtils.logi(LogLevel.MINIMAL, "All y: %s", seqsMap.get(firstPlayer.next));
-		LogUtils.logi(LogLevel.MINIMAL, "\n");
+		printAllVariables(LogLevel.MINIMAL, firstPlayer);
+		printAllVariables(LogLevel.MINIMAL, firstPlayer.next);
+		
+		LogUtils.logi(LogLevel.MINIMAL, "");
 		for (int i = 0; i < equilibriums.size(); i++) {
 			LogUtils.logi(LogLevel.MINIMAL, "(%d) x: %s && y: %s", i, equilibriums.get(i).x.transpose().rowtoString(0), equilibriums.get(i).y.transpose().rowtoString(0));
 		}
 	}
 	
 	private void calculateEq(RationalMatrix xI, RationalMatrix yI) {
-		
-		xI = xI.transpose();
-		yI = yI.transpose();
-		
-		RationalMatrix xN = p1.add(P1.multiply(xI));
-		RationalMatrix xD = p2.add(P2.multiply(xI));
-		RationalMatrix yN = q1.add(Q1.multiply(yI));
-		RationalMatrix yD = q2.add(Q2.multiply(yI)); 
 	
-		RationalMatrix x = xN.appendBelow(xD).appendBelow(xI);
-		RationalMatrix y = yN.appendBelow(yD).appendBelow(yI); 
+		RationalMatrix x = calculateAllVariableValues(firstPlayer, xI);
+		RationalMatrix y = calculateAllVariableValues(firstPlayer.next, yI); 
 		
 		Equilibria solution = new Equilibria(x,y);
 		if (equilibriums.contains(solution)) {
@@ -649,7 +686,7 @@ public class ReducedForm
 		return output;
 	}
 
-	private RationalMatrix makeVRepFromLrs(String output) {
+	private RationalMatrix makeVRepFromLrs(Player player, String output) {
 		LogUtils.logi(LogLevel.SHORT, "~~~~~ Processing vertex representation from lrs >>> ~~~~~");
 		int firstIdx = 0, lastIdx = 0;
 		
@@ -715,17 +752,27 @@ public class ReducedForm
 			}
 		}
 		
-		LogUtils.logi(LogLevel.SHORT, "Vertices: \n%s", vertices.toString());
-		String labelStr = "";
+		printIndependentVariables(LogLevel.SHORT, player);
+		LogUtils.logi(LogLevel.SHORT, "Vertices:");
+		
+		for (int i = 0; i < vertices.getRowSize(); i++) {
+			
+			LogUtils.logi(LogLevel.SHORT, "(%d) : %s, which means:", i, vertices.rowtoString(i));	
+			LogUtils.logi(LogLevel.SHORT, "Label: %s, all values:", Integer.toBinaryString(labels.get(i)));
+			
+			int dualVarSize = (player==firstPlayer) ? Q2.getRowSize() : P2.getRowSize();
+			RationalMatrix row = vertices.getSubmatrix(i, 0, i+1, vertices.getColumnSize() - dualVarSize);
+			printAllVariableValues(LogLevel.SHORT, player, row);
+			LogUtils.logi(LogLevel.SHORT, "");
+		}
+		
 		
 		RationalMatrix labelCol = new RationalMatrix(labels.size(), 1);
 		for (int i = 0; i < labels.size(); i++) {
 			labelCol.setElement(i, 0, new Rational(labels.get(i)));
-			labelStr += "\n\t" + Integer.toBinaryString(labels.get(i));
 		}
 		vertices = vertices.appendAfter(labelCol);
 		
-		LogUtils.logi(LogLevel.SHORT, "Labels: %s\n", labelStr);
 		LogUtils.logi(LogLevel.SHORT, "~~~~~ <<< Processing vertex representation from lrs ~~~~~\n");
 		
 		return vertices;
