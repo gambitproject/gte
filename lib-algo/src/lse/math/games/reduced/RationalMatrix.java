@@ -7,7 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import lse.math.games.LogUtils;
 import lse.math.games.Rational;
+import lse.math.games.LogUtils.LogLevel;
 import lse.math.games.io.ColumnTextWriter;
 
 public class RationalMatrix 
@@ -162,7 +164,7 @@ public class RationalMatrix
 		for (int i = 0; i < _row; i++) {
 			for (int j = 0; j < other._column; j++) {
 				
-				result._matrix[i][j] = Rational.ZERO;
+				result._matrix[i][j] = new Rational(Rational.ZERO);
 				
 				for (int k = 0; k < _column; k++) {
 					result._matrix[i][j] = result._matrix[i][j].add(_matrix[i][k].multiply(other._matrix[k][j]));
@@ -201,7 +203,7 @@ public class RationalMatrix
 	}
 	
 	public Rational getElement(int i, int j) {
-		return _matrix[i][j];
+		return new Rational(_matrix[i][j]);
 	}
 
 	public RationalMatrix getSubmatrix(int i0, int j0, int i1, int j1) {
@@ -327,7 +329,7 @@ public class RationalMatrix
 			/* Increase the size of the basis */
 			size++;
 			
-//			logi("\t%d. step: \n%s", k, this.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "\t%d. step: \n%s", k, this.toString());
 		}
 		
 		/* Transform to ones in pivot positions */
@@ -366,9 +368,6 @@ public class RationalMatrix
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((_basisHead == null) ? 0 : _basisHead.hashCode());
-		result = prime * result + _basisSize;
 		result = prime * result + _column;
 		result = prime * result + Arrays.hashCode(_matrix);
 		result = prime * result + _row;
@@ -384,17 +383,13 @@ public class RationalMatrix
 		if (getClass() != obj.getClass())
 			return false;
 		RationalMatrix other = (RationalMatrix) obj;
-		if (_basisHead == null) {
-			if (other._basisHead != null)
-				return false;
-		} else if (!_basisHead.equals(other._basisHead))
-			return false;
-		if (_basisSize != other._basisSize)
-			return false;
+
 		if (_column != other._column)
 			return false;
-		if (!Arrays.deepEquals(_matrix, other._matrix))
+
+		if (!Arrays.deepEquals(_matrix, other._matrix)) {
 			return false;
+		}
 		if (_row != other._row)
 			return false;
 		return true;

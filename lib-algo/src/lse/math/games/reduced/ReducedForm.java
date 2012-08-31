@@ -114,6 +114,8 @@ public class ReducedForm
 	RationalMatrix f;
 	int nSizeForPlayer1;
 	int nSizeForPlayer2;
+	List<Integer> nonTerminals1;
+	List<Integer> nonTerminals2;
 	List<Integer> basisHeadT1;
 	List<Integer> basisHeadT2;
 	
@@ -332,20 +334,24 @@ public class ReducedForm
 		
 		/* Nonterminals for Player1 */
 		nSizeForPlayer1 = 0;
+		nonTerminals1 = new LinkedList<Integer>();
 		for (int i = 0; i < E.getColumnSize(); i++) {
 			for (int j = 0; j < E.getRowSize(); j++) {
 				if (E.getElement(j,  i).negate().isOne()) {
 					nSizeForPlayer1++;
+					nonTerminals1.add(i);
 					break;
 				}
 			}			
 		}
 		
 		nSizeForPlayer2 = 0;
+		nonTerminals2 = new LinkedList<Integer>();
 		for (int i = 0; i < F.getColumnSize(); i++) {
 			for (int j = 0; j < F.getRowSize(); j++) {
 				if (F.getElement(j,  i).negate().isOne()) {
 					nSizeForPlayer2++;
+					nonTerminals2.add(i);
 					break;
 				}
 			}			
@@ -354,19 +360,21 @@ public class ReducedForm
 		{
 			RationalMatrix t1 = E.copy();
 			t1 = t1.appendAfter(e);
-//			LogUtils.logi(LOGLEVEL.DETAILED, "t1 before:\n%s", t1.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "t1 before:\n%s", t1.toString());
 			t1.makeBasisForm();
-//			LogUtils.logi(LOGLEVEL.DETAILED, "t1 after:\n%s", t1.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "t1 after:\n%s", t1.toString());
 			basisHeadT1 = t1.getBasisHead();
+//			LogUtils.logi(LogLevel.DEBUG, "Basishead:\n%s", basisHeadT1.toString());
 			
 			RationalMatrix E_B = t1.getBasis();
 			RationalMatrix E_I0 = t1.getNonBasis();
 			RationalMatrix E_I = E_I0.getSubmatrix(0, 0, E_I0.getRowSize(), E_I0.getColumnSize()-1);
 			RationalMatrix e_  = E_I0.getSubmatrix(0, E_I0.getColumnSize()-1, E_I0.getRowSize(), E_I0.getColumnSize());
 
-//			LogUtils.logi(LOGLEVEL.DETAILED, "E_b:\n%s", E_B.toString());
-//			LogUtils.logi(LOGLEVEL.DETAILED, "E_i:\n%s", E_I.toString());
-//			LogUtils.logi(LOGLEVEL.DETAILED, "e_:\n%s", e_.toString());
+			
+//			LogUtils.logi(LogLevel.DEBUG, "E_b:\n%s", E_B.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "E_i:\n%s", E_I.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "e_:\n%s", e_.toString());
 			
 			RationalMatrix t2 = F.copy();
 			t2 = t2.appendAfter(f);
@@ -378,10 +386,10 @@ public class ReducedForm
 			RationalMatrix F_I0 = t2.getNonBasis();
 			RationalMatrix F_I = F_I0.getSubmatrix(0, 0, F_I0.getRowSize(), F_I0.getColumnSize()-1);
 			RationalMatrix f_  = F_I0.getSubmatrix(0, F_I0.getColumnSize()-1, F_I0.getRowSize(), F_I0.getColumnSize());
-			
-//			LogUtils.logi(LOGLEVEL.DETAILED, "F_b:\n%s", F_B.toString());
-//			LogUtils.logi(LOGLEVEL.DETAILED, "F_i:\n%s", F_I.toString());
-//			LogUtils.logi(LOGLEVEL.DETAILED, "f_:\n%s", f_.toString());
+
+//			LogUtils.logi(LogLevel.DEBUG, "F_b:\n%s", F_B.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "F_i:\n%s", F_I.toString());
+//			LogUtils.logi(LogLevel.DEBUG, "f_:\n%s", f_.toString());
 			
 			p = E_B.inverse().multiply(e_);
 			P = E_B.inverse().multiply(Rational.NEGONE).multiply(E_I);
@@ -473,18 +481,66 @@ public class ReducedForm
 	private RationalMatrix calculateAllVariableValues(Player player, RationalMatrix valuesOfIndependents) {
 		
 		RationalMatrix ret;
+		List<Move> moves = seqsMap.get(player);
+		List<Integer> basisHead = (player == firstPlayer) ? basisHeadT1 : basisHeadT2;
+		List<Integer> nonTerminals = (player == firstPlayer) ? nonTerminals1 : nonTerminals2; 
+		
 		if (player == firstPlayer) {
 			RationalMatrix xI = valuesOfIndependents.transpose();
 			RationalMatrix xN = p1.add(P1.multiply(xI));
 			RationalMatrix xD = p2.add(P2.multiply(xI));
 			RationalMatrix x = xN.appendBelow(xD).appendBelow(xI);
-			ret = x;
+
+			RationalMatrix x_orig = new RationalMatrix(x.getRowSize(), x.getColumnSize());
+			
+			for (int k = 0, i =0, n = 0, d = 0; k < moves.size(); k++) {
+				if (nonTerminals.contains(k) == true) {
+					x_orig.setElement(k,  0, xN.getElement(n,  0));
+					n++;
+				} else if (basisHead.contains(k) == true) {
+					x_orig.setElement(k,  0, xD.getElement(d,  0));
+					d++;
+				} else {
+					x_orig.setElement(k,  0, xI.getElement(i,  0));
+					i++;
+				}
+			}
+			
+			if (E.multiply(x_orig).equals(e) == false) {
+				LogUtils.logi(LogLevel.MINIMAL, "!!! CHECK FAILED E*x=e !!!\n%s * \n%s = \n%s =?= \n%s",E,x_orig.transpose(),E.multiply(x_orig).transpose(),e.transpose());
+			} else {
+				LogUtils.logi(LogLevel.DEBUG, "CHECK OK E*x=e\n%s * \n%s = \n%s =?= \n%s",E,x_orig.transpose(),E.multiply(x_orig).transpose(),e.transpose());
+			}
+			
+			ret = x_orig;
 		} else {
 			RationalMatrix yI = valuesOfIndependents.transpose();
 			RationalMatrix yN = q1.add(Q1.multiply(yI));
 			RationalMatrix yD = q2.add(Q2.multiply(yI)); 
 			RationalMatrix y = yN.appendBelow(yD).appendBelow(yI);
-			ret = y;
+
+			RationalMatrix y_orig = new RationalMatrix(y.getRowSize(), y.getColumnSize());
+			
+			for (int k = 0, i =0, n = 0, d = 0; k < moves.size(); k++) {
+				if (nonTerminals.contains(k) == true) {
+					y_orig.setElement(k,  0, yN.getElement(n,  0));
+					n++;
+				} else if (basisHead.contains(k) == true) {
+					y_orig.setElement(k,  0, yD.getElement(d,  0));
+					d++;
+				} else {
+					y_orig.setElement(k,  0, yI.getElement(i,  0));
+					i++;
+				}
+			}
+			
+			if (F.multiply(y_orig).equals(f) == false) {
+				LogUtils.logi(LogLevel.MINIMAL, "!!! CHECK FAILED F*y=f !!!\n%s * \n%s = \n%s =?= \n%s",F,y_orig.transpose(),F.multiply(y_orig).transpose(),e.transpose());	
+			} else {
+				LogUtils.logi(LogLevel.DEBUG, "CHECK OK F*y=f\n%s * \n%s = \n%s =?= \n%s",F,y_orig.transpose(),F.multiply(y_orig).transpose(),f.transpose());
+			}
+			
+			ret = y_orig;
 		}
 		
 		return ret;
@@ -586,6 +642,11 @@ public class ReducedForm
 									appendAfter(new RationalMatrix(B_.getRowSize(), B_.getRowSize(), true)).
 									appendAfter(new RationalMatrix(B_.getRowSize(), Q2.getRowSize(), false));
 
+		LogUtils.logi(LogLevel.DETAILED, "S:\n%s", ineqS.toString());
+		LogUtils.logi(LogLevel.DETAILED, "T:\n%s", ineqT.toString());
+		LogUtils.logi(LogLevel.DETAILED, "M:\n%s", ineqM.toString());
+		LogUtils.logi(LogLevel.DETAILED, "N:\n%s", ineqN.toString());
+		
 		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
 		
 		String ret = makeHOutput(m, n, constraints);
@@ -614,6 +675,11 @@ public class ReducedForm
 		RationalMatrix ineqN = new RationalMatrix(A_.getColumnSize(), a_.getColumnSize(), false).
 									appendAfter(new RationalMatrix(A_.getColumnSize(), A_.getColumnSize(), true)).
 									appendAfter(new RationalMatrix(A_.getColumnSize(), P2.getRowSize(), false));
+
+		LogUtils.logi(LogLevel.DETAILED, "S:\n%s", ineqS.toString());
+		LogUtils.logi(LogLevel.DETAILED, "T:\n%s", ineqT.toString());
+		LogUtils.logi(LogLevel.DETAILED, "M:\n%s", ineqM.toString());
+		LogUtils.logi(LogLevel.DETAILED, "N:\n%s", ineqN.toString());
 		
 		constraints = ineqS.appendBelow(ineqT).appendBelow(ineqM).appendBelow(ineqN).toString();
 		
@@ -917,10 +983,14 @@ public class ReducedForm
 	
 	public void printReducedSystem() {
 		LogUtils.logi(LogLevel.SHORT, "~~~~~ Reduced form: REDUCED SYSTEM >>> ~~~~~");
-		LogUtils.logi(LogLevel.SHORT, "p:\n%s", p.toString());
-		LogUtils.logi(LogLevel.SHORT, "P:\n%s", P.toString());
-		LogUtils.logi(LogLevel.SHORT, "q:\n%s", q.toString());
-		LogUtils.logi(LogLevel.SHORT, "Q:\n%s", Q.toString());
+		LogUtils.logi(LogLevel.SHORT, "p1:\n%s", p1.toString());
+		LogUtils.logi(LogLevel.SHORT, "p2:\n%s", p2.toString());
+		LogUtils.logi(LogLevel.SHORT, "P1:\n%s", P1.toString());
+		LogUtils.logi(LogLevel.SHORT, "P2:\n%s", P2.toString());
+		LogUtils.logi(LogLevel.SHORT, "q1:\n%s", q1.toString());
+		LogUtils.logi(LogLevel.SHORT, "q2:\n%s", q2.toString());
+		LogUtils.logi(LogLevel.SHORT, "Q1:\n%s", Q1.toString());
+		LogUtils.logi(LogLevel.SHORT, "Q2:\n%s", Q2.toString());
 		LogUtils.logi(LogLevel.SHORT, "a_:\n%s", a_.toString());
 		LogUtils.logi(LogLevel.SHORT, "b_:\n%s", b_.toString());
 		LogUtils.logi(LogLevel.SHORT, "A_:\n%s", A_.toString());

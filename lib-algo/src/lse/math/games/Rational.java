@@ -29,8 +29,7 @@ public class Rational
 	
 	public Rational(Rational toCopy)
 	{
-		this.num = toCopy.num;
-		this.den = toCopy.den;
+		this(toCopy.num, toCopy.den);
 	}
 	
     /* reduces Na Da by gcd(Na,Da) */
@@ -224,7 +223,10 @@ public class Rational
         else if (positive(num) && (zero(other.num) || negative(other.num))) 
         	return 1;
 
-        Rational c = other.negate();            
+        BigInteger c1 = new BigInteger(other.num.toString());
+        BigInteger c2 = new BigInteger(other.den.toString());
+        Rational c = new Rational(c1,c2);
+        c = c.negate();
         c.addEq(this);
         return (c.isZero() ? 0 : (negative(c.num) ? -1 : 1));
     }
