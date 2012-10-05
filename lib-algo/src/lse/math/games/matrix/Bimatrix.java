@@ -1,5 +1,7 @@
 package lse.math.games.matrix;
 
+import java.util.LinkedList;
+
 import lse.math.games.Rational;
 import lse.math.games.io.ColumnTextWriter;
 
@@ -100,6 +102,93 @@ public class Bimatrix {
 		}
 		
 		return s;
+	}
+	
+	
+	public String printFormatHTML()
+	{
+		String s="";
+		s+=this.nrows() + " x " + this.ncols() +" Payoff player 1"+lineSeparator; 
+		
+		s+=lineSeparator;
+		s+=buildMatrixString(a);
+		
+		/*
+		for (int i=0;i<a.length;i++){
+			for (int j=0;j<a[i].length;j++){
+				s+=" "+a[i][j];
+			}
+			s+=lineSeparator;
+		}*/
+		
+		s+=lineSeparator;
+		s+=lineSeparator;
+		s+=this.ncols() + " x " + this.nrows() +" Payoff player 2"+lineSeparator;
+		s+=lineSeparator;
+		s+=buildMatrixString(b);
+		/*
+		for (int i=0;i<b.length;i++){
+			for (int j=0;j<b[i].length;j++){
+				s+=" "+b[i][j];
+			}
+			s+=lineSeparator;
+		}*/
+		s+=lineSeparator;
+		return s;
+	}
+	
+	
+	/**
+	 * Create a String from the array of payoffs
+	 *@param pm:Array - 2-dim Array of payoffs
+	 *@return String - an return seperated string with all payoffs.
+	 *@author Martin  
+	 */	
+	private String buildMatrixString(Rational[][] pm) 
+	{
+		
+		String delimeter=" ";
+		LinkedList<Integer>  maxLength = new LinkedList<Integer>(); 
+		int i=0;
+		int j=0;
+		
+		if (pm==null) 
+			return "";
+		if (pm[0]==null) 
+			return "";
+		
+		for (j=0;j<pm[0].length;j++){
+			int maxLen = 0;
+			for (i=0;i<pm.length;i++){
+				if (pm[i][j]!=null) {
+					if (pm[i][j].toString().length()>maxLen) {
+						maxLen=pm[i][j].toString().length();
+					}
+					
+				}
+			}
+			maxLength.add(Integer.valueOf(maxLen));
+		}
+		
+		String matrixString= "";
+		for (i=0;i<pm.length;i++){
+			for (j=0;j<pm[i].length;j++){
+				
+				for (int w=0;w<maxLength.get(j) - pm[i][j].toString().length();w++) {
+					matrixString += " ";
+				}
+				matrixString += pm[i][j].toString();;
+				if (j<pm[i].length-1){
+					matrixString +=delimeter;
+				}
+				
+			}
+			if (i<pm.length - 1) {
+				matrixString += lineSeparator;
+			}
+		}
+		return matrixString;
+	
 	}
 	
 }
