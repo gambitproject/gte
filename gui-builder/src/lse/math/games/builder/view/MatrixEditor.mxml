@@ -334,6 +334,12 @@
 				}
 			}
 			
+			/**
+			 * Converts a string delimetered by returns (rows) and a column delimeter into an array (pm)
+			 *@param inputString:String payoffss in string representation
+			 *@param pm:Array - source array 
+			 *@author Martin  
+			 */	
 			private function convertToMatrix(inputString:String,pm:Array):void {
 				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
 				var rows:Array = inputString.split("\n");
@@ -359,6 +365,14 @@
 				}
 			}
 			
+			
+			/**
+			 * Fills empty columns and rows with zeros. If (sym==true) this function creates a symmetric matrix and
+			 * and fills empty elements with zeros.
+			 *@param pm:Array - source array 
+			 *@param sym:Boolean - if true than add columns or rows until pm is a symmetric array.
+			 *@author Martin  
+			 */	
 			private function fillWithZeros(pm:Array,sym:Boolean):void{
 				var i:int=0;
 				var l:int=0;
@@ -401,6 +415,12 @@
 
 			}
 			
+			/**
+			 * Creates a negative array from pmFrom and copies it to pmTo
+			 *@param pmFrom:Array - source array 
+			 *@param pmTo:Array - destination array 
+			 *@author Martin  
+			 */	
 			private function makeNegative(pmFrom:Array,pmTo:Array):void {
 				for (var i:int=0;i<pmFrom.length;i++){
 					var columns:Array=new Array();
@@ -422,6 +442,14 @@
 				return int(Math.random() * max);
 			}
 			
+			/**
+			 * Generate random payoffs for array pmFrom and copy as negative numbers to array pmTo (copy==true) or create random
+			 * payoffs for array pmTo (copy==false)
+			 *@param pmFrom:Array - source array 
+			 *@param pmTo:Array - destination array (negative copy of pmFrom or random payoffs)
+			 *@param copy:Boolean - copy negativ array from pmFrom to pmTo (true) or create new random payoffs (false)   
+			 *@author Martin  
+			 */	
 			private function makeRandom(pmFrom:Array,pmTo:Array,copy:Boolean):void {
 				var pay2:Rational=null;
 				for (var i:int=0;i<pmFrom.length;i++){
@@ -440,6 +468,11 @@
 				}
 			}
 			
+			
+			/**
+			 * Generate random payoffs for player 1 and player 2 and aligns them
+			 *@author Martin  
+			 */	
 			private function generateRandomPayoffs():void
 			{
 				payoffMatrix1=new Array();
@@ -454,6 +487,13 @@
 				pl2PayMapStr=buildMatrixString(payoffMatrix2);
 			}
 			
+			
+			/**
+			 * Creates a transposed matrix from the array pmFrom and stores it to array pmTo
+			 *@param pmFrom:Array - source Array
+			 *@param pmTo:Array - destination array (transposed) 
+			 *@author Martin  
+			 */	
 			private function makeTranspo(pmFrom:Array,pmTo:Array):void {
 				
 				for (var j:int=0;j<pmFrom[0].length;j++){
@@ -465,6 +505,13 @@
 				}
 			}
 			
+			
+			/**
+			 * Create a String from the array of payoffs
+			 *@param pm:Array - 2-dim Array of payoffs
+			 *@return String - an return seperated string with all payoffs.
+			 *@author Martin  
+			 */	
 			private function buildMatrixString(pm:Array):String 
 			{
 				
@@ -508,6 +555,11 @@
 			
 			}
 			
+			/**
+			 * Align the matrix in columns and rows for player 1 and player 2
+			 *  
+			 *@author Martin  
+			 */	
 			private function onlyAlignStrategy():void 
 			{
 				payoffMatrix1=new Array();
@@ -523,6 +575,12 @@
 				
 			}
 			
+			
+			/**
+			 * Align the matrix in columns and rows for player 1 and player 2 and update the strategy names
+			 *  
+			 *@author Martin  
+			 */	
 			private function alignStrategy():void 
 			{
 				
@@ -569,19 +627,12 @@
 				
 			}
 
-			//Old function - only for DDLB of game types)
-			private function changeEvt(event:Event):void {
-				//var instyle:String =event.currentTarget.selectedItem.data;
-				if ((instyle=="ZG") || (instyle=="SG")) {
-					setP2editable(false);
-
-				} else {
-					setP2editable(true);
-				}
-				
-				alignStrategy();
-			}
 			
+			/**
+			 * Sets the current status of the editor depending on the radiobutton. Sets the member variable <instyle> and enables or disables the matrix of player 2
+			 *@param arg:String (ZG=ZeroSum Game,SG=Symetric Game, 2G=General Game)  
+			 *@author Martin  
+			 */	
 			private function changeEvtRadioButton(arg : String):void {
 				instyle=arg;
 				if ((instyle=="ZG") || (instyle=="SG")) {
@@ -595,6 +646,16 @@
 				
 			}
 			
+			
+			/**
+			 * Controls wether matrix of player 2 is editable and it changes the background color ot the textarea of the matrix
+			 * <ul>
+			 * <li> true: textarear of plaer 2 matrix is editable and background color is white
+			 * <li> true: textarear of plaer 2 matrix is NOT editable and background color is gray (#ccc)
+			 * </ul>
+			 *@param editable:Boolean 
+			 *@author Martin  
+			 */	
 			private function setP2editable(editable:Boolean):void {
 				if (editable==true){
 					p2editable=true;
@@ -607,6 +668,10 @@
 			
 			}
 			
+			/**
+			 * Event catches the return event to align the matrix of player 1 after a new row is inserted 
+			 *@author Martin  
+			 */	
 			private function keyPressedP1Payoff(event:KeyboardEvent):void{
 				
 				if ((instyle!="SG") && (event.keyCode==13)){
@@ -617,6 +682,10 @@
 				}
 			}
 			
+			/**
+			 * Event catches the return event to align the matrix of player 2 after a new row is inserted 
+			 *@author Martin  
+			 */	
 			private function keyPressedP2Payoff(event:KeyboardEvent):void{
 				
 				if ((instyle!="SG") && (event.keyCode==13)){
@@ -630,15 +699,7 @@
 			
 		]]>
 	</fx:Script>
-	<fx:Declarations>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
-		<!--
-		<fx:String>Zero-Sum Game</fx:String>
-		<fx:String>Symmetric Game</fx:String>
-		<fx:String>Seperate matrix for every player</fx:String>
-		-->
 
-	</fx:Declarations>
 	<fx:Style>
 		@font-face {
 			src:url("../../../../../../assets/fonts/COURBD.TTF");
@@ -657,19 +718,7 @@
 		</s:HGroup>
 		<s:HGroup width="100%" gap="0">
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-				<!--
-				<s:HGroup width="100%" verticalAlign="middle">
-					
-					<s:Label y="0" width="90" height="20" text="Type of game:" verticalAlign="middle"/>
-					<mx:ComboBox id="inputStyle" width="100%" change="changeEvt(event);dataChanged=true;" textAlign="left" >
-							<mx:ArrayCollection>
-								<fx:Object label="Zerosum game (A,-A)" data="ZG"/>
-								<fx:Object label="Symmetric game (A,AT)" data="SG"/>
-								<fx:Object label="General game (A,B)" data="2G"/>
-							</mx:ArrayCollection>
-					</mx:ComboBox>
-				</s:HGroup>
-				-->
+
 				<s:HGroup  width="100%" verticalAlign="middle">
 					<s:Label height="20" width="90" text="Strategy names: " verticalAlign="middle"/>
 					<s:TextInput id="pl1StratInput" width="100%" editable="true" widthInChars="22" text="{alpha1}" change="dataChanged=true;" />
