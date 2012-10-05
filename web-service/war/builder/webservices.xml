@@ -10,6 +10,7 @@
     <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
+<!--
   <Servlet Name="NativeServlet">
     <Active>1</Active>
     <Tooltip>NativeServlet</Tooltip>
@@ -19,7 +20,8 @@
     <BinaryWindows>test.bat</BinaryWindows>
     <BinaryLinux>test.sh</BinaryLinux>
     <MaxSeconds>600</MaxSeconds>
-  </Servlet>
+  </Servlet> 
+  -->
   
   <Servlet Name="Lrs Find All Eq">
     <Active>1</Active>
