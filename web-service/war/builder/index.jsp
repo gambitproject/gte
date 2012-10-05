@@ -8,7 +8,7 @@
 	<meta name="keywords" content="" />
 	
 	<script src="swfobject.js" type="text/javascript"></script>
-	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script type="text/javascript" src="js/jquery-1.8.2.js"></script>
 	<script type="text/javascript">
 	
 
