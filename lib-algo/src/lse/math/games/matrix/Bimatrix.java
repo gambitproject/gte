@@ -111,7 +111,7 @@ public class Bimatrix {
 		s+=this.nrows() + " x " + this.ncols() +" Payoff player 1"+lineSeparator; 
 		
 		s+=lineSeparator;
-		s+=buildMatrixString(a);
+		s+=buildMatrixString(buildString(a));
 		
 		/*
 		for (int i=0;i<a.length;i++){
@@ -123,9 +123,9 @@ public class Bimatrix {
 		
 		s+=lineSeparator;
 		s+=lineSeparator;
-		s+=this.ncols() + " x " + this.nrows() +" Payoff player 2"+lineSeparator;
+		s+=this.nrows() + " x " + this.ncols() +" Payoff player 2"+lineSeparator;
 		s+=lineSeparator;
-		s+=buildMatrixString(b);
+		s+=buildMatrixString(buildString(b));
 		/*
 		for (int i=0;i<b.length;i++){
 			for (int j=0;j<b[i].length;j++){
@@ -144,8 +144,51 @@ public class Bimatrix {
 	 *@return String - an return seperated string with all payoffs.
 	 *@author Martin  
 	 */	
-	private String buildMatrixString(Rational[][] pm) 
+	private String[][] buildString(Rational[][] pm) 
 	{
+		
+		if (pm==null) 
+			return null;
+		if (pm[0]==null) 
+			return null;
+		
+		String[][] pm_out=new String[pm.length+1][pm[0].length+1];
+		
+		for (int i=0;i<pm_out[0].length;i++) {
+			if (i==0) {
+				pm_out[0][0]=new String("");
+			} else {
+				pm_out[0][i]=new String(this.colNames[i-1]);	
+			}
+		}
+		
+		for (int i=0;i<pm_out.length;i++) {
+			if (i==0) {
+				pm_out[0][0]=new String("");
+			} else {
+				pm_out[i][0]=new String(this.rowNames[i-1]);	
+			}
+		}
+		
+		for (int i=1;i<pm_out.length;i++) {
+			for (int j=1;j<pm_out[i].length;j++) {
+				pm_out[i][j]=pm[i-1][j-1].toString();
+			}
+		}
+		
+		return pm_out;
+	}	
+	
+	
+	/**
+	 * Create a String from the array of payoffs
+	 *@param pm:Array - 2-dim Array of payoffs
+	 *@return String - an return seperated string with all payoffs.
+	 *@author Martin  
+	 */	
+	private String buildMatrixString(String[][] pm) 
+	{
+		
 		
 		String delimeter=" ";
 		LinkedList<Integer>  maxLength = new LinkedList<Integer>(); 
@@ -161,12 +204,13 @@ public class Bimatrix {
 			int maxLen = 0;
 			for (i=0;i<pm.length;i++){
 				if (pm[i][j]!=null) {
-					if (pm[i][j].toString().length()>maxLen) {
-						maxLen=pm[i][j].toString().length();
+					if (pm[i][j].length()>maxLen) {
+						maxLen=pm[i][j].length();
 					}
 					
 				}
 			}
+			
 			maxLength.add(Integer.valueOf(maxLen));
 		}
 		
@@ -174,10 +218,10 @@ public class Bimatrix {
 		for (i=0;i<pm.length;i++){
 			for (j=0;j<pm[i].length;j++){
 				
-				for (int w=0;w<maxLength.get(j) - pm[i][j].toString().length();w++) {
+				for (int w=0;w<maxLength.get(j) - pm[i][j].length();w++) {
 					matrixString += " ";
 				}
-				matrixString += pm[i][j].toString();;
+				matrixString += pm[i][j];
 				if (j<pm[i].length-1){
 					matrixString +=delimeter;
 				}
@@ -191,4 +235,5 @@ public class Bimatrix {
 	
 	}
 	
+
 }
