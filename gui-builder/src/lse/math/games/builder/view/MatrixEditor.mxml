@@ -232,7 +232,9 @@
 			private function saveChanges():void 
 			{
 				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
+				alignStrategy();
 				updateAlphabets();
+				
 				
 				var firstPl:Player = _matrix.firstPlayer;
 				_matrix.clearMatrix();

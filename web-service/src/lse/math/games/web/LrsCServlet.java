@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Vector;
 
 import java.util.logging.Level;
@@ -189,7 +190,7 @@ public class LrsCServlet extends AbstractRESTServlet
 							response.getWriter().println("From C Algo:");
 							response.getWriter().println(consoleOutput);
 							response.getWriter().println("");
-							response.getWriter().println("EE = Extreme Equilibrium, EP = Expected Payoff");
+							response.getWriter().println("EE = Extreme Equilibrium, EP = Expected Payoffs");
 							response.getWriter().println("");
 							response.getWriter().println("Rational:");
 							response.getWriter().println(formatOutput(processOutput(consoleOutput,true)));
@@ -398,6 +399,106 @@ public class LrsCServlet extends AbstractRESTServlet
 			if (start) {
 				if ((lines[i]!=null) && (lines[i].length()>=1)) {
 					eq++;
+					LinkedList<String> lp1=new LinkedList<String>();
+					LinkedList<String> lp2=new LinkedList<String>();
+					while ((lines[i]!=null) && (lines[i].length()>=1)) {
+						String d1[] = lines[i].split("\\s+");
+						if (d1[0].trim().equals("1")) {
+							lp1.add(lines[i]);
+							
+						}
+						if (d1[0].trim().equals("2")) {
+							lp2.add(lines[i]);
+							
+						}
+						i++;
+					}
+
+					if (lp1.size()>lp2.size()){
+						while (lp2.size()<lp1.size()) {
+							if (lp2.size()>0) {
+								String d1=lp2.get(lp2.size()-1);
+								
+								lp2.add(new String(d1));
+							} else {
+								lp2.add(new String(""));
+							}
+						}
+					}
+					if (lp1.size()<lp2.size()){
+						while (lp1.size()<lp2.size()) {
+							if (lp1.size()>0) {
+								String d1=lp1.get(lp1.size()-1);
+								
+								lp1.add(new String(d1));
+							} else {
+								lp1.add(new String(""));
+							}
+						}
+					}	
+					
+					for (int k1=0;k1<lp1.size();k1++) {
+						String p2[] = lp1.get(k1).split("\\s+");
+						String p1[] = lp2.get(k1).split("\\s+");
+						
+						
+						ret+="EE "+eq+" P1: ("+eq+") ";
+						
+						for (int j=1;j<p2.length-1;j++){
+							if (rational) {
+								ret+=p2[j]+" ";
+							}else {
+								ts=Double.toString((Math.round(Rational.valueOf(p2[j]).doubleValue() *100000.)/100000.));
+								if (ts.equals("0.0")) {
+									ts="0";
+								}
+								ret+=ts+" ";
+							}
+						}
+						
+						if (rational) {
+							ret+="EP= "+p1[p1.length-1]+" ";
+						} else {
+							ts=Double.toString((Math.round(Rational.valueOf(p1[p1.length-1]).doubleValue() *100000.)/100000.));
+							if (ts.equals("0.0")) {
+								ts="0";
+							}
+							ret+="EP= "+ts+" ";
+						}
+						
+						ret+="P2: ("+eq+") ";
+
+						for (int j=1;j<p1.length-1;j++){
+							if (rational) {
+								ret+=p1[j]+" ";
+							} else {
+								ts=Double.toString((Math.round(Rational.valueOf(p1[j]).doubleValue() *100000.)/100000.));
+								if (ts.equals("0.0")) {
+									ts="0";
+								}
+								ret+=ts+" ";
+							}
+						}
+						
+						if (rational) {
+							ret+="EP= "+p2[p2.length-1]+System.getProperty("line.separator") ;
+						} else {
+							ts=Double.toString((Math.round(Rational.valueOf(p2[p2.length-1]).doubleValue() *100000.)/100000.));
+							if (ts.equals("0.0")) {
+								ts="0";
+							}
+							ret+="EP= "+ts +System.getProperty("line.separator") ;
+						}
+						if (k1>0) {
+							eq++;
+						}
+					}
+					
+				}
+				
+				/*
+				if ((lines[i]!=null) && (lines[i].length()>=1)) {
+					eq++;
 					String p1[] = lines[i].split("\\s+");
 					i++;
 					String p2[] = lines[i].split("\\s+");
@@ -438,7 +539,7 @@ public class LrsCServlet extends AbstractRESTServlet
 						ts=Double.toString((Math.round(Rational.valueOf(p2[p2.length-1]).doubleValue() *100000.)/100000.));
 						ret+="EP= "+ts +System.getProperty("line.separator") ;
 					}
-				}
+				} */
 				
 			}
 			
