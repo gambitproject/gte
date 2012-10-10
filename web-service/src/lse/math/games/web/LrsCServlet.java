@@ -184,10 +184,13 @@ public class LrsCServlet extends AbstractRESTServlet
 					try {
 						this.writeResponseHeader(request, response);
 						if (game != null) {
-							response.getWriter().println("NormalForm " + game.nrows() + " " + game.ncols());
-							response.getWriter().println(game.printFormat());
+							response.getWriter().println("Sequenzform: ");
+							response.getWriter().println(game.printFormatHTML());
 							response.getWriter().println("From C Algo:");
 							response.getWriter().println(consoleOutput);
+							response.getWriter().println("");
+							response.getWriter().println("EE = Extreme Equilibrium, EP = Expected Payoff");
+							response.getWriter().println("");
 							response.getWriter().println("Rational:");
 							response.getWriter().println(formatOutput(processOutput(consoleOutput,true)));
 							response.getWriter().println("Decimal:");
@@ -383,6 +386,7 @@ public class LrsCServlet extends AbstractRESTServlet
 	
 	private String processOutput(String s,Boolean rational){
 		String lines[] = s.split("\\r?\\n");
+		String ts="";
 		Boolean start=false;
 		int eq=0;
 		String ret="";
@@ -398,20 +402,23 @@ public class LrsCServlet extends AbstractRESTServlet
 					i++;
 					String p2[] = lines[i].split("\\s+");
 					
-					ret+="E "+eq+" P1: ("+eq+") ";
+					ret+="EE "+eq+" P1: ("+eq+") ";
 					
 					for (int j=1;j<p2.length-1;j++){
 						if (rational) {
 							ret+=p2[j]+" ";
 						}else {
-							ret+=Rational.valueOf(p2[j]).doubleValue()+" ";
+							ts=Double.toString((Math.round(Rational.valueOf(p2[j]).doubleValue() *100000.)/100000.));
+									
+							ret+=ts+" ";
 						}
 					}
 					
 					if (rational) {
 						ret+="EP= "+p1[p1.length-1]+" ";
 					} else {
-						ret+="EP= "+Rational.valueOf(p1[p1.length-1]).doubleValue()+" ";
+						ts=Double.toString((Math.round(Rational.valueOf(p1[p1.length-1]).doubleValue() *100000.)/100000.));
+						ret+="EP= "+ts+" ";
 					}
 					
 					ret+="P2: ("+eq+") ";
@@ -420,14 +427,16 @@ public class LrsCServlet extends AbstractRESTServlet
 						if (rational) {
 							ret+=p1[j]+" ";
 						} else {
-							ret+=Rational.valueOf(p1[j]).doubleValue()+" ";
+							ts=Double.toString((Math.round(Rational.valueOf(p1[j]).doubleValue() *100000.)/100000.));
+							ret+=ts+" ";
 						}
 					}
 					
 					if (rational) {
 						ret+="EP= "+p2[p2.length-1]+System.getProperty("line.separator") ;
 					} else {
-						ret+="EP= "+Rational.valueOf(p2[p2.length-1]).doubleValue()+System.getProperty("line.separator") ;
+						ts=Double.toString((Math.round(Rational.valueOf(p2[p2.length-1]).doubleValue() *100000.)/100000.));
+						ret+="EP= "+ts +System.getProperty("line.separator") ;
 					}
 				}
 				
