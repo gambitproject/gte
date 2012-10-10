@@ -5,7 +5,7 @@
 			   xmlns:local="."
 			   title="Matrix editor"
 			   close="promptExit()"
-			   creationComplete="init()" >
+			   creationComplete="init()"  >
 	<fx:Script>
 		<![CDATA[
 			import flash.ui.Keyboard;
@@ -80,11 +80,16 @@
 				
 				populate(0);
 				populate(1);
-				onlyAlignStrategy()
+				onlyAlignStrategy();
+	
 				
 			}
 			
 			private function init():void {
+				this.mouseEnabled=true;
+				this.skin.mouseEnabled=true;
+				
+				
 				pl1PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP1Payoff);
 				pl2PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP2Payoff);
 				setP2editable(false);
@@ -708,18 +713,19 @@
 			fontFamily: myFontFamily;
 			advancedAntiAliasing: true;
 		}
+		
 	</fx:Style>
 
-	<s:VGroup width="819" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+	<s:VGroup width="819" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
 		<s:HGroup width="100%" >
 			<s:Label y="0" width="90" height="20" text="Type of game: " verticalAlign="middle"/>
 			<s:RadioButton groupName="rbg" id="rgb_ZG" label="Zerosum game (A,-A)"  selected="true" click="changeEvtRadioButton('ZG');dataChanged=true;" />
 			<s:RadioButton groupName="rbg" id="rgb_SG" label="Symmetric game (A,AT)" click="changeEvtRadioButton('SG');dataChanged=true;" />
-			<s:RadioButton groupName="rbg" id="rgb_2G" label="General game (A,B)"   click="changeEvtRadioButton('2G');dataChanged=true;" />
+			<s:RadioButton groupName="rbg" id="rgb_2G" label="General game (A,B)"    click="changeEvtRadioButton('2G');dataChanged=true;" />
 			<s:Button label="Random Payoffs" click="generateRandomPayoffs();" />
 		</s:HGroup>
-		<s:HGroup width="100%" gap="0">
-			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+		<s:HGroup width="100%" gap="0" >
+			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
 
 				<s:HGroup  width="100%" verticalAlign="middle">
 					<s:Label height="20" width="90" text="Strategy names: " verticalAlign="middle"/>
@@ -730,8 +736,10 @@
 				<s:TextArea id="pl1PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
 							text="{pl1PayMapStr}" change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;"/>
 				<s:HGroup width="100%" horizontalAlign="center">
-					<s:Button label="Reset" cornerRadius="0" click="populate(0);"/>
+					<s:Button label="Reset" cornerRadius="0" click="populate(0);alignStrategy();"/>
+					<s:Button label="Clear" cornerRadius="0" click="pl1PayMapStrBox.text='0';pl1PayMapStr='0';alignStrategy();"/>
 					<s:Button label="Align and Update" cornerRadius="0" click="alignStrategy();"/>
+					
 				</s:HGroup>
 			</s:VGroup>
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
@@ -747,7 +755,8 @@
 				<s:TextArea editable="{p2editable}" id="pl2PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
 							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 				<s:HGroup width="100%" horizontalAlign="center">
-					<s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);" />
+					<s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);alignStrategy();" />
+					<s:Button label="Clear" cornerRadius="0" click="pl2PayMapStrBox.text='0';pl2PayMapStr='0';alignStrategy();"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>
