@@ -441,6 +441,9 @@ public class LrsCServlet extends AbstractRESTServlet
 						String p2[] = lp1.get(k1).split("\\s+");
 						String p1[] = lp2.get(k1).split("\\s+");
 						
+						if (k1>0) {
+							eq++;
+						}
 						
 						ret+="EE "+eq+" P1: ("+eq+") ";
 						
@@ -489,9 +492,7 @@ public class LrsCServlet extends AbstractRESTServlet
 							}
 							ret+="EP= "+ts +System.getProperty("line.separator") ;
 						}
-						if (k1>0) {
-							eq++;
-						}
+
 					}
 					
 				}
