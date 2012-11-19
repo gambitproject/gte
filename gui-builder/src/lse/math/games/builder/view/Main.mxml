@@ -292,7 +292,7 @@
 			private function resetNewGUI():void{
 				setExtensiveStep(0);
 				resetNewGuiButtons();
-				
+				updateExpandStatus();
 			}
 
 			/**
@@ -574,8 +574,8 @@
 			 */
 			private function updateExpandStatus():void 
 			{
-				expanded = settings.getValue(SCodes.EXPANDED) as Boolean;
-				ExternalInterface.call("expand", expanded);
+				//expanded = settings.getValue(SCodes.EXPANDED) as Boolean;
+				ExternalInterface.call("expand", true);
 				updateLogLineDimensions();
 			}
 
@@ -666,7 +666,11 @@
 			private function tabChange(event:IndexChangedEvent):void
 			{				
 				//Set canvas
-				controller.canvas = event.target.selectedIndex == 0 ? canvas : canvasNF; 
+				if (event.target.selectedIndex == 0) {
+					controller.canvas =  canvas;
+				} else if (event.target.selectedIndex == 2) {
+					controller.canvas =  canvasNF;
+				}
 				
 				//Set list of algorithms
 				algos.source = event.target.selectedIndex == 0 ? xfalgos : nfalgos; 
@@ -676,9 +680,9 @@
 				if(event.target.selectedIndex == 0)	{
 					if(mouseScrollingEnabled) scrollbarEF.enableMouseScrolling();
 					else scrollbarEF.disableMouseScrolling();
-				} else if(event.target.selectedIndex == 1) {
+				} else if(event.target.selectedIndex == 2) {
 					if(mouseScrollingEnabled) scrollbarSF.enableMouseScrolling();
-					else scrollbarSF.disableMouseScrolling();
+							else scrollbarSF.disableMouseScrolling();
 				}
 			}
 			
@@ -791,8 +795,8 @@
 				
 				if(tab == "Extensive Form")
 					scrollbarEF.enableMouseScrolling();
-				else if(tab == "Strategic Form")
-					scrollbarSF.enableMouseScrolling();
+				else if(tab == "Matrix layout")
+				scrollbarSF.enableMouseScrolling();
 				
 				mouseScrollingEnabled = true;
 			}
@@ -805,8 +809,8 @@
 				
 				if(tab == "Extensive Form")
 					scrollbarEF.disableMouseScrolling();
-				else if(tab == "Strategic Form")
-					scrollbarSF.disableMouseScrolling();
+				else if(tab == "Matrix Layout")
+				scrollbarSF.disableMouseScrolling();
 				
 				mouseScrollingEnabled = false;
 			}
@@ -1162,6 +1166,7 @@
 		<OutputWindow id="intOutputWindow" xmlns="lse.math.games.builder.view.*" skinClass="lse.math.games.builder.view.OutputWindowSkin" />
 		
 		
+		
 		<mx:Sequence id="bounceEffect" repeatCount="1">
 			<mx:Move duration="2000" yBy="100" easingFunction="{Bounce.easeOut}"/>
 		</mx:Sequence>
@@ -1191,7 +1196,7 @@
 					   click="controller.redo()" />				
 			<mx:Spacer width="13"/>	
 			
-			
+			<mx:Spacer width="60"/>
 			<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}" enabled="{editMode==0}">
 				<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Add and delete tree node" click="setExtensiveStep(0);" />
 				<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Assign players to tree nodes" click="setExtensiveStep(1);" />	
@@ -1235,24 +1240,21 @@
 					   click="controller.zoomAdjust()" />				
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarSF.mouseScrollingEnabled ? 'ON' : 'OFF'} [Hold SpaceBar]" 
 					   toggle="true" selected="{mouseScrollingEnabled}" change="if(mouseScrollingEnabled) disableMouseScrolling(); else enableMouseScrolling()" />
+			
 			<mx:Button id="toggleDecimalLayoutButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/rational.png')" toolTip="Decimal Layout {decimalLayout ? 'ON' : 'OFF'}" 
 					   toggle="true" selected="{decimalLayout}" change="decimalLayout = event.target.selected;toggleDecimalLayout();"  overIcon="@Embed(source='../../../../../../assets/icons/decimal.png')"/>
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" 
 					   click="showSettings()"/>		
 
 		</s:HGroup>
-		<s:Button id="expandButton" right="{expanded ? 3 : 0}" top="4" height="24" styleName="myButton" chromeColor="#d6d6d6" 
-				  label="{expanded ? 'Contract' : 'Expand'}"
-				  click="switchExpandStatus()"
-				  add="updateExpandStatus()" />		
-
+	
 		<!-- TABS -->
 		<s:BorderContainer top="30" bottom="18" left="0" right="{leaves.visible ? 185 : 0}" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
 			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" 
 							 change="tabChange(event)">
 				<s:NavigatorContent label="Extensive Form">
 					
-					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="middle" clipAndEnableScrolling="true" enabled="{editMode==0}">
+					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="middle" clipAndEnableScrolling="true" enabled="{editMode==0}">
 						<s:HGroup  enabled="{eStep0}" verticalAlign="middle" gap="-1" >
 							<!-- Tree Step-->
 							<mx:Button id="ngTreeAdd" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/add.png')"  
@@ -1349,21 +1351,56 @@
 				</s:NavigatorContent>
 				
 				<s:NavigatorContent label="Strategic Form">
+					
+					<s:VGroup left="120" horizontalAlign="center"  width="100%" >
+						<MatrixEditor id="matrixEditor" xmlns="lse.math.games.builder.view.*" />	
+					</s:VGroup>
+					
+					
+					<!--
 					<MouseScroller id="scrollbarSF" width="100%" height="100%">
 						<s:Group id="viewportNF" width="100%" height="100%">
 							<Canvas id="canvasNF" width="100%" height="100%" painter="{matrixPainter}" />
 						</s:Group>
 					</MouseScroller>
+					-->
 						
-					<s:Label id="infoNF" top="5" right="{scrollbarSF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
-					<s:VGroup top="5" left="120" horizontalAlign="center" >
+<!--					<s:Label id="infoNF" top="5" right="{scrollbarSF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
+-->					
+					<s:VGroup top="5" left="5" horizontalAlign="center" >
 						<s:Label  styleName="mxLabels" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
 								 visible="{editMode!=1}"/>
 						<s:Button   styleName="mxLabels" label="Click to edit" 
 								  visible="{editMode!=1}" click="changeEditMode(1);"/>
 					</s:VGroup>							
 					
-					<s:HGroup gap="-1" left="280" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
+					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
+						<mx:Spacer width="23" />
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/table_edit.png')" toolTip="Edit matrixes"
+								   click="showMatrixEditor()" visible="{editMode==1}"/>
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/image.png')" toolTip="Open Test Editor"
+								   click="showTestEditor()" visible="{editMode==1}"/>
+						
+					</s:HGroup>
+				</s:NavigatorContent>		
+		
+				<s:NavigatorContent label="Matrix Layout">
+						
+					<MouseScroller id="scrollbarSF" width="100%" height="100%">
+						<s:Group id="viewportNF" width="100%" height="100%">
+							<Canvas id="canvasNF" width="100%" height="100%" painter="{matrixPainter}" />
+						</s:Group>
+					</MouseScroller>
+					
+					
+					<s:Label id="infoNF" top="5" right="{scrollbarSF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
+					
+					<s:VGroup top="5" left="5" horizontalAlign="center" >
+						<s:Label  styleName="mxLabels" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
+								  visible="{editMode!=1}"/>
+					</s:VGroup>							
+					
+					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isStrategicReduced = (event.target.selectedIndex == 0);">
 							<mx:dataProvider>					
 								<mx:ArrayCollection>
@@ -1382,10 +1419,10 @@
 						
 					</s:HGroup>
 				</s:NavigatorContent>		
-		
 				
-
+			
 			</mx:TabNavigator>
+			
 		</s:BorderContainer>
 		
 		<!-- SEQUENCE TABLE -->

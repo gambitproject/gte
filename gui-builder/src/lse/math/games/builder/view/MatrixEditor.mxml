@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:local="."
-			   title="Matrix editor"
-			   close="promptExit()"
 			   creationComplete="init()"  >
 	<fx:Script>
 		<![CDATA[
+			
+			
+			//title="Matrix editor"
+			//close="promptExit()"
 			import flash.ui.Keyboard;
 			
 			import lse.math.games.builder.model.Outcome;
@@ -87,7 +89,7 @@
 			
 			private function init():void {
 				this.mouseEnabled=true;
-				this.skin.mouseEnabled=true;
+//1				this.skin.mouseEnabled=true;
 				
 				
 				pl1PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP1Payoff);
@@ -767,4 +769,4 @@
 		
 	</s:VGroup>
 	
-</s:TitleWindow>
+</s:VGroup>
