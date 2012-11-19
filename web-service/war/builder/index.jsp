@@ -9,6 +9,9 @@
 	
 	<script src="swfobject.js" type="text/javascript"></script>
 	<script type="text/javascript" src="js/jquery-1.8.2.js"></script>
+	<script type="text/javascript" src="js/jquery.bpopup-0.7.0.min.js"></script>
+	
+	
 	<script type="text/javascript">
 	
 
@@ -124,14 +127,16 @@
 			outputWindow.resizeTo(500,desiredHeight); 
 		}
 			
+		
+		
 		//Expands / Contracts the gui if setting is true / false
 		function expand(setting)
 		{
 			if(setting) //Expand
 			{
 				//Hide title and credits
-				document.getElementById("titleContainer").style.display = "none";
-				document.getElementById("creditsContainer").style.display = "none";
+				//document.getElementById("titleContainer").style.display = "";
+				//document.getElementById("creditsContainer").style.display = "none";
 				
 				//Remove borders
 				document.getElementById("GTEContainer").style.padding = "";
@@ -172,7 +177,43 @@
 							+ 'Do you really want to quit?'; 
 			  return message;
 		   }
-		}		
+		}	
+		
+		
+		 ;(function($) {
+
+	         // DOM Ready
+	        $(function() {
+
+	            // Binding a click event
+	            // From jQuery v.1.7.0 use .on() instead of .bind()
+	            $('#creditPopup').bind('click', function(e) {
+
+	                // Prevents the default action to be triggered. 
+	                e.preventDefault();
+
+	                // Triggering bPopup when click event is fired
+	                $('#creditsContainer').bPopup({modalClose: true});
+
+	            });
+
+	            $('#creditClose').bind('click', function(e) {
+
+	                // Prevents the default action to be triggered. 
+	                e.preventDefault();
+
+	                // Triggering bPopup when click event is fired
+	                $('#creditsContainer').bPopup().close();
+	            });
+
+
+	        });
+
+	    })(jQuery);
+	    
+
+		
+		
 	</script>
 	<style type="text/css">
 		html, body { height:100%; background-color: #303030;}		
@@ -181,14 +222,18 @@
 	</style>
 </head>
 <body onload="javascript:prepareVars();">
-	<div id="titleContainer" style="text-align: left; width: 85%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
+	<div id="titleContainer" style="text-align: left; width: 100%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
 		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
 			<h3 style="display: inline; font-family: Helvetica;">Game Theory Explorer <span style="color: #ffd700">&#946;</span></h3><br/>
 			<em style="font-size: 13px; font-family: Helvetica; color: #a0a0a0;">Build, explore and solve extensive form games.</em>
 		</div>
+		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px; float: right;">
+		<em id="creditPopup" style="font-size: 13px; font-family: Helvetica; color: #a0a0a0; text-decoration:underline;cursor:pointer;">Credits and Feedback</em>
+		</div>
 	</div>
-	<div id="GTEContainer" style="position: relative; text-align: left; width: 85%; margin: auto; background-color: #B7BABC;  padding: 2px 5px 5px 5px; border: 1px solid #808080;">
+	<!--   <div id="GTEContainer" style="position: relative; text-align: left; width: 85%; margin: auto; background-color: #B7BABC;  padding: 2px 5px 5px 5px; border: 1px solid #808080;"> -->
+    <div id="GTEContainer" style="position: relative; text-align: left; width: 100%; height: 100%; margin: auto; background-color: #B7BABC; border: 0px;">	
 		<!-- <div style="background-color: #e0e0e0; border: #808080 solid 1px; font-size: 12px; padding: 3px 5px 3px 5px; font-family: Helvetica; font-weight: bold;">Build</div> -->
 			<div id="flashContainer" style="height: 100%; position: absolute; top: 0px; left: 0px;" >			
 				<p>
@@ -231,12 +276,24 @@
 			</div>
 	</div>
 
-	<div id="creditsContainer" style="font-size: 10px; font-family: Helvetica; text-align: left; width: 85%; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
+ 
+
+    <div id="creditsContainer" style="display:none; font-size: 10px; font-family: Helvetica; text-align: left; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030; width:400px;height:200px;">
+		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
+		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
+			<h3 style="display: inline; font-family: Helvetica;">Game Theory Explorer <span style="color: #ffd700">&#946;</span></h3><br/>
+			<em style="font-size: 13px; font-family: Helvetica; color: #a0a0a0;">Build, explore and solve extensive form games.</em>
+		</div>
+		<br/>
 		<div>
 		<div style="display: inline-block; margin-bottom: 5px;">Last modified: yyyy-MM-dd hh:mm GMT</div><br/>
-		<!--  Copyright 2010 <span style="color: #ffffff;">Mark Egesdal</span><br/> -->
-		Developed by <span style="color: #ffffff;">Mark Egesdal, Alfonso Gómez-Jordana and Martin Prause</span><br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.
+		Developed by <span style="color: #ffffff;">Mark Egesdal, Alfonso Gomez-Jordana and Martin Prause</span><br/>Lemke algorithm and Sequence Form implementations adapted from the work of Bernhard von Stengel.<br/><br/>Lrs algorithm implementation adapted from the work of David Avis.  Lrs enumeration adapted from the work of Rahul Savani.<br/>Most icons courtesy of the Silk Icon Set created by Mark James.
 		</div>
-	</div> 
+		<br/>
+		<em id="creditClose" style="font-size: 13px; font-family: Helvetica; color: #a0a0a0; text-decoration:underline;cursor:pointer;margin:auto">Close</em>
+
+	</div>
+
+
 </body>
 </html>
