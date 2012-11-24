@@ -20,7 +20,6 @@
 			import lse.math.games.builder.presenter.Presenter;
 			import lse.math.games.builder.viewmodel.AutoLabeller;
 			
-			
 			import mx.controls.Alert;
 			import mx.managers.PopUpManager;
 			import mx.utils.StringUtil;
@@ -42,6 +41,8 @@
 			
 			private var payoffMatrix1:Array;
 			private var payoffMatrix2:Array;
+			private var payoffMatrix3:Array;
+			
 			private var maxColumns:int;
 			
 			[Bindable]
@@ -62,7 +63,19 @@
 			private var p2editable:Boolean=false;
 			
 			[Bindable]
+			private var p1editable:Boolean=true;
+
+			[Bindable]
+			private var dimensions1:String="";
+			
+			[Bindable]
+			private var dimensions2:String="";
+			
+			[Bindable]
 			private var p2cbg:uint=0xffffff;
+			
+			[Bindable]
+			private var p1cbg:uint=0xffffff;
 			
 			private var glbSettings:UserSettings = UserSettings.instance;
 			private var dataChanged:Boolean = false;
@@ -87,7 +100,7 @@
 				
 			}
 			
-			private function init():void {
+			public function init():void {
 				this.mouseEnabled=true;
 //1				this.skin.mouseEnabled=true;
 				
@@ -107,10 +120,27 @@
 			public function setMode(isZero:Boolean):void {
 				if (!isZero) {
 					instyle="2G";
-					p2editable=true;
+					setP2editable(true);
 				}
 			}
 			
+			
+			public function setEditable(isEditable:Boolean):void{
+				
+				if (isEditable) {
+					if (instyle=="2G") {
+						setP2editable(true);
+					} else {
+						setP2editable(false);
+					}
+					setP1editable(true);
+					
+				} else {
+					setP2editable(false);
+					setP1editable(false);
+				}
+				
+			}
 			
 			//Populates the matrix payoffs and strategies of player number 'plIdx' (starting in 0)
 			//onto the graphical components
@@ -236,7 +266,7 @@
 			}
 			
 			// Save the changes into the new matrix
-			private function saveChanges():void 
+			public function saveChanges():void 
 			{
 				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
 				alignStrategy();
@@ -316,6 +346,7 @@
 					}
 				}
 				
+				/*Ü
 				//invalidate display
 				if(_controller != null)
 					_controller.invalidate(false, true, true); 
@@ -323,12 +354,13 @@
 					log.add(Log.ERROR_HIDDEN, "No controller defined ", "Settings");
 				
 				exit();
+				*/
 			}
 			
 			//Close the window
 			private function exit():void
 			{
-				PopUpManager.removePopUp(this);
+				//PopUpManager.removePopUp(this);
 			}
 			
 			private function trim( s:String ):String
@@ -471,6 +503,12 @@
 						
 						if (instyle=="ZG")					
 							pay2=pay2.negate();
+						
+						if (instyle=="2G"){
+							if (randomInt(2)==0){
+								pay2=pay2.negate();
+							}
+						}
 						columns.push(pay2.toString());	
 					}
 					pmTo.push(columns)
@@ -482,18 +520,60 @@
 			 * Generate random payoffs for player 1 and player 2 and aligns them
 			 *@author Martin  
 			 */	
-			private function generateRandomPayoffs():void
+			public function generateRandomPayoffs():void
 			{
 				payoffMatrix1=new Array();
 				payoffMatrix2=new Array();
+				payoffMatrix3=new Array();
 				
-				convertToMatrix(pl1PayMapStr,payoffMatrix1);
-				fillWithZeros(payoffMatrix1,false);
-				makeRandom(payoffMatrix1,payoffMatrix2,false);
-				payoffMatrix1=new Array();
-				makeRandom(payoffMatrix2,payoffMatrix1,true);
-				pl1PayMapStr=buildMatrixString(payoffMatrix1);
-				pl2PayMapStr=buildMatrixString(payoffMatrix2);
+				
+				if (instyle=="SG") {	
+					convertToMatrix(pl1PayMapStr,payoffMatrix1);
+					fillWithZeros(payoffMatrix1,true);
+					payoffMatrix2=new Array();
+					makeRandom(payoffMatrix1,payoffMatrix2,false);
+					
+					payoffMatrix1=payoffMatrix2;
+					pl1PayMapStr=buildMatrixString(payoffMatrix1);
+					
+					payoffMatrix2=new Array();
+					makeTranspo(payoffMatrix1,payoffMatrix2);
+					pl2PayMapStr=buildMatrixString(payoffMatrix2);
+				} else if (instyle=="ZG") {
+					
+					convertToMatrix(pl1PayMapStr,payoffMatrix1);
+					fillWithZeros(payoffMatrix1,true);
+					payoffMatrix2=new Array();
+					makeRandom(payoffMatrix1,payoffMatrix2,false);
+					
+					payoffMatrix1=payoffMatrix2;
+										
+					payoffMatrix2=new Array();
+					makeRandom(payoffMatrix1,payoffMatrix2,true);
+					
+					pl1PayMapStr=buildMatrixString(payoffMatrix2);
+					pl2PayMapStr=buildMatrixString(payoffMatrix1);
+					
+				} else if (instyle=="2G") {
+					
+					convertToMatrix(pl1PayMapStr,payoffMatrix1);
+					fillWithZeros(payoffMatrix1,false);
+					payoffMatrix2=new Array();
+					makeRandom(payoffMatrix1,payoffMatrix2,false);
+					
+					payoffMatrix1=payoffMatrix2;
+					pl1PayMapStr=buildMatrixString(payoffMatrix1);
+					
+					payoffMatrix2=new Array();
+					convertToMatrix(pl2PayMapStr,payoffMatrix2);
+					fillWithZeros(payoffMatrix2,false);
+					payoffMatrix3=new Array();
+					makeRandom(payoffMatrix2,payoffMatrix3,false);
+					
+					payoffMatrix2=payoffMatrix3;
+					pl2PayMapStr=buildMatrixString(payoffMatrix2);
+					
+				}
 			}
 			
 			
@@ -632,17 +712,102 @@
 				}else {
 					pl2NumStr =0;
 				}
+				
+				
+				dimensions1=payoffMatrix1.length.toString();
+				if (payoffMatrix1.length>0) {
+					dimensions1=dimensions1+" "+payoffMatrix1[0].length.toString();
+				}
+					
+				dimensions2=payoffMatrix2.length.toString();
+				if (payoffMatrix2.length>0) {
+					dimensions2=dimensions2+" "+payoffMatrix2[0].length.toString();
+				}
+				
 				updateAlphabets()
 				
 			}
+			
+			private function createEmptyArrayString(dim:String,player:int):void {
+				
+				var xdim:int=-1;
+				var ydim:int=-1;
+				var pm:Array=new Array();
+				
+				
+				var dims:Array = dim.split(" ");
+				for (var m:int=0;m<dims.length;m++) {
+					dims[m]=trim(dims[m]);
+					if ((dims[m]!=null) && (dims[m].length>0)) {
+						var test:Boolean = isNaN( Number( dims[m] ) );
+						if (!test) {
+							if (xdim==-1) {
+								xdim = int( dims[m]);
+							} else if (ydim==-1) {
+								ydim = int( dims[m]);
+							} 
+						}
+					}
+				}
+				if ((xdim!=-1) && (ydim!=-1)) {
+					for (var j:int=0;j<ydim;j++){
+						var columns:Array=new Array();
+						for (var i:int=0;i<xdim;i++){
+							columns.push("0");
+						}
+						pm.push(columns);
+					}
+				}
+				
+				if (player==1) {
+					payoffMatrix1=new Array();
+					convertToMatrix(pl1PayMapStr,payoffMatrix1);
+							
+					for (var i:int=0;i<xdim;i++){
+						for (var j:int=0;j<ydim;j++){
+							if (payoffMatrix1.length>0) {
+								if (i<payoffMatrix1.length) {
+									if (j<payoffMatrix1[i].length) {
+										pm[i][j]=payoffMatrix1[i][j];
+									}
+								}
+							}
+						}
+					
+					}
+					
+					pl1PayMapStr=buildMatrixString(pm);
+				} else if (player==2) {
+					payoffMatrix2=new Array();
+					convertToMatrix(pl2PayMapStr,payoffMatrix2);
+					
+					for (var i:int=0;i<xdim;i++){
+						for (var j:int=0;j<ydim;j++){
+							if (payoffMatrix2.length>0) {
+								if (i<payoffMatrix2.length) {
+									if (j<payoffMatrix2[i].length) {
+										pm[i][j]=payoffMatrix2[i][j];
+									}
+								}
+							}
+						}
+						
+					}
+					
+					pl2PayMapStr=buildMatrixString(pm);
+				}
+				
+				alignStrategy();
+			}
 
+	
 			
 			/**
 			 * Sets the current status of the editor depending on the radiobutton. Sets the member variable <instyle> and enables or disables the matrix of player 2
 			 *@param arg:String (ZG=ZeroSum Game,SG=Symetric Game, 2G=General Game)  
 			 *@author Martin  
 			 */	
-			private function changeEvtRadioButton(arg : String):void {
+			public function changeEvtRadioButton(arg : String):void {
 				instyle=arg;
 				if ((instyle=="ZG") || (instyle=="SG")) {
 					setP2editable(false);
@@ -675,6 +840,18 @@
 					
 				}
 			
+			}
+			
+			private function setP1editable(editable:Boolean):void {
+				if (editable==true){
+					p1editable=true;
+					p1cbg=0xffffff;
+				} else {
+					p1editable=false;
+					p1cbg=0xcccccc;
+					
+				}
+				
 			}
 			
 			/**
@@ -719,28 +896,27 @@
 	</fx:Style>
 
 	<s:VGroup width="819" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
-		<s:HGroup width="100%" >
-			<s:Label y="0" width="90" height="20" text="Type of game: " verticalAlign="middle"/>
-			<s:RadioButton groupName="rbg" id="rgb_ZG" label="Zerosum game (A,-A)"  selected="true" click="changeEvtRadioButton('ZG');dataChanged=true;" />
-			<s:RadioButton groupName="rbg" id="rgb_SG" label="Symmetric game (A,AT)" click="changeEvtRadioButton('SG');dataChanged=true;" />
-			<s:RadioButton groupName="rbg" id="rgb_2G" label="General game (A,B)"    click="changeEvtRadioButton('2G');dataChanged=true;" />
-			<s:Button label="Random Payoffs" click="generateRandomPayoffs();" />
-		</s:HGroup>
+		
 		<s:HGroup width="100%" gap="0" >
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
 
 				<s:HGroup  width="100%" verticalAlign="middle">
 					<s:Label height="20" width="90" text="Strategy names: " verticalAlign="middle"/>
-					<s:TextInput id="pl1StratInput" width="100%" editable="true" widthInChars="22" text="{alpha1}" change="dataChanged=true;" />
+					<s:TextInput editable="{p1editable}" id="pl1StratInput" width="100%" widthInChars="22" text="{alpha1}" change="dataChanged=true;" contentBackgroundColor="{p1cbg}" />
+				</s:HGroup>
+				<s:HGroup  width="100%" verticalAlign="middle">
+					<s:Label height="20" width="90" text="Dimensions: " verticalAlign="middle"/>
+					<s:TextInput editable="{p1editable}" id="pl1Dimensions" width="100%" widthInChars="22" text="{dimensions1}" change="dataChanged=true;" contentBackgroundColor="{p1cbg}" />
+					<s:Button enabled="{p1editable}" label="Set" cornerRadius="0" click="createEmptyArrayString(pl1Dimensions.text,1);"/>					
 				</s:HGroup>	
 				<s:Label height="20" color="#2323E6" text="Player 1 PayOff Matrix"
 						 verticalAlign="middle"/>
-				<s:TextArea id="pl1PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
-							text="{pl1PayMapStr}" change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;"/>
+				<s:TextArea editable="{p1editable}" id="pl1PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
+							text="{pl1PayMapStr}" change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p1cbg}"/>
 				<s:HGroup width="100%" horizontalAlign="center">
-					<s:Button label="Reset" cornerRadius="0" click="populate(0);alignStrategy();"/>
-					<s:Button label="Clear" cornerRadius="0" click="pl1PayMapStrBox.text='0';pl1PayMapStr='0';alignStrategy();"/>
-					<s:Button label="Align and Update" cornerRadius="0" click="alignStrategy();"/>
+					<!-- <s:Button enabled="{p1editable}" label="Reset" cornerRadius="0" click="populate(0);alignStrategy();"/> -->
+					<s:Button enabled="{p1editable}" label="Clear" cornerRadius="0" click="pl1PayMapStrBox.text='0';pl1PayMapStr='0';alignStrategy();"/>
+					<s:Button enabled="{p1editable}" label="Align and Update" cornerRadius="0" click="alignStrategy();"/>
 					
 				</s:HGroup>
 			</s:VGroup>
@@ -750,25 +926,25 @@
 				-->
 				<s:HGroup width="100%" verticalAlign="middle">
 					<s:Label height="20" width="90" text="Strategy names:" verticalAlign="middle"/>
-					<s:TextInput editable="{p2editable}" width="100%" id="pl2StratInput" widthInChars="22" text="{alpha2}" change="dataChanged=true;" />
+					<s:TextInput editable="{p2editable}" width="100%" id="pl2StratInput" widthInChars="22" text="{alpha2}" change="dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 				</s:HGroup>
+				<s:HGroup  width="100%" verticalAlign="middle">
+					<s:Label height="20" width="90" text="Dimensions: " verticalAlign="middle"/>
+					<s:TextInput editable="{p2editable}" id="pl2Dimensions" width="100%" widthInChars="22" text="{dimensions2}" change="dataChanged=true;" contentBackgroundColor="{p2cbg}" />
+					<s:Button enabled="{p2editable}" label="Set" cornerRadius="0" click="createEmptyArrayString(pl2Dimensions.text,2);"/>					
+				</s:HGroup>	
 				<s:Label height="20" color="#2323E6" text="Player 2 PayOff Matrix"
 						 verticalAlign="middle"/>
 				<s:TextArea editable="{p2editable}" id="pl2PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
 							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 				<s:HGroup width="100%" horizontalAlign="center">
-					<s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);alignStrategy();" />
-					<s:Button label="Clear" cornerRadius="0" click="pl2PayMapStrBox.text='0';pl2PayMapStr='0';alignStrategy();"/>
+					<!-- <s:Button enabled="{p2editable}" label="Reset" cornerRadius="0" click="populate(1);alignStrategy();" /> -->
+					<s:Button enabled="{p2editable}" label="Clear" cornerRadius="0" click="pl2PayMapStrBox.text='0';pl2PayMapStr='0';alignStrategy();"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>
 
-		<s:HGroup width="100%" horizontalAlign="center" paddingBottom="5" paddingTop="5">
-			<s:Button label="Close and save changes" cornerRadius="0" width="200" click="saveChanges();"/>
-			<s:Button label="Close and discard changes" cornerRadius="0" width="200" click="exit()"/>
-		</s:HGroup>
-
-		
+				
 	</s:VGroup>
 	
 </s:VGroup>

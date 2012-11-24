@@ -78,5 +78,7 @@ package lse.math.games.builder.view
 				_painter.paint(_graphics, unscaledWidth, unscaledHeight);
 			}
 		}
+		
+		
 	}
 }
