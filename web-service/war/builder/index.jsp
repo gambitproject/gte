@@ -146,6 +146,7 @@
 				document.getElementById("GTEContainer").style.height = "100%"; 
 				document.getElementById("GTEContainer").style.width = "100%";
 			}
+			/*
 			else //Contract
 			{
 				document.getElementById("titleContainer").style.display = "";
@@ -156,7 +157,7 @@
 				
 				document.getElementById("GTEContainer").style.height = "580px";
 				document.getElementById("GTEContainer").style.width = "85%";
-			}
+			}*/
 		}
 		
 		//Returns the flashmovie
