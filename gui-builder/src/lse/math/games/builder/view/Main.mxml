@@ -486,7 +486,8 @@
 					setExtensiveStep(0);
 					matrixEditor.setEditable(false);			
 				} else	if (value==1) {
-					PromptTwoButtons.show(resultFromSwitchStrategic, "If you edit the game in strategic form the game tree form will be reinitialized from the matrix. Do you want to continue?");					
+					//PromptTwoButtons.show(resultFromSwitchStrategic, "If you edit the game in strategic form the game tree form will be reinitialized from the matrix. Do you want to continue?");
+					resultFromSwitchStrategic();
 				}
 			}
 			
@@ -643,36 +644,7 @@
 			
 		
 					
-			/**
-			 * Opens the MatrixEditor
-			 *@author Martin  
-			 */
-			private function showMatrixEditor():void
-			{
-				var me:MatrixEditor = new MatrixEditor();
-				me.matrix = matrix;
-				me.controller = controller;
-				
-				PopUpManager.addPopUp(me, this, true);
-				PopUpManager.centerPopUp(me);
-								
-				me.setMode(grid.isZeroSum);
-				
-			}	
-
-			/**
-			 * Opens the TestEditor
-			 *@author Martin  
-			 */
-			private function showTestEditor():void
-			{
-				var te:TestEditor = new TestEditor();
-				te.matrix = matrix;
-				te.controller = controller;
-				
-				PopUpManager.addPopUp(te, this, true);
-				PopUpManager.centerPopUp(te);
-			}			
+		
 			
 			
 			/**
@@ -687,7 +659,14 @@
 			 * This function runs when tabs are changed
 			 */
 			private function tabChange(event:IndexChangedEvent):void
-			{				
+			{		
+				//Align editmode and trree/matrixMode after a file has been loaded
+				if ((controller.matrixMode) && (editMode!=1)) {
+					changeEditMode(1);
+				} else if ((controller.treeMode) && (editMode!=0)) {
+					changeEditMode(0);
+				}
+				
 				
 				if ((event.oldIndex==1) && (event.newIndex!=1)) {
 					matrixEditor.saveChanges();
@@ -703,6 +682,7 @@
 					controller.canvas =  canvasNF;
 					
 				} else if (event.target.selectedIndex ==1 ){
+			
 					arrowMenu.enabled=false;
 					if (editMode==0) {
 						matrixEditor.init();
@@ -957,6 +937,9 @@
 						if(ctrl) controller.open();
 						break;
 					case 83: //'s'
+						if (tabNavigator.selectedIndex==1) {
+							matrixEditor.saveChanges();
+						}
 						if(ctrl) controller.save();
 						break;
 					case 82: //'r'
@@ -983,6 +966,9 @@
 			private function runAlgorithm(m:int):void {
 				var a:Object=algoComboBox.selectedItem;
 				var s:String=seed;
+				if (tabNavigator.selectedIndex==1) {
+					matrixEditor.saveChanges();
+				}
 				if (m==0) {
 					//Run the Algo for the first time to estimate the process time
 					if (a.es=="1") {
@@ -1118,7 +1104,7 @@
 			 *@author Martin  
 			 */	
 			private function resultFromSwitchStrategic():void {
-				if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
+				//if(PromptTwoButtons.buttonPressed == PromptTwoButtons.OK) {
 					editMode=1;
 					controller.toggleMatrixMode();
 					matrixEditor.setEditable(true);
@@ -1133,7 +1119,7 @@
 						transpoMatrix.selected=false;
 						matrixEditor.changeEvtRadioButton('2G')
 					}
-				}
+				//}
 			}
 			
 			/**
