@@ -795,10 +795,12 @@
 							
 					for (var i:int=0;i<xdim;i++){
 						for (var j:int=0;j<ydim;j++){
-							if (payoffMatrix1.length>0) {
+							if (payoffMatrix1.length>0){
 								if (i<payoffMatrix1.length) {
-									if (j<payoffMatrix1[i].length) {
-										pm[i][j]=payoffMatrix1[i][j];
+									if (payoffMatrix1[i].length>0) {
+										if (j<payoffMatrix1[i].length) {
+											pm[i][j]=payoffMatrix1[i][j];
+										}
 									}
 								}
 							}
@@ -815,8 +817,10 @@
 						for (var j:int=0;j<ydim;j++){
 							if (payoffMatrix2.length>0) {
 								if (i<payoffMatrix2.length) {
-									if (j<payoffMatrix2[i].length) {
-										pm[i][j]=payoffMatrix2[i][j];
+									if (payoffMatrix2[i].length>0) {
+										if (j<payoffMatrix2[i].length) {
+											pm[i][j]=payoffMatrix2[i][j];
+										}
 									}
 								}
 							}

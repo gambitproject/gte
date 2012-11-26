@@ -498,11 +498,13 @@ package lse.math.games.builder.presenter
 			
 			var type:int = new XMLImporter(xml).type;
 			if(type == XMLImporter.EF) {
-				_controllGuiModeEF();
+				
 				loadTreeFromXML(xml);
+				_controllGuiModeEF();
 			} else if(type == XMLImporter.SF) {
-				_controllGuiModeSF();
+				
 				loadMatrixFromXML(xml);
+				_controllGuiModeSF();
 			} else
 			{
 				log.add(Log.ERROR, "The file contained an unknown game format" +
