@@ -62,7 +62,8 @@ package lse.math.games.builder.presenter
            feature is disabled for that move */
 		private var _lastActionZoom:Boolean =false;
 		
-		private var _controllNewGuiMode:Function=null;
+		private var _controllGuiModeSF:Function=null;
+		private var _controllGuiModeEF:Function=null;
 		
 		public function Presenter():void
 		{
@@ -167,10 +168,15 @@ package lse.math.games.builder.presenter
 		
 		
 		[Bindable]
-		/** Action executed when clicking in the canvas */
-		public function get getControllNewGuiMode():Function {	return _controllNewGuiMode; }
-		public function set getControllNewGuiMode(value:Function):void {
-			_controllNewGuiMode = value;
+		public function get getControllGuiModeEF():Function {	return _controllGuiModeEF; }
+		public function set getControllGuiModeEF(value:Function):void {
+			_controllGuiModeEF = value;
+		}
+		
+		[Bindable]
+		public function get getControllGuiModeSF():Function {	return _controllGuiModeSF; }
+		public function set getControllGuiModeSF(value:Function):void {
+			_controllGuiModeSF = value;
 		}
 		
 		[Bindable]
@@ -489,13 +495,15 @@ package lse.math.games.builder.presenter
 		/** Loads a tree/matrix from xml, deleting any previous states */
 		public function loadFromXML(xml:XML):void
 		{			
-			_controllNewGuiMode();
+			
 			var type:int = new XMLImporter(xml).type;
-			if(type == XMLImporter.EF)
+			if(type == XMLImporter.EF) {
+				_controllGuiModeEF();
 				loadTreeFromXML(xml);
-			else if(type == XMLImporter.SF)
+			} else if(type == XMLImporter.SF) {
+				_controllGuiModeSF();
 				loadMatrixFromXML(xml);
-			else
+			} else
 			{
 				log.add(Log.ERROR, "The file contained an unknown game format" +
 					" and couldn't be loaded");

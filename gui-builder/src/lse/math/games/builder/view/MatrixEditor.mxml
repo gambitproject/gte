@@ -463,6 +463,7 @@
 			 *@author Martin  
 			 */	
 			private function makeNegative(pmFrom:Array,pmTo:Array):void {
+				
 				for (var i:int=0;i<pmFrom.length;i++){
 					var columns:Array=new Array();
 					for (var j:int=0;j<pmFrom[i].length;j++){
@@ -609,6 +610,9 @@
 				var i:int=0;
 				var j:int=0;
 				
+				var use_dp:Boolean=glbSettings.getValue("SYSTEM_DECIMAL_LAYOUT") as Boolean;
+				var dp:int=glbSettings.getValue("SYSTEM_DECIMAL_PLACES") as int;
+				
 				if (pm==null) 
 					return Rational.NaN as String;
 				if (pm[0]==null) 
@@ -618,8 +622,17 @@
 					var maxLen:int = 0;
 					for (i=0;i<pm.length;i++){
 						if (pm[i][j]!=null) {
-							if (pm[i][j].length>maxLen) {
-								maxLen=pm[i][j].length;
+							var test:String;
+							if (use_dp) { 
+								test= String(roundTodecimal(Rational.parse(pm[i][j]).floatValue,dp));
+							} else {
+								test=Rational.parse(pm[i][j]).toString();
+								
+							}
+							
+							if (test.length>maxLen) {
+									maxLen=test.length;
+								
 							}
 							log.add(Log.DEBUG,pm[i][j]);
 						}
@@ -627,10 +640,21 @@
 					maxLength.push(maxLen) as int;
 				}
 				
+			
+									
+				
 				var matrixString:String= "";
 				for (i=0;i<pm.length;i++){
 					for (j=0;j<pm[i].length;j++){
-						matrixString += StringUtil.repeat(" ", maxLength[j] - pm[i][j].length ) + pm[i][j];
+						
+						var test:String=null;
+						if (use_dp) { 
+							test=String(roundTodecimal(Rational.parse(pm[i][j]).floatValue,dp));
+						} else {
+							test=Rational.parse(pm[i][j]).toString();
+						}
+						matrixString += StringUtil.repeat(" ", maxLength[j] - test.length ) + test;
+						
 						if (j<pm[i].length-1){
 							matrixString +=delimeter;
 						}
@@ -644,12 +668,18 @@
 			
 			}
 			
+			private function roundTodecimal(n:Number, p:int = 0):Number
+			{
+				var dp:Number = Math.pow(10, p);
+				return Math.round(dp * n) / dp;
+			}
+			
 			/**
 			 * Align the matrix in columns and rows for player 1 and player 2
 			 *  
 			 *@author Martin  
 			 */	
-			private function onlyAlignStrategy():void 
+			public function onlyAlignStrategy():void 
 			{
 				payoffMatrix1=new Array();
 				payoffMatrix2=new Array();

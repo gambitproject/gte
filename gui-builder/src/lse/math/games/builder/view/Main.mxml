@@ -307,6 +307,7 @@
 						controller.zoomIn();	
 					}
 					arrowMenu.enabled=true;
+					//log.add(Log.HINT,canvas.height +"x"+ canvas.width+"-"+scrollbarEF.height+"x"+scrollbarEF.width);
 										
 				} else {
 					controller.toggleMatrixMode();
@@ -321,9 +322,19 @@
 			 * Resets all NEWGUI Buttons and checks the current stage 
 			 *@author Martin  
 			 */	
-			private function resetAndCheck():void {
+			private function resetAndCheckEF():void {
 				resetNewGuiButtons();
 				checkExtensiveStep(0);
+				tabNavigator.selectedIndex=0;
+				arrowMenu.enabled=true;
+			}
+			
+			private function resetAndCheckSF():void {
+				resetNewGuiButtons();
+				checkExtensiveStep(0);
+				changeEditMode(1);
+				tabNavigator.selectedIndex=1;
+				arrowMenu.enabled=false;
 			}
 			
 			/**
@@ -333,7 +344,8 @@
 			 */		
 			private function init():void{
 				
-				controller.getControllNewGuiMode=resetAndCheck;
+				controller.getControllGuiModeEF=resetAndCheckEF;
+				controller.getControllGuiModeSF=resetAndCheckSF;
 				controller.clear();
 				resetNewGUI();
 			}
@@ -622,6 +634,7 @@
 			{
 				if(controller.treeMode)
 				{
+					//log.add(Log.HINT,canvas.height +"x"+ canvas.width+"-"+scrollbarEF.height+"x"+scrollbarEF.width);
 					//First disable pan tool if it is running
 					if(mouseScrollingEnabled)
 						disableMouseScrolling();
@@ -747,6 +760,9 @@
 					toggleDecimalLayoutButton.setStyle("icon",rationalIcon);
 				}
 				controller.invalidate(true,false,true);
+				if (editMode==1) {
+					matrixEditor.onlyAlignStrategy();
+				}
 			}			
 			
 			
