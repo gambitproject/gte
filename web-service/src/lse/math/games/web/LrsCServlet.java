@@ -185,10 +185,10 @@ public class LrsCServlet extends AbstractRESTServlet
 					try {
 						this.writeResponseHeader(request, response);
 						if (game != null) {
-							response.getWriter().println("Sequenzform: ");
+							response.getWriter().println("Strategic form: ");
 							response.getWriter().println(game.printFormatHTML());
-							response.getWriter().println("From C Algo:");
-							response.getWriter().println(consoleOutput);
+							//response.getWriter().println("From C Algo:");
+							//response.getWriter().println(consoleOutput);
 							response.getWriter().println("");
 							response.getWriter().println("EE = Extreme Equilibrium, EP = Expected Payoffs");
 							response.getWriter().println("");
