@@ -1446,12 +1446,12 @@
 				
 				<s:NavigatorContent label="Strategic Form">
 					
-					<s:VGroup left="120" horizontalAlign="center"  width="100%" >
+					<s:VGroup left="210" horizontalAlign="center"  width="100%" >
 						<MatrixEditor id="matrixEditor" xmlns="lse.math.games.builder.view.*" />	
 					</s:VGroup>
 						
 				
-					<s:VGroup top="5" left="5" horizontalAlign="center" >
+					<s:VGroup top="5" left="120" horizontalAlign="center" >
 						<s:Label  styleName="mxLabels" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
 								 visible="{editMode!=1}"/>
 						<s:Button   styleName="mxLabels" label="Click to edit" 
@@ -1485,10 +1485,7 @@
 					
 					<s:Label id="infoNF" top="5" right="{scrollbarSF.verticalScrollBar.visible ? 20 : 5}" fontFamily="Helvetica" text="{int(canvasNF.width)} x {int(canvasNF.height)} ({int(matrixPainter.scale * 100)}%)" />
 					
-					<s:VGroup top="5" left="5" horizontalAlign="center" >
-						<s:Label  styleName="mxLabels" color="0x808080" text="VIEW ONLY" toolTip="Toggle SF Edit mode for editing the matrix" 
-								  visible="{editMode!=1}"/>
-					</s:VGroup>							
+							
 					
 					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isStrategicReduced = (event.target.selectedIndex == 0);">

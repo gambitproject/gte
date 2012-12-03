@@ -935,11 +935,11 @@
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
 
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="90" text="Strategy names: " verticalAlign="middle"/>
+					<s:Label height="20" width="110" text="Strategy names: " verticalAlign="middle"/>
 					<s:TextInput editable="{p1editable}" id="pl1StratInput" width="100%" widthInChars="22" text="{alpha1}" change="dataChanged=true;" contentBackgroundColor="{p1cbg}" />
 				</s:HGroup>
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="90" text="Dimensions: " verticalAlign="middle"/>
+					<s:Label height="20" width="110" text="Dimensions: " verticalAlign="middle"/>
 					<s:TextInput editable="{p1editable}" id="pl1Dimensions" width="100%" widthInChars="22" text="{dimensions1}" change="dataChanged=true;" contentBackgroundColor="{p1cbg}" />
 					<s:Button enabled="{p1editable}" label="Set" cornerRadius="0" click="createEmptyArrayString(pl1Dimensions.text,1);"/>					
 				</s:HGroup>	
@@ -959,11 +959,11 @@
 					<mx:Spacer height="20"/>
 				-->
 				<s:HGroup width="100%" verticalAlign="middle">
-					<s:Label height="20" width="90" text="Strategy names:" verticalAlign="middle"/>
+					<s:Label height="20" width="110" text="Strategy names:" verticalAlign="middle"/>
 					<s:TextInput editable="{p2editable}" width="100%" id="pl2StratInput" widthInChars="22" text="{alpha2}" change="dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 				</s:HGroup>
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="90" text="Dimensions: " verticalAlign="middle"/>
+					<s:Label height="20" width="110" text="Dimensions: " verticalAlign="middle"/>
 					<s:TextInput editable="{p2editable}" id="pl2Dimensions" width="100%" widthInChars="22" text="{dimensions2}" change="dataChanged=true;" contentBackgroundColor="{p2cbg}" />
 					<s:Button enabled="{p2editable}" label="Set" cornerRadius="0" click="createEmptyArrayString(pl2Dimensions.text,2);"/>					
 				</s:HGroup>	
