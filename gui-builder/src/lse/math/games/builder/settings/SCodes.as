@@ -191,7 +191,7 @@ package lse.math.games.builder.settings
 			settings.setValue(DEFAULT_PLAYER_2_COLOR, 0x0000FF);
 			settings.setValue(DEFAULT_FONT, "Times");
 			settings.setValue(DEFAULT_STROKE_WIDTH, 1);
-			settings.setValue(DEFAULT_NODE_DIAMETER, new Number(7));
+			settings.setValue(DEFAULT_NODE_DIAMETER, new Number(5));
 			settings.setValue(DEFAULT_ISET_DIAMETER, new Number(25));
 			settings.setValue(DEFAULT_LEVEL_DISTANCE, 75);
 			settings.setValue(DEFAULT_CELL_PADDING_VERT, new Number(5));

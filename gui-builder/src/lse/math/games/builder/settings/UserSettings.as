@@ -117,7 +117,7 @@ package lse.math.games.builder.settings
 		* Firstly loads all default values for the settings, then it overwrites the ones stored in user's local cookies
 		* <p/> It should be called at the start of the program just once, or if you want to reset settings to the default ones+loaded ones
 		*/
-		private function firstLoad():void
+		public function firstLoad():void
 		{
 			if(_loaded)
 				log.add(Log.ERROR_HIDDEN, "Warning: Non-saved settings are potentially being overwriting ");

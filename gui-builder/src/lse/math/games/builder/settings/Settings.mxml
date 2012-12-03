@@ -90,7 +90,7 @@
 			}
 			
 			
-			// Changes orientation of the tree
+				
 			private function changeOrientation(orientation:int):void
 			{
 				if (_controller.treeMode){
@@ -121,15 +121,42 @@
 				invalidate();
 				
 				unsavedChanges = true;
+				exit();
 			}
 			
 			//Resets the current file settings from the defaults
 			private function resetFileSettingsFromDefaults():void
 			{
-				fileSettings.clear();
+				glbSettings.firstLoad();
+				fileSettings.reset();
+				STORE_SETTINGS_LOCALLY.selected = glbSettings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean;
+				outputDispGroup.selectedValue = (glbSettings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean)?'flash':'HTML';
+				MINIMUM_BUFFER_SIZE.value = glbSettings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int;
+				AUTOSAVE_ENABLED.selected = glbSettings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;
+				AUTOSAVE_INTERVAL.enabled = glbSettings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;
+				AUTOSAVE_INTERVAL.text = ''+(glbSettings.getValue(SCodes.AUTOSAVE_INTERVAL) as int);
+				AUTOADJUST_ENABLED.selected = glbSettings.getValue(SCodes.TREE_AUTO_ADJUST) as Boolean;
+				MATRIX_DELIMETER.text = glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
+				SYSTEM_ENABLE_GUIDANCE.selected = glbSettings.getValue(SCodes.SYSTEM_ENABLE_GUIDANCE) as Boolean;
+				SYSTEM_MAX_PAYOFF.text = String(glbSettings.getValue(SCodes.SYSTEM_MAX_PAYOFF));
+				SYSTEM_DECIMAL_PLACES.text = String(glbSettings.getValue(SCodes.SYSTEM_DECIMAL_PLACES));
+				
+				
+				
+				FILE_PLAYER_1_COLOR.selectedColor = fileSettings.getValue(SCodes.FILE_PLAYER_1_COLOR) as uint;
+				FILE_PLAYER_2_COLOR.selectedColor = fileSettings.getValue(SCodes.FILE_PLAYER_2_COLOR) as uint;
+				FILE_FONT.selectedItem = fileSettings.getValue(SCodes.FILE_FONT) as String;
+				FILE_STROKE_WIDTH.value = fileSettings.getValue(SCodes.FILE_STROKE_WIDTH) as int;
+				FILE_NODE_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_NODE_DIAMETER) as Number);
+				FILE_ISET_DIAMETER.value = (fileSettings.getValue(SCodes.FILE_ISET_DIAMETER) as Number);
+				FILE_LEVEL_DISTANCE.value = (fileSettings.getValue(SCodes.FILE_LEVEL_DISTANCE) as int);
+				FILE_CELL_PADDING_VERT.value = (fileSettings.getValue(SCodes.FILE_CELL_PADDING_VERT) as Number);
+				FILE_CELL_PADDING_HOR.value = (fileSettings.getValue(SCodes.FILE_CELL_PADDING_HOR) as Number);
+				changeOrientation(SCodes.TREE_ORIENTATION as Number);
+				orientationBar.selectedIndex=SCodes.TREE_ORIENTATION as Number;
 				invalidate();
 				
-				exit();
+				
 			}
 			
 			//Saves settings if necessary, and closes the settings panel
@@ -140,6 +167,8 @@
 				
 				PopUpManager.removePopUp(this);
 			}
+		
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -293,8 +322,8 @@
 						</mx:FormItem>
 						<mx:FormItem label="Tree orientation">
 							<mx:ToggleButtonBar id="orientationBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" 
-												
-												valueCommit="changeOrientation(orientationBar.selectedIndex)">
+												valueCommit="changeOrientation(orientationBar.selectedIndex)"
+												selectedIndex="{fileSettings.getValue(SCodes.TREE_ORIENTATION) as Number}" >
 								<mx:dataProvider>	
 									<mx:ArrayCollection>
 										<mx:source>
@@ -407,9 +436,9 @@
 
 					</mx:Form>
 					<s:HGroup>
-						<s:Button bottom="25" label="Use as default settings" cornerRadius="0" 
+						<s:Button bottom="25" label="Use as current settings and close" cornerRadius="0" 
 								  click="setFileSettingsAsDefault()" />
-						<s:Button bottom="0" label="Reset to default settings" cornerRadius="0" 
+						<s:Button bottom="0" label="Reset settings" cornerRadius="0" 
 								  click="resetFileSettingsFromDefaults()" />
 						
 					</s:HGroup>

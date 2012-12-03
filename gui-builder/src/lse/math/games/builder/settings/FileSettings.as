@@ -89,6 +89,14 @@ package lse.math.games.builder.settings
 			loadDefaults();
 		}
 		
+		/** Clears the settings. Should be called when a new file is opened */
+		public function reset():void
+		{
+			clear();
+		}
+		
+	
+		
 		/* Loads all stored values from user's local 'flash cookies' */
 		private function loadDefaults():void
 		{
