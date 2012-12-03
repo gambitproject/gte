@@ -212,8 +212,14 @@
 
 	    })(jQuery);
 	    
-
+		;(function($) {
+			$("#GTEContainer").height($(window).height() - $("#titleContainer").height());
+			$(window).resize(function() { $("#GTEContainer").height($(window).height() - $("#titleContainer").height()); });
+			
+		})(jQuery);	
 		
+			
+	
 		
 	</script>
 	<style type="text/css">
