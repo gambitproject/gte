@@ -4,7 +4,9 @@ package lse.math.games.builder.presenter
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
+	import flash.geom.Point;
 	
 	import lse.math.games.builder.fig.CanvasToFigWriter;
 	import lse.math.games.builder.io.FileManager;
@@ -475,19 +477,105 @@ package lse.math.games.builder.presenter
 			_fileManager.saveFig(figStr);
 		}
 		
+		
+		/**
+		 * Returns a rectangle which specifies the minimum drawing area. This avoids any extra white space around the game tree of matrix
+		**/
+		
+		
+		public function getCroppedImage(_canvas:Canvas,bd:BitmapData):Rectangle{
+			var startx:int;
+			var starty:int;
+			var endx:int;
+			var endy:int;
+			var stop:Boolean;
+			var x:int;
+			var y:int;
+			
+			stop=false;
+			for (x=0;x<_canvas.width;x++) {
+				for (y=0;y<_canvas.height;y++) {
+					var z:uint=bd.getPixel(x,y);
+					if (bd.getPixel(x,y)!=16777215) {
+						startx=x;
+						stop=true;
+						if (stop)
+							break;
+					}
+				}
+				if (stop)
+					break;
+			}
+			
+			stop=false;
+			for (y=0;y<_canvas.height;y++) {
+				for (x=0;x<_canvas.width;x++) {
+					if (bd.getPixel(x,y)!=16777215) {
+						starty=y;
+						stop=true;
+						if (stop)
+							break;
+					}
+				}
+				if (stop)
+					break;
+			}
+			
+			stop=false;
+			for (x=_canvas.width-1;x>0;x--) {
+				for (y=_canvas.height-1;y>0;y--) {
+					if (bd.getPixel(x,y)!=16777215) {
+						endx=x;
+						stop=true;
+						if (stop)
+							break;
+					}
+				}
+				if (stop)
+					break;
+			}
+			
+			stop=false;
+			for (y=_canvas.height-1;y>0;y--) {
+				for (x=_canvas.width-1;x>0;x--) {
+					if (bd.getPixel(x,y)!=16777215) {
+						endy=y;
+						stop=true;
+						if (stop)
+							break;
+					}
+				}
+				if (stop)
+					break;
+			}
+			
+			return new Rectangle(startx,starty,endx-startx+1,endy-starty+1);
+		}
+		
+		
 		/**
 		 * Opens a dialog for saving an image of the current canvas in .png format
 		 */
 		public function image():void
 		{
+				
 			var bd:BitmapData = new BitmapData(_canvas.width, _canvas.height);
 			
+	
 			removeSelected(true);
 			_canvas.validateNow();
 			bd.draw(_canvas);
 			restoreSelected();
 			
-			var ba:ByteArray = (new PNGEncoder()).encode(bd);
+			var rec:Rectangle=getCroppedImage(_canvas,bd);		
+			
+			
+			var small_bd:BitmapData = new BitmapData(rec.width, rec.height, false, 0x000000FF);
+					
+			small_bd.copyPixels(bd, rec, new Point(0, 0));
+			
+			
+			var ba:ByteArray = (new PNGEncoder()).encode(small_bd);
 			
 			_fileManager.saveImage(ba);
 		}
