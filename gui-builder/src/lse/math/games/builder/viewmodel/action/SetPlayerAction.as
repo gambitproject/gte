@@ -52,12 +52,7 @@ package lse.math.games.builder.viewmodel.action
 					var node:Node = grid.getNodeById(_nodeId);
 					if (node != null) {
 						iset = node.makeNonTerminal();
-						
-						if (!(settings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean)) {
-							//DFS labeling
-							labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
-						}
-						
+											
 					} else
 						log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "ChangePlayerAction");
 				} else
@@ -65,11 +60,7 @@ package lse.math.games.builder.viewmodel.action
 			} else {
 				if (_player!=null) {
 					iset.changeToSpecificPlayer(_player);
-					
-					if (!(settings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean)) {
-						labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
-					}
-					
+														
 				}
 			}
 			

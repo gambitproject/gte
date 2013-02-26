@@ -341,7 +341,7 @@ package lse.math.games.builder.viewmodel
 								x.reachedby.label = " ";
 							
 						} else {
-							if (settings.getValue("SYSTEM_MODE_GUIDANCE")==3) {
+							
 								while (true) {
 									if (player==tree.firstPlayer) {
 										autoLabel = getNextAutoLabel_Player1(tree);
@@ -353,7 +353,7 @@ package lse.math.games.builder.viewmodel
 									}
 								}
 								x.reachedby.label = autoLabel;
-							}
+							
 							
 						}
 					}

@@ -6,6 +6,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
+	import lse.math.games.builder.settings.UserSettings;
+	import lse.math.games.builder.settings.SCodes;
 	
 	import util.Log;
 	
@@ -22,7 +24,7 @@ package lse.math.games.builder.viewmodel.action
 		private var log:Log = Log.instance;
 
 		private var _timeElapsed:int = 0;
-		
+		private var settings:UserSettings = UserSettings.instance;	
 		
 		
 		public function get timeElapsed():int {return _timeElapsed; }
@@ -42,9 +44,12 @@ package lse.math.games.builder.viewmodel.action
 				
 				var labeler:AutoLabeller = new AutoLabeller;
 				labeler.autoLabelTree(grid,false);
+
+				
 			} else
 				log.add(Log.ERROR, "Couldn't find any iset with idx "+_isetId, "DissolveAction");
 			
+
 			grid.orderIds();
 			
 			_timeElapsed = getTimer() - prevTime;
