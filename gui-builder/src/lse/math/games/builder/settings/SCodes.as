@@ -161,6 +161,7 @@ package lse.math.games.builder.settings
 		
 		public static const SYSTEM_DECIMAL_LAYOUT:String = "SYSTEM_DECIMAL_LAYOUT";
 		public static const SYSTEM_DECIMAL_PLACES:String = "SYSTEM_DECIMAL_PLACES";
+		public static const SYSTEM_BFS_LABELING:String = "SYSTEM_BFS_LABELING";
 		
 		
 		/* <--- OTHER SETTINGS (Not shown under the Settings panel) ---> */
@@ -204,7 +205,7 @@ package lse.math.games.builder.settings
 			settings.setValue(SYSTEM_MAX_PAYOFF, new Number(25));
 			settings.setValue(SYSTEM_DECIMAL_LAYOUT, false);
 			settings.setValue(SYSTEM_DECIMAL_PLACES, 2);
-			
+			settings.setValue(SYSTEM_BFS_LABELING, true);
 			
 			
 			//OTHER SETTINGS

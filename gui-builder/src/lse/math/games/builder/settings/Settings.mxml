@@ -295,6 +295,38 @@
 											 change="setGlobalSetting(SCodes.SYSTEM_DECIMAL_PLACES, Number(SYSTEM_DECIMAL_PLACES.text));" />
 							</s:HGroup>								
 						</mx:FormItem>
+						
+						<mx:FormItem label="MOVE LABELS">
+							<s:VGroup>
+								<s:RadioButton groupName="LABELING" 
+											   id="BFS_LABELING"
+											   label="BFS" 
+											   width="150"
+											   toolTip="Label moves using breadth first traversal."
+											   creationComplete="BFS_LABELING.selected =
+											   glbSettings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean;"
+											   
+											   change="setGlobalSetting(SCodes.SYSTEM_BFS_LABELING, BFS_LABELING.selected);"
+											   
+											   
+											   />
+								<s:RadioButton groupName="LABELING" 
+											   id="DFS_LABELING"
+											   label="DFS" 
+											   width="150"
+											   toolTip="Label moves using depth first traversal."
+											   creationComplete="DFS_LABELING.selected =
+											   !glbSettings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean;"
+											   
+											   change="setGlobalSetting(SCodes.SYSTEM_BFS_LABELING, !DFS_LABELING.selected);"
+											   											   											   
+											   />
+			      
+							</s:VGroup>
+							
+							
+							
+						</mx:FormItem>
 					</mx:Form>
 				</s:Group>
 			</s:NavigatorContent>	
