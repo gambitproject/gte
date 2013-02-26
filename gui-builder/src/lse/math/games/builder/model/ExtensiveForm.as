@@ -351,7 +351,7 @@ package lse.math.games.builder.model
 							var newLabel:String=movesToSet.substring(0,pos);
 							newLabel=StringUtil.trim(newLabel);
 							setLabel=newLabel;
-							movesToSet=movesToSet.substring(pos+1);
+							movesToSet=StringUtil.trim(movesToSet.substring(pos+1));
 						} else if (movesToSet!=""){
 							if (StringUtil.trim(movesToSet)!="") {
 								setLabel=StringUtil.trim(movesToSet);
