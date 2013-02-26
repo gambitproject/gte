@@ -10,7 +10,7 @@ package lse.math.games.builder.viewmodel
 	{
 		import lse.math.games.builder.model.*;
 		import lse.math.games.builder.settings.UserSettings;
-		
+		import lse.math.games.builder.settings.SCodes;
 
 		
 		private var _alpha:Vector.<String> = new Vector.<String>();	
@@ -21,10 +21,15 @@ package lse.math.games.builder.viewmodel
 		private var count2_p2:int;
 		
 		private var _uniqueLabelNum:int;
-		private var inUse:Vector.<String> = new Vector.<String>();		
+		private var inUse:Vector.<String> = new Vector.<String>();	
+		
 		private var log:Log = Log.instance;
+		private var bfs:Vector.<Node>= new Vector.<Node>();
+		private var bfs_count:int;
 		
 		private var settings:UserSettings = UserSettings.instance;
+		
+		
 		
 		public function AutoLabeller(alpha:Vector.<String> =  null)
 		{
@@ -184,13 +189,32 @@ package lse.math.games.builder.viewmodel
 		public function autoLabelTree(grid:TreeGrid, reset:Boolean):void
 		{										
 			initFromTree(grid,reset);
-			recLabelTree(grid.root, grid,reset,null);
+			
+			
+			if (settings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean) {
+				bfs = new Vector.<Node>();
+				bfs.push(grid.root);
+				bfs_count=0;
+			
+				recLabelTree_bfs(grid,reset,null);
+			} else {
+				recLabelTree_dfs(grid.root, grid,reset,null);
+			}
+			
 		}
 		
 		public function autoLabelTreeSetEmptyMoves(grid:TreeGrid, reset:Boolean,specificIset:Iset):void
 		{										
 			initFromTree(grid,reset);
-			recLabelTree(grid.root, grid,reset,specificIset);
+			if (settings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean) {
+				bfs = new Vector.<Node>();
+				bfs.push(grid.root);
+				bfs_count=0;
+				recLabelTree_bfs(grid,reset,specificIset);
+			} else {
+				recLabelTree_dfs(grid.root, grid,reset,specificIset);
+			}
+		
 		}
 		
 		private function initFromTree(tree:ExtensiveForm,reset:Boolean):void
@@ -202,7 +226,82 @@ package lse.math.games.builder.viewmodel
 			initCounts();		
 		}
 		
-		private function recLabelTree(x:Node, tree:ExtensiveForm,reset:Boolean,specificIset:Iset):void
+		
+		private function recLabelTree_bfs(tree:ExtensiveForm,reset:Boolean,specificIset:Iset):void {
+			
+			while (bfs.length>0) {
+				var x:Node=bfs.shift()
+				var labGen:Boolean = true;
+				if (x.parent != null && (!x.reachedby.hasLabel || reset || !x.reachedby.hasLabelEmpty)) {
+					var player:Player = x.parent.iset.player;
+					//if ((player != Player.CHANCE) && (x.reachedby!=null)) {	
+					if ((player != Player.CHANCE)) {		
+						var n1:Node = x.parent;
+						var n2:Node = x.parent.iset.firstNode;
+						
+						while (n2 != null && n1 != n2) {
+							if (n1.iset == n2.iset) {
+								labGen = false;
+								break;
+							}
+							n2 = n2.sibling;
+						}
+						
+						if (!labGen) {
+							n1 = x.parent.firstChild;
+							n2 = x.parent.iset.firstNode.firstChild;
+							
+							var n:int = 0;
+							while (n1 != x) {
+								n1 = n1.sibling;
+								n2 = n2.sibling;
+								n++;
+							}
+							x.reachedby.label = n2.reachedby.label;						
+						} 
+						else 
+						{
+							var autoLabel:String = null;
+							
+							if ((specificIset!=null) && (x.parent.iset==specificIset)) {
+								x.reachedby.label = " ";
+								
+							} else {
+								while (true) {
+									if (player==tree.firstPlayer) {
+										autoLabel = getNextAutoLabel_Player1(tree);
+									} else if (player==tree.firstPlayer.nextPlayer) {
+										autoLabel = getNextAutoLabel_Player2(tree);
+									}
+									if (inUse.indexOf(autoLabel) < 0) {
+										break;
+									}
+								}
+								x.reachedby.label = autoLabel;
+							}			
+							
+							//x.reachedby.label = bfs_count.toString();
+							//bfs_count ++;
+						}
+					}
+				}
+				var y:Node = x.firstChild;
+				
+				
+				if (y!=null) {
+					bfs.push(y);
+					while (y.sibling!=null) {
+						y=y.sibling
+						bfs.push(y);
+					}
+					
+				}
+			
+			}
+		
+		}
+		
+		private function recLabelTree_dfs(x:Node, tree:ExtensiveForm,reset:Boolean,specificIset:Iset):void
 		{			
 			if (x.parent != null && (!x.reachedby.hasLabel || reset || !x.reachedby.hasLabelEmpty))    // if father exists and I am not assigned, then label
 			{	
@@ -263,7 +362,7 @@ package lse.math.games.builder.viewmodel
 			
 			var y:Node = x.firstChild;
 			while (y != null) {
-				recLabelTree(y, tree,reset,specificIset);
+				recLabelTree_dfs(y, tree,reset,specificIset);
 				y = y.sibling;
 			}
 		}
@@ -276,7 +375,7 @@ package lse.math.games.builder.viewmodel
 				if (i.player != Player.CHANCE) {
 					for (var child:Node = i.firstNode.firstChild; child != null; child = child.sibling) {
 						if (child.reachedby.hasLabel) { //not checking if child.reachedby is null, since that is an error we want to know about				
-							inUse.push(child.reachedby.label.toLowerCase());
+							inUse.push(child.reachedby.label);
 						} else {
 							++_uniqueLabelNum;
 						}

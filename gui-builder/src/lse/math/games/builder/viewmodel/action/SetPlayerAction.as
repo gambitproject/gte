@@ -8,6 +8,8 @@ package lse.math.games.builder.viewmodel.action
 	import lse.math.games.builder.presenter.IAction;
 	import lse.math.games.builder.viewmodel.AutoLabeller;
 	import lse.math.games.builder.viewmodel.TreeGrid;
+	import lse.math.games.builder.settings.UserSettings;
+	import lse.math.games.builder.settings.SCodes;
 	
 	import util.Log;
 	
@@ -26,7 +28,7 @@ package lse.math.games.builder.viewmodel.action
 		private var _player:Player=null;
 		private var _timeElapsed:int = 0;
 		
-		
+		private var settings:UserSettings = UserSettings.instance;	
 		
 		public function get timeElapsed():int {return _timeElapsed; }
 		
@@ -51,7 +53,11 @@ package lse.math.games.builder.viewmodel.action
 					if (node != null) {
 						iset = node.makeNonTerminal();
 						
-						labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
+						if (!(settings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean)) {
+							//DFS labeling
+							labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
+						}
+						
 					} else
 						log.add(Log.ERROR, "Couldn't find any node with idx "+_nodeId, "ChangePlayerAction");
 				} else
@@ -60,8 +66,10 @@ package lse.math.games.builder.viewmodel.action
 				if (_player!=null) {
 					iset.changeToSpecificPlayer(_player);
 					
-					//labeler.autoLabelTree(grid,false);
-					labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
+					if (!(settings.getValue(SCodes.SYSTEM_BFS_LABELING) as Boolean)) {
+						labeler.autoLabelTreeSetEmptyMoves(grid,false,iset);
+					}
+					
 				}
 			}
 			
