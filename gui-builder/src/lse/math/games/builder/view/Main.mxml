@@ -1463,16 +1463,16 @@
 					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
 						<mx:Spacer width="23" />
 						
-						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   
-								   click="matrixEditor.generateRandomPayoffs();" toolTip="Generate random payoffs." visible="{editMode==1}" />
+						<mx:Button id="generalMatrix" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/nzerosum.png')" toolTip="General matrix"
+								   toggle="true" click="matrixEditor.changeEvtRadioButton('2G');transpoMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;" visible="{editMode==1}"/>
 						<mx:Button id="ngToggleZeroSumStrategic" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')"  
 								   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();transpoMatrix.selected=false;generalMatrix.selected=false;"  
 								   toolTip="Zero Sum" visible="{editMode==1}"/>
 						<mx:Button id="transpoMatrix" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/transpo.png')" toolTip="Symmetric matrix"
 								   toggle="true" click="matrixEditor.changeEvtRadioButton('SG');generalMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;" visible="{editMode==1}"/>
-						<mx:Button id="generalMatrix" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/general.png')" toolTip="General matrix"
-								   toggle="true" click="matrixEditor.changeEvtRadioButton('2G');transpoMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;" visible="{editMode==1}"/>
-						
+						<mx:Spacer width="23" />
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   
+								   click="matrixEditor.generateRandomPayoffs();" toolTip="Generate random payoffs." visible="{editMode==1}" />
 					</s:HGroup>
 				</s:NavigatorContent>		
 		
