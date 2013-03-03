@@ -210,6 +210,8 @@
 			*/
 			[Bindable]
 			private var Player2InputVisible:Boolean=false;
+			
+		
 
 			// ------------------------------------
 			// START: Icon Definitions
@@ -713,14 +715,14 @@
 				//Set canvas
 				if (event.target.selectedIndex == 0) {
 					controller.canvas =  canvas;
-					arrowMenu.enabled=true;
+					arrowMenu.visible=true;
 				} else if (event.target.selectedIndex == 2) {
-					arrowMenu.enabled=false;
+					arrowMenu.visible=false;
 					controller.canvas =  canvasNF;
 					
 				} else if (event.target.selectedIndex ==1 ){
 			
-					arrowMenu.enabled=false;
+					arrowMenu.visible=false;
 					if (editMode==0) {
 						matrixEditor.init();
 						matrix.populateFromTree();
@@ -784,7 +786,7 @@
 					toggleDecimalLayoutButton.setStyle("icon",rationalIcon);
 				}
 				controller.invalidate(true,false,true);
-				if (editMode==1) {
+				if ((editMode==1) || (tabNavigator.selectedIndex==1)) {
 					matrixEditor.onlyAlignStrategy();
 				}
 			}			
@@ -1292,7 +1294,7 @@
 			<mx:Spacer width="13"/>	
 			
 			<mx:Spacer width="60"/>
-			<s:HGroup id="arrowMenu">
+			<s:HGroup id="arrowMenu" >
 			<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}" enabled="{editMode==0}">
 				<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Add and delete tree node" click="setExtensiveStep(0);" />
 				<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Assign players to tree nodes" click="setExtensiveStep(1);" />	
@@ -1338,7 +1340,7 @@
 					   toggle="true" selected="{mouseScrollingEnabled}" change="if(mouseScrollingEnabled) disableMouseScrolling(); else enableMouseScrolling()" />
 			
 			<mx:Button id="toggleDecimalLayoutButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/rational.png')" toolTip="Decimal Layout {decimalLayout ? 'ON' : 'OFF'}" 
-					   toggle="true" selected="{decimalLayout}" change="decimalLayout = event.target.selected;toggleDecimalLayout();"  overIcon="@Embed(source='../../../../../../assets/icons/decimal.png')"/>
+					   toggle="true" selected="{decimalLayout}" change="decimalLayout = event.target.selected;toggleDecimalLayout();" />
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" 
 					   click="showSettings()"/>		
 
