@@ -80,8 +80,9 @@ the command
 
     ant makeWarFile   
 
-and reload the client program (which is generated in  gte.war)
-in your browser at the URL
+which creates the file    gte.war   which contains the
+client program.
+To see what does, reload the client program in your browser at the URL
 
     http://127.0.0.1:8080/gte/
 
@@ -98,4 +99,8 @@ JETTY_HOME, which above is the Linux directory
 
      java -jar start.jar
 
+If you want to contribute to the  gte  project, the first
+thing you need to do is to successfully install these
+things, and to see if you can re-compile the war file when
+there have been changes to the GUI.
 
