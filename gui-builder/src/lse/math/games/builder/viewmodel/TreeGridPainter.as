@@ -35,6 +35,7 @@ package lse.math.games.builder.viewmodel
 	{
 		private static const pbuffx:Number = 4;      //correction required to display payoff
 		private static const pbuffy:Number = 2;     //correction required to display payoff
+		private static const pleafdisty:Number = 6; //how far away the payoff is from end of line
 		
 		private var marginTop:Number = 0;
 		private var marginBottom:Number = 0;
@@ -515,8 +516,8 @@ package lse.math.games.builder.viewmodel
 				//without comma
 				xpos1 = n.xpos - width1 / 2;
 				xpos2 = n.xpos + width1 / 2 - width2;
-				ypos1 = n.ypos + ascent1 + pbuffy;
-				ypos2 = n.ypos + ascent2 + height1 + 2*pbuffy;
+				ypos1 = n.ypos + ascent1 + pbuffy + pleafdisty;
+				ypos2 = n.ypos + ascent2 + height1 + 2*pbuffy + pleafdisty;
 			} else if(grid.rotate == 1) {
 				
 				//with comma
@@ -536,8 +537,8 @@ package lse.math.games.builder.viewmodel
 				//without comma
 				xpos1 = n.xpos - width1 / 2;
 				xpos2 = n.xpos + width1 / 2 - width2;
-				ypos1 = n.ypos + ascent1 - height1 - pbuffy;
-				ypos2 = n.ypos + ascent2 - height1 - height2 - 2*pbuffy;	
+				ypos1 = n.ypos + ascent1 - height1 - pbuffy - pleafdisty;
+				ypos2 = n.ypos + ascent2 - height1 - height2 - 2*pbuffy - pleafdisty;	
 
 			} else {
 				//with comma
