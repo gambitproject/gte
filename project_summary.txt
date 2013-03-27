@@ -1,0 +1,157 @@
+#Project Summary
+2012/08/14
+
+#Summary#
+
+The project **Improve GTE** which was conducted under the umbrella of GSoC consists of three main parts
+
+- PART I - **Adapt and merge**
+- PART II - **Improve usability**
+- PART III - **Improve the game creation and solving process**
+
+The first steps were spent on fixing minor bugs and getting familiar with the code. 
+
+After this introduction part the coding went straight into **PART I** and the native code of the LRS algorithm by Rahul Savani ([http://www.csc.liv.ac.uk/~rahul/form.html](http://www.csc.liv.ac.uk/~rahul/form.html "http://www.csc.liv.ac.uk/~rahul/form.html")) was made accessible to GTE. A configuration-based structure was implemented that allows adding new native algorithms only by registering them in a configuration file. All game parameters from GTE and outputs from the native algorithms are processed by a new servlet. In addition, the functionality of the Matrix Editor (for games in strategic form) was enhanced.
+
+**PART II** primary consists of how to make life easier for developers and users on accessing GTE. The installation process for developers was redesigned and a nightly scripts for automatically compilation of github code was created. Moreover a new website for accessing GTE directly, as  a war-file or in a bundle with a Jetty-server including native algorithms was designed. Finally a lot of smaller GUI improvements and bug fixing were conducted.
+
+**PART III** was introduced by Bernhard from Stengel with a very detailed proposal about how the NEWGUI should look like ([http://www.maths.lse.ac.uk/Personal/stengel/NEWGUI/](http://www.maths.lse.ac.uk/Personal/stengel/NEWGUI/)). The implementation followed those guidelines closely. After that, further improvements were made regarding parameterization of an extensive game and calculation of Nash equilibria for such a parameterized game.
+
+Code available at: [https://github.com/trobar/gte](https://github.com/trobar/gte " https://github.com/trobar/gte")
+
+# PART I - **Adapt and merge**#
+
+##1. Use Vaadin as a new framework for graphs##
+This task was skipped, because we (mentors and I) agreed to focus on one platform to get things pushed forward, even if Flash might not be the best choice regarding future support by Adobe or technical constraints (single threaded).
+
+##2. Call native algorithms##
+Rather than implementing native calls with JNI on the server side, I decided to use direct systemcalls, because the native algorithm from Rahul (written in C) was originally not intended to be executed in a library and thus is more in low cohesion rather than loosely coupled. A new servlet (**LrsCServlet**) was implemented to act as an interface between GTE and the native algorithms. Because the native algorithm was written in C and GTE should run on all major platform (windows, linux & mac os) the native code has to be compiled according to the platform. Unfortunately a Mac OS was not available for me during GSoC and as a consequence the makefiles of the native algorithms were only adjusted to run on windows machines with cygwin (**makefile_windows**) and on linux machines (**makefile_unix**), both 32bit. The ANT build file of the project was redesigned to determine the underlying operating system and according to the os choosing the correct target for compiling and copying (**baseDir/native-algo**) the native algorithms. 
+
+A new configuration file (**basDIR/war/builder/webservices.xml**) was introduced which replaces the previous hard coded algorithm parameters. The configuration file is parsed using jquery in index.jsp and handed over as parameters to the flash swf-file. It is now possible to add new native algorithms to the project only by defining the parameters in this configuration file. You can find a documentation on how to use this structure in the file **baseDir/servlet_howto.txt**.
+
+
+
+##3. Implement a more convenient way of entering a matrix.##
+
+The Matrix Editor was redesigned and adjusted to the functionality published on [http://www.csc.liv.ac.uk/~rahul/form.html ](http://www.csc.liv.ac.uk/~rahul/form.html  "http://www.csc.liv.ac.uk/~rahul/form.html "). Moreover the editor automatically aligns columns and fills empty cells with zero values (Auto complete of strategies). It automatically updates the second player matrix according to the game mode.
+
+![Matrix Editor](https://dl.dropbox.com/u/67910030/matrix_editor.png)
+
+The new functionality of Random Payoffs has been moved from the canvas area to the editor area, because games in strategic form are always changed in the matrix editor (until now). Only games in extensive form are changed directly on the canvas pane. 
+
+# PART II - **Improve usability**#
+
+##1. Add user management##
+This task has not bee implemented due to low priority and time constraints.
+
+##2. Estimate the computation time of a calculation ##
+
+Unfortunately Flash is single threaded, thus there is no way to monitor a started batch process with a second thread. To avoid long computation times (which are exponential for some equilibria calculations) an estimation is made for the native algorithm by Rahul using the estimator described in [http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html#Estimation](http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html#Estimation "http://cgm.cs.mcgill.ca/~avis/C/lrslib/USERGUIDE.html#Estimation"). Before the algorithm is started the user is asked if she/he wants to wait for the estimated computation time. However in the configuration file (webservices.xml) each servlet has a parameter which indicates the maximum computation time that is allowed, even if the user wants to wait. This feature was added to avoid undesired usage of computation time, if GTE is later published on the internet and everyone can run an algorithm.
+
+##3. Add existing games (like the prisoners dilemma) and a tutorial ##
+
+Rather than adding existing games to GTE a tutorial in terms of a video has been made. This video shows how to create a game tree and run algorithms in GTE. This video is available on youtube [http://www.youtube.com/watch?v=2mN1iLr9FHk](http://www.youtube.com/watch?v=2mN1iLr9FHk "http://www.youtube.com/watch?v=2mN1iLr9FHk").
+
+##4. Add welcome page##
+
+A new website was created for easy access of GTE (**baseDir/builder/index_web.jsp**). This website directly links to:
+
+- GTE: use the GTE directly
+- Tutorial: Youtube video as an embedded stream
+- Download: Download the war-file for jetty or the Jetty-Server including the war-fiel and all native algorithms or download the source code from github
+
+![GTE new website](https://dl.dropbox.com/u/67910030/gte_website.png)
+
+##5. Create an installation package##
+The installation package is two folded:
+
+- Developer
+- User
+
+Because GTE incorporates four different languages:
+
+- ActionScript/Flas for the front-end
+- Java-Servlets for the backend
+- Javascript for the website
+- C for native algorithms
+
+The installation process differs mainly between developers and users. The installation process  (including Flash, Jetty Server, Java, C-compiler etc.) is described in the **baseDir/README** file. The Ant build file was adjusted to fit several needs for the developer:
+
+- Compile only the front-end
+- Compile only the backend
+- Compile only native code
+- Mix of the three above
+- Compile an publish automatically to a Jetty Server
+- Publish automatically a war file for the nightly build
+- Publish automatically a zip file including Jetty-Server, native algorithms and the war-file for easy installation
+
+In addition to the new ANT targets a nightly script (**baseDir/gte-update-nigthly**) has been developed which can be run as a cron-job, fetch the latest version of GTE from github and compile a fresh war-file or jetty-zip-file for publishing on a website.
+
+#Improve the GUI usability
+Several GUI improvements have been made during continuous testing:
+
+- The switch between extensive and strategic form and how to edit each one of them is now more sophisticated.
+- The Matrix Editor can handle different column separators. The separator can be specified in the system settings (default: one blank).
+- Auto Zoom: The extensive and strategic form is now automatically adjusted to fit into the screen size
+- Square layout: The squares to display the matrix in strategic form are now actually squares and not rectangles if payoffs are more than 2 digits.
+- Decimal places: In extensive and strategic form the user can switch between displaying numbers as a rational number (3/5) or as a decimal number (0.6)
+
+#PART III - **Improve the game creation and solving process**
+
+Rather than focusing on how to display results and equilibria or developing a method on how to incorporate analysis elements into GTE, PART III mainly consists of a new GUI design and a completely different game creation process (extensive games)
+
+##1. NEWGUI 
+
+The NEWGUI propose by Bernhard von Stengel  ([http://www.maths.lse.ac.uk/Personal/stengel/NEWGUI/](http://www.maths.lse.ac.uk/Personal/stengel/NEWGUI/)) follows a more intuitive design of extensive game  by dividing the process in five steps: 
+
+
+- Create a tree
+- Assign players
+- Determine infosets
+- Assign moves/strategy names
+- Assign payoffs
+
+![NEWGUI Toolbar](https://dl.dropbox.com/u/67910030/toolbar.png)
+
+The NEWGUI give more direction on how to create a game rather than offer only a root node a bunch of functionalities to manipulate the game. During the implementation of the NEWGUI a couple of new features were introduced, too:
+
+- Auto labeling of move names can be executed to override all move names
+- Payoffs can be enumerated from left ro right
+- Move names and payoffs can be now changed **in place** on the canvas pane, rather than using an edit window.
+- Player names can be changed
+- The orientation of the tree can now be changed in the system settings rather than on the toolbar
+- New design of various icons for the new toolbar of the NEWGUI
+- Adjusted fonts to a non-serif one (Helvetica)
+
+##2. Enhanced functionality of adding parameters
+
+In the extensive mode it's now possible to add one parameter to a game. This parameter is incremented in integer steps by one and on each step the desired algorithm is executed. The output shoes for each concrete value of the parameter the outcome of the algorithm. This serves as a first implementation on how to include parameters into the game tree.
+
+![Game tree with parameters](https://dl.dropbox.com/u/67910030/parameter.png)
+
+Moreover a new Test Editor was created for the strategic layout of a game. You can generate large matrices with only a few clicks and create large random strategic form games.
+
+![Test Editor](https://dl.dropbox.com/u/67910030/testeditor.png)
+##3. Implement a more sophisticated representation of the results
+
+Due to time constraints this task has not been started.
+
+##4. Design a showcase example of a process
+
+Due to time constraints this task has not been started.
+
+#Future work
+
+##1. Framework?
+Until now the development of the GTE is divided into two elements: Programming the front-end (ActionScript) and programming the backend (Java). This is not the best solution, because you need two separate projects - one associated with FLEX and one with JAVA. This makes life very complicated and in addition the front-end development can only be conducted with a specific FLEX framework, because new frameworks of FLEX will crash (don't know the reason). Again, I would raise the question to think about redesign GTE in a different framework.
+
+##2. Loosely coupled redesign?
+With all the new functionality the GTE program has become pretty hard to understand. Originally it was not designed as an open source project with many contributors. The GTE code (ActionScript) is highly coupled. This means changes are hard to implement and will affect several places. Unfortunately the NEWGUI has eliminated the feature to add more than 2 players to the game. From my point of view - GTE has to be rewritten to be fully functionally with more than 2 players and in addition to support parameters instead of concrete payoffs. I recommend redesigning how nodes and outcomes are implemented before adding any more functionality (this will affect roughly every part of GTE)
+
+##3. Public server
+A public server should be prepared to host the complete GTE application and make it easy accessible. Although the ANT targets and nightly scripts are in place, they still need to be fine tuned to work on the dedicated server. 
+
+
+
+
+
