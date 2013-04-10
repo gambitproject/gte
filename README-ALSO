@@ -81,8 +81,12 @@ the command
     ant makeWarFile   
 
 which creates the file    gte.war   which contains the
-client program.
-To see what does, reload the client program in your browser at the URL
+client program. This is what needs to be run whenever you change the GUI.
+If you also change the server side, run
+
+    ant makeProductive
+    
+To see the change, reload the client program in your browser at the URL
 
     http://127.0.0.1:8080/gte/
 
