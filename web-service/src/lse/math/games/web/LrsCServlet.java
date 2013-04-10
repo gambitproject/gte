@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -42,6 +44,8 @@ public class LrsCServlet extends AbstractRESTServlet
 	private String program2="";
 	//program3=Estimate process time
 	private String program3="";
+	//program4=Clique process
+	private String program4="";
 	
 	public void init(ServletConfig config) 
 	throws ServletException
@@ -52,10 +56,12 @@ public class LrsCServlet extends AbstractRESTServlet
 			program1="prepare_nash.exe";
 			program2="nash.exe";
 			program3="lrs.exe";
+			program4=""; //clique binary not yet working under windows os
 		} else {
 			program1="prepare_nash";
 			program2="nash";
 			program3="lrs";
+			program4="coclique3";
 		}
 		
 	}
@@ -193,9 +199,11 @@ public class LrsCServlet extends AbstractRESTServlet
 							response.getWriter().println("EE = Extreme Equilibrium, EP = Expected Payoffs");
 							response.getWriter().println("");
 							response.getWriter().println("Rational:");
-							response.getWriter().println(formatOutput(processOutput(consoleOutput,true)));
+							StringBuilder clique=new StringBuilder();
+							response.getWriter().println(formatOutput(processOutput(consoleOutput,true,clique)));
 							response.getWriter().println("Decimal:");
-							response.getWriter().println(formatOutput(processOutput(consoleOutput,false)));
+							response.getWriter().println(formatOutput(processOutput(consoleOutput,false,clique)));
+							response.getWriter().println(processClique(pathToAlgo,clique));
 						}
 					} catch (Exception ex) {
 						response.getWriter().println(ex.getMessage());
@@ -385,12 +393,84 @@ public class LrsCServlet extends AbstractRESTServlet
 		Rational.printRow(name, value, colpp, excludeZero);	
 	}
 	
-	private String processOutput(String s,Boolean rational){
+	private String processClique(String pathToAlgo,StringBuilder cliqueInput){
+		String ret=new String("");
+		File[] f= new File[2]; 
+		
+		//Not working on windows
+		if (program4.equals(""))
+			return ret;
+		
+		try {
+			//Create the tempfiles
+			for (int i=0;i<2;i++){
+				f[i]=File.createTempFile("clique","lrs");
+				log.info(f[i].getCanonicalPath());
+			}
+			//Write cliqueInput to File
+			FileWriter fstream= new FileWriter(f[0]);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(cliqueInput.toString());
+			out.close();
+			
+			Runtime rt=Runtime.getRuntime();
+			Process p=null;
+
+			//Call external program 
+			String[] cmdArray1 = new String[]{pathToAlgo+program4, 
+					"<"+f[0].getCanonicalPath()};
+			p = rt.exec(pathToAlgo+program4);
+			
+			OutputStream os = p.getOutputStream();
+		    OutputStreamWriter osr = new OutputStreamWriter(os);
+		    BufferedWriter bw=new BufferedWriter(osr);
+		    bw.write(cliqueInput.toString());
+		    bw.flush();
+		    bw.close();
+		
+					
+			String line;
+			String lineSeparator = System.getProperty("line.separator");
+			BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				while ((line = bri.readLine()) != null) {
+					ret+=line+lineSeparator;
+			      }
+			bri.close();
+			p.waitFor();
+			
+			
+		} catch (IOException e1){
+			log.log(Level.SEVERE,e1.toString());
+		} catch(Throwable e2)	{
+		log.log(Level.SEVERE,e2.toString());
+		} finally {
+			//Delete files
+			for (int i=0;i<2;i++){
+				if (f[i]!=null) {
+					f[i].delete();
+				}
+			}
+			
+		}
+		
+		return ret;
+	}
+	
+	private String processOutput(String s,Boolean rational,StringBuilder clique_string){
+		
 		String lines[] = s.split("\\r?\\n");
 		String ts="";
 		Boolean start=false;
 		int eq=0;
 		String ret="";
+		if (clique_string==null){
+			clique_string=new StringBuilder();
+		} else {
+			clique_string.setLength(0);
+		}
+		LinkedList<String> indexP1=new LinkedList<String>();
+		LinkedList<String> indexP2=new LinkedList<String>();
+		
 		for (int i=0;i<lines.length;i++){
 			if ((lines[i]!=null) && (lines[i].length()>=5) && (lines[i].substring(0,4).equals("*Num"))) {
 				start=false;
@@ -437,7 +517,32 @@ public class LrsCServlet extends AbstractRESTServlet
 						}
 					}	
 					
+										
 					for (int k1=0;k1<lp1.size();k1++) {
+						
+						String iP1=lp1.get(k1);
+						String iP2=lp2.get(k1);
+						int indexEqP1=0;
+						int indexEqP2=0;
+						
+						for (int n=0;n<indexP1.size();n++){
+							if (indexP1.get(n).equals(iP1))
+								indexEqP1=n+1;
+						}
+						if (indexEqP1==0){
+							indexP1.add(iP1);
+							indexEqP1=indexP1.size();
+						}
+						
+						for (int n=0;n<indexP2.size();n++){
+							if (indexP2.get(n).equals(iP2))
+								indexEqP2=n+1;
+						}
+						if (indexEqP2==0){
+							indexP2.add(iP2);
+							indexEqP2=indexP2.size();
+						}
+						
 						String p2[] = lp1.get(k1).split("\\s+");
 						String p1[] = lp2.get(k1).split("\\s+");
 						
@@ -445,7 +550,8 @@ public class LrsCServlet extends AbstractRESTServlet
 							eq++;
 						}
 						
-						ret+="EE "+eq+" P1: ("+eq+") ";
+						ret+="EE "+eq+" P1: ("+indexEqP1+") ";
+						clique_string.append(indexEqP1+" ");
 						
 						for (int j=1;j<p2.length-1;j++){
 							if (rational) {
@@ -469,7 +575,9 @@ public class LrsCServlet extends AbstractRESTServlet
 							ret+="EP= "+ts+" ";
 						}
 						
-						ret+="P2: ("+eq+") ";
+						ret+="P2: ("+indexEqP2+") ";
+						clique_string.append(indexEqP2);
+						clique_string.append(System.getProperty("line.separator"));
 
 						for (int j=1;j<p1.length-1;j++){
 							if (rational) {
