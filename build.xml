@@ -311,6 +311,13 @@
 	<target name="copy-package-war-dist" depends="create-package">	
 		<copy file="${build.dir}/${war.name}.war" todir="${WAR_DIST_DIR}" overwrite="true" />
 	</target>
+
+	<target name="makeWithoutServer" depends="create-package">	
+		<zip destfile="${GTE_WSC}/gte_wsc.zip"
+			basedir="${gui.build.dir}">		
+		</zip>	
+	</target>
+
 	
 	<target name="copy-package-jetty-dist" depends="create-package">
 		
