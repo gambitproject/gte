@@ -511,6 +511,7 @@ package lse.math.games.builder.model
 		}
 		
 		
+		
 		private var autoLabel:Number=0;
 		public function setPlayerPayoffsAuto(zeroSum:Boolean,firstPlayer:Player,reset:Boolean):void
 		{
