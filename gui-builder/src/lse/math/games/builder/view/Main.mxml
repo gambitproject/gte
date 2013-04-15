@@ -1102,9 +1102,9 @@
 				if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
 				{
 					if (ngMovesPlayer==1) {
-						controller.grid.setPlayerMoves(controller.grid.firstPlayer,PromptTextInputCanvas.lastEnteredText);
+						controller.grid.setPlayerMoves(controller.grid.firstPlayer,PromptTextInputCanvas.lastEnteredText.replace("\s+/g"," "));
 					} else if (ngMovesPlayer==2) {
-						controller.grid.setPlayerMoves(controller.grid.firstPlayer.nextPlayer,PromptTextInputCanvas.lastEnteredText);
+						controller.grid.setPlayerMoves(controller.grid.firstPlayer.nextPlayer,PromptTextInputCanvas.lastEnteredText.replace("\s+/g"," "));
 					} 
 					controller.invalidate(true, false, true);
 				}
@@ -1119,9 +1119,9 @@
 				if(PromptTextInputCanvas.lastEnteredText!=null && PromptTextInputCanvas.lastEnteredText!="")
 				{
 					if (ngPayoffsPlayer==1) {
-						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer,PromptTextInputCanvas.lastEnteredText);
+						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer,PromptTextInputCanvas.lastEnteredText.replace("\s+/g"," "));
 					} else if (ngPayoffsPlayer==2) {
-						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer.nextPlayer,PromptTextInputCanvas.lastEnteredText);
+						controller.grid.setPlayerPayoffs(controller.grid.firstPlayer.nextPlayer,PromptTextInputCanvas.lastEnteredText.replace("\s+/g"," "));
 					} 
 					controller.invalidate(true, false, true);
 				}
