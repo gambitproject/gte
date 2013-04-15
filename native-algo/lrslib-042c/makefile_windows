@@ -39,7 +39,7 @@ all:	lrs.c lrslib.c lrslib.h lrsmp.c lrsmp.h lrslong.c lrslong.h redund.c buffer
 #	gcc-3 -Wall -O3 -o fourier  fourier.c lrslib.c lrsmp.c
 	gcc-3 -O3 -o buffer buffer.c
 	gcc-3 -O3 -o 2nash 2nash.c
-	gcc-3 -O3 -DTIMES -DSIGNALS -DLONG -o coclique3  coclique3.c
+	gcc-3 -Wl,--stack,14194304 -O3 -DTIMES -DSIGNALS -DLONG -o coclique3  coclique3.c
 
 gmp:	fourier.c 2gnash.c lrs.c redund.c lrslib.h lrslib.c lrsgmp.h lrsgmp.c nash.c
 	gcc-3 -O3 -static -DTIMES -DSIGNALS  -DGMP -I${INCLUDEDIR} lrs.c lrslib.c lrsgmp.c -L${LIBDIR}  -lgmp -o glrs
