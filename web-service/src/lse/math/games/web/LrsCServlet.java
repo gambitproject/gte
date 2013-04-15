@@ -56,7 +56,7 @@ public class LrsCServlet extends AbstractRESTServlet
 			program1="prepare_nash.exe";
 			program2="nash.exe";
 			program3="lrs.exe";
-			program4=""; //clique binary not yet working under windows os
+			program4="coclique3.exe"; 
 		} else {
 			program1="prepare_nash";
 			program2="nash";
