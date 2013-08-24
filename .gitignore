@@ -1,2 +1,8 @@
 build
 /build.properties
+html-template
+bin-debug
+/.flexProperties
+/.project
+/.actionScriptProperties
+.settings
