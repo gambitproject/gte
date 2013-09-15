@@ -1021,7 +1021,7 @@
 						 verticalAlign="middle"/>
 				
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="150" text="Number of strategies: " verticalAlign="middle"/>
+					<s:Label height="20" width="150" text="NNumber of strategies: " verticalAlign="middle"/>
 					<s:TextInput tabIndex="1" editable="{p1_numb_editable}" id="pl1Dimensions" width="60" widthInChars="22" text="{dimensions1}" change="createEmptyArrayString(pl1Dimensions.text,pl2Dimensions.text);dataChanged=true;" contentBackgroundColor="{p1cbg}" />
 					<s:Label height="20" width="100%" text="(rows)" verticalAlign="middle"/>
 				</s:HGroup>	
