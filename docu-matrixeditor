@@ -1,0 +1,58 @@
+For strategic-form input:
+Behavior w.r.t. keyboard input
+
+Player 1:
+Number of strategies [numstrats1]
+Strategy names       [names1]
+Payoffs              [payoffs1]
+
+Player 2:
+Number of strategies [numstrats2]  <disabled for symmetric games>
+Strategy names       [names2]
+Payoffs              [payoffs2]    <disabled for zero-sum and symmetric ames>
+
+[numstrats1] and [numstrats2]
+permitted entries: integer 1 to 26 (later to be expanded)
+default values: 3 for both (can be changed)
+
+reaction after <ENTER> key: 
+- updates the rows/columns of the two payoff matrices:
+  - If FEWER rows than before: truncate the DISPLAY of what
+    was shown before, but do NOT change or reset the
+    additional rows 
+  - If MORE rows than before: expand the display with what
+    was in the matrix before (0 at initialization).
+- updates the strategy names:
+  truncates/expands the displayed list of strategy names
+- skip to next tab entry
+
+[names1] and [names2]:
+default values:  A-Z and a-z
+reaction after <ENTER> key:
+- skip to next tab entry
+
+default values reset with <RESET> button
+
+[payoffs1] and [payoffs2]:
+reaction after <ENTER> key:
+- newline in text entry but do not leave input area
+
+clicking on the bottom [confirm payoffs] button:
+- read all input fields
+- react as if [numstrats1] and [numstrats2] have been
+  clicked, i.e. adjust strategy names list and row and
+  columns
+- convert to fraction or decimal according to current
+  setting
+- adjusting column widths
+
+clicking the [zerosum] or [symmetric game] button:
+- grey out [payoffs2] (non-editable), but do not
+  change entries until "confirm payoffs" or change of
+  rows/columns with <ENTER> key
+  (reason: this leaves the payoffs untouched if those
+  buttons are clicked accidentally)
+clicking the [symmetric game] button:
+- grey out [numstrats2]
+
+
