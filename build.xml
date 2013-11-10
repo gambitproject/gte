@@ -311,6 +311,13 @@
 	<target name="copy-package-war-dist" depends="create-package">	
 		<copy file="${build.dir}/${war.name}.war" todir="${WAR_DIST_DIR}" overwrite="true" />
 	</target>
+
+	<target name="makeWithoutServer" depends="create-package">	
+		<zip destfile="${GTE_WSC}/gte_wsc.zip"
+			basedir="${gui.build.dir}">		
+		</zip>	
+	</target>
+
 	
 	<target name="copy-package-jetty-dist" depends="create-package">
 		
@@ -347,16 +354,18 @@
   		<copy file="${lib.proj.native.algo}/nash.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
   		<copy file="${lib.proj.native.algo}/prepare_nash.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
   		<copy file="${lib.proj.native.algo}/lrs.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
-  		
+  		<copy file="${lib.proj.native.algo}/coclique3.exe"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
   		<copy file="${lib.proj.native.my}/test.bat"  todir="${JETTY_HOME}/${lib.proj.native.my}" overwrite="true" />
 	</target>
  
 	<target name="-copyUnixFiles" if="isUnix">
   		<copy file="${lib.proj.native.algo}/nash"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
 		<copy file="${lib.proj.native.algo}/prepare_nash"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
+		<copy file="${lib.proj.native.algo}/coclique3"  todir="${JETTY_HOME}/${lib.proj.native.algo}" overwrite="true" />
 		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/nash" perm="700"/>
 		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/prepare_nash" perm="700"/>
 		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/lrs" perm="700"/>
+		<chmod file="${JETTY_HOME}/${lib.proj.native.algo}/coclique3" perm="700"/>
 		
 		<copy file="${lib.proj.native.my}/test.sh"  todir="${JETTY_HOME}/${lib.proj.native.my}" overwrite="true" />
 		<chmod file="${JETTY_HOME}/${lib.proj.native.my}/test.sh" perm="700"/>

@@ -389,7 +389,7 @@ package lse.math.games.builder.model
 						var newLabel:String=movesToSet.substring(0,pos);
 						newLabel=StringUtil.trim(newLabel);
 						y.reachedby.label=newLabel;
-						movesToSet=movesToSet.substring(pos+1);
+						movesToSet=StringUtil.trim(movesToSet.substring(pos+1));
 					} else if (movesToSet!=""){
 						if (StringUtil.trim(movesToSet)!="") {
 							y.reachedby.label=StringUtil.trim(movesToSet);
@@ -495,7 +495,7 @@ package lse.math.games.builder.model
 							if (y.outcome==null)
 								y.makeTerminal();
 							y.outcome.setPay(value,Rational.parse(newLabel));
-							payoffsToSet=payoffsToSet.substring(pos+1);
+							payoffsToSet=StringUtil.trim(payoffsToSet.substring(pos+1));
 					}  else if (payoffsToSet!=""){
 						if (StringUtil.trim(payoffsToSet)!="") {
 								if (y.outcome==null)
@@ -509,6 +509,7 @@ package lse.math.games.builder.model
 				y = y.sibling;
 			}	
 		}
+		
 		
 		
 		private var autoLabel:Number=0;
