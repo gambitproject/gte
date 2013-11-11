@@ -203,19 +203,31 @@ package lse.math.games.builder.viewmodel
 				g.drawLine(n.xpos, n.ypos, father.xpos, father.ypos) ;
 			}
 			
-			if (n.outcome == null) {
+			if (n.outcome == null) {  // not an outcome node
 				g.color = getNodeColor(n, grid, selectionFound);
-				if (n.mode==0) {
+				if (n.mode==0) { // seems to be never set, see line 59/60 of Node.as
+                    g.color = 0xFFFF00; //magenta
 					g.fillCircle(n.xpos, n.ypos, this.scale * grid.nodeDiameter / 2);
 				} else if (n.iset.player == Player.CHANCE) {	
-					if (((glbSettings.getValue("SYSTEM_ENABLE_GUIDANCE")) &&
-						(glbSettings.getValue("SYSTEM_MODE_GUIDANCE")>0)) &&
-						(n.isLeaf)
-					   ) {
-						
-					} else {
-							g.fillRect(n.xpos - this.scale * grid.nodeDiameter/2, n.ypos - scale * grid.nodeDiameter/2, scale * grid.nodeDiameter, scale * grid.nodeDiameter);
-					}
+                    // decide if this is an unassigned player
+					//if (((glbSettings.getValue("SYSTEM_ENABLE_GUIDANCE")) &&
+                    //		(glbSettings.getValue("SYSTEM_MODE_GUIDANCE")>0)) // not TREE stage
+                    //        && (n.isLeaf)
+					if (
+                        ((glbSettings.getValue("SYSTEM_MODE_GUIDANCE")==0)
+                        && n.isLeaf)   //  leaf at TREE stage
+                    ||  // chance move with NaN move probability
+                        (!(n.isLeaf) && (n.firstChild.reachedby.prob==Rational.NaN))
+                       ){
+                    g.color = 0x000000; //black;  unassigned color could be e.g. 0xFFCC00; //golden
+					g.fillCircle(n.xpos, n.ypos, this.scale * grid.nodeDiameter / 2);
+					} else { 
+                    // draw as square chance node
+							if (!n.isLeaf) {
+                              g.fillRect(n.xpos - this.scale * grid.nodeDiameter/2,
+                              n.ypos - scale * grid.nodeDiameter/2, scale * grid.nodeDiameter, scale * grid.nodeDiameter);
+                            }
+                           }
 				} else {	
 					g.fillCircle(n.xpos, n.ypos, this.scale * grid.nodeDiameter / 2);
 				}
@@ -227,7 +239,7 @@ package lse.math.games.builder.viewmodel
 		private function getNodeColor(n:Node, grid:TreeGrid, isSelected:Boolean):uint
 		{
 			var color:uint = isSelected ? 0xFFD700 : 0x000000;
-			if (n.mode==0) {
+			if (n.mode==0) { // seems to be never set, see line 59/60 of Node.as
 				color = 0x000000;
 			} else 
 			if (!isSelected && n.iset != null && n.iset.player != Player.CHANCE) {
