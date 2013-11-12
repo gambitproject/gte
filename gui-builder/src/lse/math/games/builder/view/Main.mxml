@@ -787,7 +787,7 @@
 				}
 				controller.invalidate(true,false,true);
 				if ((editMode==1) || (tabNavigator.selectedIndex==1)) {
-					matrixEditor.onlyAlignStrategy();
+					matrixEditor.alignStrategy();
 				}
 			}			
 			
@@ -1287,11 +1287,14 @@
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="13"/>
 			
+            <!--  // Disable UNDO and REDO buttons
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" 
 					   click="controller.undo()" />
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" 
 					   click="controller.redo()" />				
+            -->
 			<mx:Spacer width="13"/>	
+
 			
 			<mx:Spacer width="60"/>
 			<s:HGroup id="arrowMenu" >
