@@ -15,7 +15,6 @@
 			
 			import util.Log;
 
-			
 			/**
 			 * <b>INSTRUCTIONS</b>
 			 * <p>Adding a new Setting</p>
@@ -131,13 +130,13 @@
 				fileSettings.reset();
 				STORE_SETTINGS_LOCALLY.selected = glbSettings.getValue(SCodes.STORE_SETTINGS_LOCALLY) as Boolean;
 				outputDispGroup.selectedValue = (glbSettings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean)?'flash':'HTML';
-				MINIMUM_BUFFER_SIZE.value = glbSettings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int;
+				// MINIMUM_BUFFER_SIZE.value = glbSettings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int;
 				AUTOSAVE_ENABLED.selected = glbSettings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;
 				AUTOSAVE_INTERVAL.enabled = glbSettings.getValue(SCodes.AUTOSAVE_ENABLED) as Boolean;
 				AUTOSAVE_INTERVAL.text = ''+(glbSettings.getValue(SCodes.AUTOSAVE_INTERVAL) as int);
 				AUTOADJUST_ENABLED.selected = glbSettings.getValue(SCodes.TREE_AUTO_ADJUST) as Boolean;
-				MATRIX_DELIMETER.text = glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
-				SYSTEM_ENABLE_GUIDANCE.selected = glbSettings.getValue(SCodes.SYSTEM_ENABLE_GUIDANCE) as Boolean;
+				// MATRIX_DELIMETER.text = glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
+				// SYSTEM_ENABLE_GUIDANCE.selected = glbSettings.getValue(SCodes.SYSTEM_ENABLE_GUIDANCE) as Boolean;
 				SYSTEM_MAX_PAYOFF.text = String(glbSettings.getValue(SCodes.SYSTEM_MAX_PAYOFF));
 				SYSTEM_DECIMAL_PLACES.text = String(glbSettings.getValue(SCodes.SYSTEM_DECIMAL_PLACES));
 				
@@ -212,10 +211,12 @@
 											
 											creationComplete="outputDispGroup.selectedValue = (glbSettings.getValue(SCodes.DISPLAY_OUTPUT_INTERNALLY) as Boolean)?'flash':'HTML'"/>
 						</mx:FormItem>
+                        <!-- // No Memory heading, no undoable actions
 						<mx:FormHeading label="Memory" />
 						<mx:FormItem label="Guaranteed undoable actions">
 							<s:HGroup verticalAlign="middle">
-								<s:Spinner id="MINIMUM_BUFFER_SIZE" toolTip="This is the minimum of actions that will be undoable. If the program runs smoothly, the actual number of undoable actions might be bigger."
+								<s:Spinner id="MINIMUM_BUFFER_SIZE"
+                                toolTip="This is the minimum of actions that will be undoable. If the program runs smoothly, the actual number of undoable actions might be bigger."
 										   minimum="1" maximum="40" snapInterval="1"
 										   
 										   creationComplete="MINIMUM_BUFFER_SIZE.value = glbSettings.getValue(SCodes.MINIMUM_BUFFER_SIZE) as int"
@@ -226,6 +227,7 @@
 								<s:Label text="{MINIMUM_BUFFER_SIZE.value}"/>
 							</s:HGroup>
 						</mx:FormItem>
+                        -->
 						<mx:FormItem label="Autosave">
 							<s:HGroup>
 								<s:CheckBox id="AUTOSAVE_ENABLED" 
@@ -254,15 +256,18 @@
 											
 											change="setGlobalSetting(SCodes.TREE_AUTO_ADJUST, AUTOADJUST_ENABLED.selected);" />
 						</mx:FormItem>
-						<mx:FormItem label="Matrix Delimeter">
-							<s:TextInput id="MATRIX_DELIMETER" 
-										toolTip="Sets the Matrix Delimeter."
-										
-										creationComplete="MATRIX_DELIMETER.text =
-										glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;"
-										
-										change="setGlobalSetting(SCodes.EDITOR_MATRIX_DELIMETER, MATRIX_DELIMETER.text);" />
-						</mx:FormItem>
+                        <!--  // No Matrix Delimiter characters
+  						<mx:FormItem label="Matrix Delimeter">
+  							<s:TextInput id="MATRIX_DELIMETER" 
+  										toolTip="Sets the Matrix Delimeter."
+  										
+  										creationComplete="MATRIX_DELIMETER.text =
+  										glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;"
+  										
+  										change="setGlobalSetting(SCodes.EDITOR_MATRIX_DELIMETER, MATRIX_DELIMETER.text);" />
+  						</mx:FormItem>
+                        -->
+                        <!-- // No Guidance please
 						<mx:FormItem label="Enable guidance">
 							<s:CheckBox id="SYSTEM_ENABLE_GUIDANCE" 
 										toolTip="Enable this option and experience how to create a game tree."
@@ -273,7 +278,8 @@
 										
 										change="setGlobalSetting(SCodes.SYSTEM_ENABLE_GUIDANCE, SYSTEM_ENABLE_GUIDANCE.selected);" />
 						</mx:FormItem>
-						<mx:FormItem label="Max Payoff">
+                        -->
+						<mx:FormItem label="Max Random Payoff">
 							<s:TextInput id="SYSTEM_MAX_PAYOFF" 
 										 toolTip="Sets the maximum payoff for random payoffs."
 										 
@@ -281,8 +287,7 @@
 										 String(glbSettings.getValue(SCodes.SYSTEM_MAX_PAYOFF));"
 										 
 										 change="setGlobalSetting(SCodes.SYSTEM_MAX_PAYOFF, Number(SYSTEM_MAX_PAYOFF.text));" />
-						</mx:FormItem>
-						
+						</mx:FormItem> 
 						
 						<mx:FormItem label="Decimal places">
 							<s:HGroup>
@@ -296,6 +301,7 @@
 							</s:HGroup>								
 						</mx:FormItem>
 						
+                        <!--  // don't want Move Labels BFS or DFS choice
 						<mx:FormItem label="MOVE LABELS">
 							<s:VGroup>
 								<s:RadioButton groupName="LABELING" 
@@ -327,12 +333,13 @@
 							
 							
 						</mx:FormItem>
+                        -->
 					</mx:Form>
 				</s:Group>
 			</s:NavigatorContent>	
 			
-			<!-- Current file graphic settings tab -->
-			<s:NavigatorContent width="100%"  label="Current file graphic settings" >
+			<!-- Current graphic settings tab -->
+			<s:NavigatorContent width="100%"  label="Current graphic settings" >
 				<s:Group x="10" y="10" width="95%" height="95%">
 					<s:VGroup>
 					<mx:Form width="100%" height="100%" >
@@ -602,4 +609,4 @@
 			-->
 
 		</mx:TabNavigator>
-</s:TitleWindow>
+</s:TitleWindow> 
