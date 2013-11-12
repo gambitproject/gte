@@ -41,7 +41,6 @@
 			
 			private var payoffMatrix1:Array;
 			private var payoffMatrix2:Array;
-			private var payoffMatrix3:Array;
 			
 			private var maxColumns:int;
 			
@@ -57,7 +56,7 @@
 			[Bindable]
 			private var pl2NumStr:int;
 			[Bindable]
-			private var pl2PayMapStr:String;
+			private var pl2PayMapStr:String; 
 			
 			[Bindable]
 			private var p1_strat_editable:Boolean=false;
@@ -75,12 +74,6 @@
 			private var p2_payoffs_editable:Boolean=false;
 
 			[Bindable]
-			private var dimensions1:String="";
-			
-			[Bindable]
-			private var dimensions2:String="";
-			
-			[Bindable]
 			private var p2_text_cbg:uint=0xffffff;
 			[Bindable]
 			private var p2_strat_cbg:uint=0xffffff;
@@ -96,12 +89,9 @@
 			private var dataChanged:Boolean = false;
 			//private var instyle:String="ZG";
 			
-			private var zerosum_mode:Boolean = true;
-			private var general_mode:Boolean = false;
+			private var zerosum_mode:Boolean = false;
+			private var general_mode:Boolean = true;
 			private var symmetric_mode:Boolean = false;
-			
-			
-			
 			
 			/** Matrix which is being edited */
 			public function set matrix(value:StrategicForm):void { 
@@ -115,18 +105,24 @@
 				
 				populate(0);
 				populate(1);
-				onlyAlignStrategy();
-	
-				
+
+				if (pl1NumStr == 1 && pl2NumStr == 1) { // 1x1 game from extensive form
+					setDefaultStrategicForm();
+					alignStrategy()
+				}
+
+				//var str = [pl1NumStr.toString(),pl2NumStr.toString()].join(" ")
+				//mx.controls.Alert.show(str); 
+
+				alignStrategy();
 			}
 			
 			public function init():void {
 				this.mouseEnabled=true;
-//1				this.skin.mouseEnabled=true;
+   				//this.skin.mouseEnabled=true;
 								
-				pl1PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP1Payoff);
-				pl2PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP2Payoff);
-			
+				//pl1PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP1Payoff);
+				//pl2PayMapStrBox.addEventListener(KeyboardEvent.KEY_DOWN,keyPressedP2Payoff);
 				
 				setEditableMode();
 			}
@@ -136,6 +132,13 @@
 			public function set controller(value:Presenter):void {
 				_controller = value;
 				
+			}
+
+			public function setDefaultStrategicForm():void {
+				pl1NumStr = 2;
+				pl2NumStr = 2;
+				pl1PayMapStr = "1 2 \n0 1";
+				pl2PayMapStr = "3 0 \n0 1";
 			}
 
 			public function setMode(isZero:Boolean):void {
@@ -198,20 +201,21 @@
 			//Update the alphabets from the text boxes and autolabelling the rest
 			private function updateAlphabets():void {
 				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
-				var inUse:Vector.<String> = new Vector.<String>();
+				var inUse1:Vector.<String> = new Vector.<String>();
+				var inUse2:Vector.<String> = new Vector.<String>();
 				
 				var strVec1:Vector.<String> = new Vector.<String>();
 				var strVec2:Vector.<String> = new Vector.<String>();
 				
 				for each(var st:String in pl1StratInput.text.split(delimeter)) {
 					if(st != null && st.length>0) {
-						inUse.push(st.toString().toLowerCase());
+						inUse1.push(st.toString().toLowerCase());
 						strVec1.push(st);
 					}
 				}
 				for each(st in pl2StratInput.text.split(delimeter)) {
 					if(st != null && st.length>0) {
-						inUse.push(st.toString().toLowerCase());
+						inUse2.push(st.toString().toLowerCase());
 						strVec2.push(st);
 					}
 				}
@@ -228,10 +232,8 @@
 						stratName = strVec1[i].toString()
 					else {
 						while(true){
-							
-			
 							stratName = al.getNextAutoLabel_Player1(_matrix);
-							if(inUse.indexOf(stratName.toLowerCase())<0)
+							if(inUse1.indexOf(stratName.toLowerCase())<0)
 								break;
 						}
 					}
@@ -246,7 +248,7 @@
 					else {
 						while(true){
 							stratName = al.getNextAutoLabel_Player2(_matrix);
-							if(inUse.indexOf(stratName.toLowerCase())<0)
+							if(inUse2.indexOf(stratName.toLowerCase())<0)
 								break;
 						}
 					}
@@ -404,14 +406,61 @@
 					return s;
 				}
 			}
-			
+
+			/** USES pl1NumStr and pl2NumStr
+			**/
+			private function createEmptyMatrix():Array {
+
+				var pm:Array=new Array(); 
+
+   				for(var i = 0; i < pl1NumStr; i++){
+					pm[i] = [];    
+					for(var j = 0; j < pl2NumStr; j++){ 
+						pm[i][j] = "0";    
+					}    
+				}
+				return pm;	
+			}
+
 			/**
-			 * Converts a string delimetered by returns (rows) and a column delimeter into an array (pm)
-			 *@param inputString:String payoffss in string representation
+			 * ASSUME SIZE UPFRONT
+			 * Converts a string delimited by returns (rows) and a column delimiter into an array (pm)
+			 *@param inputString:String payoffs in string representation
 			 *@param pm:Array - source array 
 			 *@author Martin  
 			 */	
-			private function convertToMatrix(inputString:String,pm:Array):void {
+			private function convertToMatrixFixed(inputString:String):Array {
+
+				var pm = createEmptyMatrix();
+				var temp = convertToMatrix(inputString);
+						
+				for (var i:int=0;i<pl1NumStr;i++) {
+					for (var j:int=0;j<pl2NumStr;j++) {
+						if (temp.length>0) {
+							if (i<temp.length) {
+								if (temp[i].length>0) {
+									if (j<temp[i].length) {
+										pm[i][j]=temp[i][j];
+									}
+								}
+							}
+						}
+					}
+				}
+				return pm;
+			}
+
+			/**
+			 * THIS VERSION DOES NOT ASSUME A FIXED SIZE UPFRONT
+			 * Converts a string delimited by returns (rows) and a column delimiter into an array (pm)
+			 *@param inputString:String payoffs in string representation
+			 *@param pm:Array - source array 
+			 *@author Martin  
+			 */	
+			private function convertToMatrix(inputString:String):Array {
+
+				var pm:Array=new Array(); 
+
 				var delimeter:String=glbSettings.getValue(SCodes.EDITOR_MATRIX_DELIMETER) as String;
 				var rows:Array = inputString.split("\n");
 				var line:String = rows.shift() as String;
@@ -434,6 +483,7 @@
 					}
 					line = rows.shift() as String;
 				}
+				return pm;
 			}
 			
 			
@@ -485,27 +535,22 @@
 				
 
 			}
-			
 			/**
-			 * Creates a negative array from pmFrom and copies it to pmTo
-			 *@param pmFrom:Array - source array 
-			 *@param pmTo:Array - destination array 
-			 *@author Martin  
+			 * Makes payoffMatrix2 the negative of payoffMatrix1 
+			 *@author Rahul  
 			 */	
-			private function makeNegative(pmFrom:Array,pmTo:Array):void {
+			private function makeNegative():void {
+
+				payoffMatrix2 = createEmptyMatrix();
 				
-				for (var i:int=0;i<pmFrom.length;i++){
-					var columns:Array=new Array();
-					for (var j:int=0;j<pmFrom[i].length;j++){
-						var r:Rational=Rational.parse(pmFrom[i][j]);
-						if(pmFrom[i][j] != null && r != Rational.NaN){
+				for (var i:int=0;i<payoffMatrix1.length;i++){
+					for (var j:int=0;j<payoffMatrix1[i].length;j++){
+						var r:Rational=Rational.parse(payoffMatrix1[i][j]);
+						if(payoffMatrix1[i][j] != null && r != Rational.NaN){
 							r=r.multiply(new Rational(-1,1));
-							columns.push(r.toString());	
+							payoffMatrix2[i][j] = r.toString();	
 						}
-						
-						
 					}
-					pmTo.push(columns)
 				}
 			}
 			
@@ -515,35 +560,19 @@
 			}
 			
 			/**
-			 * Generate random payoffs for array pmFrom and copy as negative numbers to array pmTo (copy==true) or create random
-			 * payoffs for array pmTo (copy==false)
-			 *@param pmFrom:Array - source array 
-			 *@param pmTo:Array - destination array (negative copy of pmFrom or random payoffs)
-			 *@param copy:Boolean - copy negativ array from pmFrom to pmTo (true) or create new random payoffs (false)   
-			 *@author Martin  
+			 * Return random payoff matrix 
+			 *@author Rahul 
 			 */	
-			private function makeRandom(pmFrom:Array,pmTo:Array,copy:Boolean):void {
-				var pay2:Rational=null;
-				for (var i:int=0;i<pmFrom.length;i++){
-					var columns:Array=new Array();
-					for (var j:int=0;j<pmFrom[i].length;j++){
-						if (copy)
-							pay2=Rational.parse(pmFrom[i][j]);
-						else
-							pay2=new Rational(randomInt(glbSettings.getValue("SYSTEM_MAX_PAYOFF") as Number), 1);
-						
-						if (zerosum_mode)					
-							pay2=pay2.negate();
-						
-						if (general_mode){
-							if (randomInt(2)==0){
-								pay2=pay2.negate();
-							}
-						}
-						columns.push(pay2.toString());	
+			private function createRandomMatrix():Array {
+
+				var pm = createEmptyMatrix()
+
+				for (var i:int=0;i<pl1NumStr;i++){
+					for (var j:int=0;j<pl2NumStr;j++){
+							pm[i][j]=new Rational(randomInt(glbSettings.getValue("SYSTEM_MAX_PAYOFF") as Number), 1);
 					}
-					pmTo.push(columns)
 				}
+				return pm;
 			}
 			
 			
@@ -553,78 +582,46 @@
 			 */	
 			public function generateRandomPayoffs():void
 			{
-				payoffMatrix1=new Array();
-				payoffMatrix2=new Array();
-				payoffMatrix3=new Array();
-				
-				
-				if (symmetric_mode) {	
-					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1,true);
-					payoffMatrix2=new Array();
-					makeRandom(payoffMatrix1,payoffMatrix2,false);
-					
-					payoffMatrix1=payoffMatrix2;
-					pl1PayMapStr=buildMatrixString(payoffMatrix1);
-					
-					payoffMatrix2=new Array();
-					makeTranspo(payoffMatrix1,payoffMatrix2);
-					pl2PayMapStr=buildMatrixString(payoffMatrix2);
-				} else if (zerosum_mode) {
-					
-					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1,true);
-					payoffMatrix2=new Array();
-					makeRandom(payoffMatrix1,payoffMatrix2,false);
-					
-					payoffMatrix1=payoffMatrix2;
-										
-					payoffMatrix2=new Array();
-					makeRandom(payoffMatrix1,payoffMatrix2,true);
-					
-					pl1PayMapStr=buildMatrixString(payoffMatrix2);
-					pl2PayMapStr=buildMatrixString(payoffMatrix1);
-					
-				} else if (general_mode) {
-					
-					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1,false);
-					payoffMatrix2=new Array();
-					makeRandom(payoffMatrix1,payoffMatrix2,false);
-					
-					payoffMatrix1=payoffMatrix2;
-					pl1PayMapStr=buildMatrixString(payoffMatrix1);
-					
-					payoffMatrix2=new Array();
-					convertToMatrix(pl2PayMapStr,payoffMatrix2);
-					fillWithZeros(payoffMatrix2,false);
-					payoffMatrix3=new Array();
-					makeRandom(payoffMatrix2,payoffMatrix3,false);
-					
-					payoffMatrix2=payoffMatrix3;
-					pl2PayMapStr=buildMatrixString(payoffMatrix2);
-					
+				payoffMatrix1 = createRandomMatrix(); // generate random matrix for player I
+				pl1PayMapStr  = buildMatrixString(payoffMatrix1)
+
+				if (general_mode) { // also generate random matrix for player II
+					payoffMatrix2 = createRandomMatrix();
+					pl2PayMapStr  = buildMatrixString(payoffMatrix2)
 				}
+				// zerosum_mode and symmetrix_mode dealt with by alignStrategy()
+				alignStrategy()
+			}
+
+			/**
+			 * Creates payoffMatrix2 as transpose of payoffMatrix1
+			 *@author Rahul  
+			 */	
+			private function makeSymmetric():void {
+
+				pl1NumStr = Math.max(pl1NumStr,pl2NumStr);
+				pl2NumStr = pl1NumStr;
+
+				payoffMatrix1 = convertToMatrixFixed(pl1PayMapStr);
+				
+				makeTranspose();
 			}
 			
 			
 			/**
-			 * Creates a transposed matrix from the array pmFrom and stores it to array pmTo
-			 *@param pmFrom:Array - source Array
-			 *@param pmTo:Array - destination array (transposed) 
-			 *@author Martin  
+			 * Creates payoffMatrix2 as transpose of payoffMatrix1
+			 *@author Rahul  
 			 */	
-			private function makeTranspo(pmFrom:Array,pmTo:Array):void {
+			private function makeTranspose():void {
+
+				payoffMatrix2 = createEmptyMatrix();
 				
-				for (var j:int=0;j<pmFrom[0].length;j++){
-					var columns:Array=new Array();
-					for (var i:int=0;i<pmFrom.length;i++){
-						columns.push(pmFrom[i][j]);
+				for (var i:int=0;i<payoffMatrix1.length;i++){
+					for (var j:int=0;j<payoffMatrix1[i].length;j++){
+							payoffMatrix2[j][i] = payoffMatrix1[i][j];
+						}
 					}
-					pmTo.push(columns);
-				}
 			}
-			
 			
 			/**
 			 * Create a String from the array of payoffs
@@ -703,96 +700,30 @@
 				var dp:Number = Math.pow(10, p);
 				return Math.round(dp * n) / dp;
 			}
-			
-			/**
-			 * Align the matrix in columns and rows for player 1 and player 2
-			 *  
-			 *@author Martin  
-			 */	
-			public function onlyAlignStrategy():void 
-			{
-				payoffMatrix1=new Array();
-				payoffMatrix2=new Array();
-				
-				convertToMatrix(pl1PayMapStr,payoffMatrix1);
-				fillWithZeros(payoffMatrix1,false);
-				pl1PayMapStr=buildMatrixString(payoffMatrix1)
-				
-				convertToMatrix(pl2PayMapStr,payoffMatrix2);
-				fillWithZeros(payoffMatrix2,false);
-				pl2PayMapStr=buildMatrixString(payoffMatrix2)
-				
-				pl1NumStr = payoffMatrix1.length;
-				if (payoffMatrix2.length>0) {
-					pl2NumStr = payoffMatrix2[0].length;
-				}else {
-					pl2NumStr =0;
-				}
-				
-				dimensions1=payoffMatrix1.length.toString();
-				if (payoffMatrix1.length>0) {
-					dimensions2=payoffMatrix1[0].length.toString();
-				}
-				updateAlphabets()
-					
-			}
-			
-			
+
 			/**
 			 * Align the matrix in columns and rows for player 1 and player 2 and update the strategy names
 			 *  
 			 *@author Martin  
 			 */	
-			private function alignStrategy():void 
+			function alignStrategy():void 
 			{
-				
-				payoffMatrix1=new Array();
-				payoffMatrix2=new Array();
+				payoffMatrix1 = convertToMatrixFixed(pl1PayMapStr);
 
-				
 				if (zerosum_mode) {
-					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1,false);
-					makeNegative(payoffMatrix1,payoffMatrix2);
-					pl1PayMapStr=buildMatrixString(payoffMatrix1)
-					pl2PayMapStr=buildMatrixString(payoffMatrix2)
-					
-					
+					makeNegative();
 				} else if (symmetric_mode) {
-					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1,true);
-					makeTranspo(payoffMatrix1,payoffMatrix2);
-					pl1PayMapStr=buildMatrixString(payoffMatrix1)
-					pl2PayMapStr=buildMatrixString(payoffMatrix2)
-					
+					makeSymmetric();
 				} else if (general_mode) {
-					convertToMatrix(pl1PayMapStr,payoffMatrix1);
-					fillWithZeros(payoffMatrix1,false);
-					pl1PayMapStr=buildMatrixString(payoffMatrix1)
-						
-						
-					convertToMatrix(pl2PayMapStr,payoffMatrix2);
-					fillWithZeros(payoffMatrix2,false);
-					pl2PayMapStr=buildMatrixString(payoffMatrix2)
-					
+					payoffMatrix2 = convertToMatrixFixed(pl2PayMapStr);
 				}
-				
-				pl1NumStr = payoffMatrix1.length;
-				if (payoffMatrix2.length>0) {
-					pl2NumStr = payoffMatrix2[0].length;
-				}else {
-					pl2NumStr =0;
-				}
-				
-				dimensions1=payoffMatrix1.length.toString();
-				if (payoffMatrix1.length>0) {
-					dimensions2=payoffMatrix1[0].length.toString();
-				}
+				pl1PayMapStr=buildMatrixString(payoffMatrix1)
+				pl2PayMapStr=buildMatrixString(payoffMatrix2)
+
 				updateAlphabets()
-				
 			}
 			
-			private function createEmptyArrayString(dim1:String,dim2:String):void {
+			private function updateNumberOfStrategies(dim1:String,dim2:String):void {
 				
 				var xdim:int=-1;
 				var ydim:int=-1;
@@ -816,74 +747,12 @@
 				} else {
 					return
 				}
-				
 				if ((xdim!=-1) && (ydim!=-1)) {
-					for (var i:int=0;i<xdim;i++){
-						var columns:Array=new Array();
-						for (var j:int=0;j<ydim;j++){
-							columns.push("0");
-						}
-						pm.push(columns);
-					}
-				}
-				
-				payoffMatrix1=new Array();
-				convertToMatrix(pl1PayMapStr,payoffMatrix1);
-						
-				for (var i:int=0;i<xdim;i++){
-					for (var j:int=0;j<ydim;j++){
-						if (payoffMatrix1.length>0){
-							if (i<payoffMatrix1.length) {
-								if (payoffMatrix1[i].length>0) {
-									if (j<payoffMatrix1[i].length) {
-										pm[i][j]=payoffMatrix1[i][j];
-									}
-								}
-							}
-						}
-					}
-				
-				}
-					
-										
-				pl1PayMapStr=buildMatrixString(pm);
-				
-					
-				
-				
-				pm=new Array();
-				if ((xdim!=-1) && (ydim!=-1)) {
-					for (var i:int=0;i<xdim;i++){
-						var columns:Array=new Array();
-						for (var j:int=0;j<ydim;j++){
-							columns.push("0");
-						}
-						pm.push(columns);
-					}
+					pl1NumStr = xdim;
+					pl2NumStr = ydim;
+					pl1PayMapStr=buildMatrixString(convertToMatrixFixed(pl1PayMapStr));
+					pl2PayMapStr=buildMatrixString(convertToMatrixFixed(pl2PayMapStr));
 				}	
-				
-				payoffMatrix2=new Array();
-				convertToMatrix(pl2PayMapStr,payoffMatrix2);
-				
-				for (var i:int=0;i<xdim;i++){
-					for (var j:int=0;j<ydim;j++){
-						if (payoffMatrix2.length>0) {
-							if (i<payoffMatrix2.length) {
-								if (payoffMatrix2[i].length>0) {
-									if (j<payoffMatrix2[i].length) {
-										pm[i][j]=payoffMatrix2[i][j];
-									}
-								}
-							}
-						}
-					}
-					
-				}
-				
-				pl2PayMapStr=buildMatrixString(pm);
-				
-				
-				
 				alignStrategy();
 			}
 		
@@ -909,9 +778,7 @@
 					symmetric_mode=false;
 					setEditableMode();
 				}
-				
 				alignStrategy();
-				
 			}
 			
 			/**
@@ -923,50 +790,52 @@
 			private function setEditableMode():void {
 				
 				if (zerosum_mode){
-					p2_strat_editable=true;
+
 					p2_numb_editable=true;
+					p2_strat_editable=true;
 					p2_payoffs_editable=false;
 					
-					p1_strat_editable=true;
-					p1_numb_editable=true;
-					p1_payoffs_editable=true;
-					
-					p2_text_cbg=0xcccccc;
-					p2_strat_cbg=0xffffff;
 					p2_num_cbg=0xffffff;	
+					p2_strat_cbg=0xffffff;
+					p2_text_cbg=0xcccccc;
+					
+					p1_numb_editable=true;
+					p1_strat_editable=true;
+					p1_payoffs_editable=true;
 					
 					p1cbg=0xffffff;
 					
 				} else if (symmetric_mode) {
-					p2_strat_editable=false;
+
 					p2_numb_editable=false;
+					p2_strat_editable=true;
 					p2_payoffs_editable=false;
 					
-					p1_strat_editable=true;
+					p2_num_cbg=0xcccccc;	
+					p2_strat_cbg=0xffffff;
+					p2_text_cbg=0xcccccc;
+					
 					p1_numb_editable=true;
+					p1_strat_editable=true;
 					p1_payoffs_editable=true;
 					
-					p2_text_cbg=0xcccccc;
-					p2_strat_cbg=0xcccccc;
-					p2_num_cbg=0xcccccc;	
-					
 					p1cbg=0xffffff;
+
 				} else if (general_mode){
 					
-					p2_strat_editable=true;
 					p2_numb_editable=true;
+					p2_strat_editable=true;
 					p2_payoffs_editable=true;
 					
-					p1_strat_editable=true;
+					p2_num_cbg=0xffffff;	
+					p2_strat_cbg=0xffffff;
+					p2_text_cbg=0xffffff;
+					
 					p1_numb_editable=true;
+					p1_strat_editable=true;
 					p1_payoffs_editable=true;
 					
-					p2_text_cbg=0xffffff;
-					p2_strat_cbg=0xffffff;
-					p2_num_cbg=0xffffff;	
-					
 					p1cbg=0xffffff;
-					
 				}
 				
 			}
@@ -976,7 +845,7 @@
 			 * Event catches the return event to align the matrix of player 1 after a new row is inserted 
 			 *@author Martin  
 			 */	
-			private function keyPressedP1Payoff(event:KeyboardEvent):void{
+			/**private function keyPressedP1Payoff(event:KeyboardEvent):void{
 				
 				if ((!symmetric_mode) && (event.keyCode==13)){
 					//It does not make sense to autoalign in a symmetric game during typing
@@ -984,12 +853,13 @@
 					pl1PayMapStrBox.text=pl1PayMapStrBox.text+"\n";
 					pl1PayMapStrBox.selectRange(pl1PayMapStrBox.text.length,pl1PayMapStrBox.text.length);
 				}
-			}
+			}**/
 			
 			/**
 			 * Event catches the return event to align the matrix of player 2 after a new row is inserted 
 			 *@author Martin  
 			 */	
+			/**
 			private function keyPressedP2Payoff(event:KeyboardEvent):void{
 				
 				if ((!symmetric_mode) && (event.keyCode==13)){
@@ -998,7 +868,7 @@
 					pl2PayMapStrBox.text=pl2PayMapStrBox.text+"\n";
 					pl2PayMapStrBox.selectRange(pl2PayMapStrBox.text.length,pl2PayMapStrBox.text.length);
 				}
-			}
+			}**/
 			
 		]]>
 	</fx:Script>
@@ -1009,7 +879,6 @@
 			fontFamily: myFontFamily;
 			advancedAntiAliasing: true;
 		}
-		
 	</fx:Style>
 	
 
@@ -1017,58 +886,97 @@
 		
 		<s:HGroup width="100%" gap="0" >
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" >
-				<s:Label height="20" color="#2323E6" text="Player 1"
-						 verticalAlign="middle"/>
+				<s:Label height="20" color="#2323E6"
+                        text="Player 1" fontSize="16"
+						verticalAlign="middle"/>
 				
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="150" text="Number of strategies: " verticalAlign="middle"/>
-					<s:TextInput tabIndex="1" editable="{p1_numb_editable}" id="pl1Dimensions" width="60" widthInChars="22" text="{dimensions1}" change="createEmptyArrayString(pl1Dimensions.text,pl2Dimensions.text);dataChanged=true;" contentBackgroundColor="{p1cbg}" />
-					<s:Label height="20" width="100%" text="(rows)" verticalAlign="middle"/>
+					<s:Label height="20" width="155"
+                        text="Number of strategies: "
+                        fontSize="14" verticalAlign="middle"/>
+					<s:TextInput tabIndex="1"
+                        editable="{p1_numb_editable}"
+                        id="pl1Dimensions" width="60"
+                        widthInChars="22"
+                        text="{pl1NumStr.toString()}" fontSize="16"
+                        enter="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);
+                          if (symmetric_mode) {pl1StratInput.setFocus();} else {pl2Dimensions.setFocus();}"
+                        change="dataChanged=true;" contentBackgroundColor="{p1cbg}" />
+					<s:Label height="20" width="100%"
+                        text="(rows)" fontSize="14"
+                        verticalAlign="middle"/>
 				</s:HGroup>	
 				
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="150" text="Strategy names: " verticalAlign="middle"/>
-					<s:TextInput tabIndex="3" editable="{p1_strat_editable}" id="pl1StratInput" width="100%" widthInChars="22" text="{alpha1}" change="dataChanged=true;" contentBackgroundColor="{p1cbg}" />
+					<s:Label height="20" width="155"
+                        text="Strategy names: " fontSize="14"
+                        verticalAlign="middle"/>
+					<s:TextInput tabIndex="3" editable="{p1_strat_editable}" id="pl1StratInput"
+                        width="100%" widthInChars="22"
+                        text="{alpha1}" fontSize="16" change="dataChanged=true;"
+                        enter="pl2StratInput.setFocus();" 
+                        contentBackgroundColor="{p1cbg}" />
 				</s:HGroup>
 
 				<s:Label height="20" color="#2323E6" text="Payoffs"
-						 verticalAlign="middle"/>
-				<s:TextArea tabIndex="5" editable="{p1_payoffs_editable}" id="pl1PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
-							text="{pl1PayMapStr}" change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p1cbg}"/>
-				
-				<s:HGroup width="100%" horizontalAlign="center">
-					<s:Button tabIndex="7" enabled="{p1_payoffs_editable}" label="Align and Update" cornerRadius="0" click="alignStrategy();"/>
-					<s:Button tabIndex="8" enabled="{p1_payoffs_editable}" label="Clear" cornerRadius="0" click="pl1PayMapStrBox.text='0';pl1PayMapStr='0';alignStrategy();"/>
-				</s:HGroup>
+                      fontSize="16" verticalAlign="middle"/>
+				<s:TextArea tabIndex="5" editable="{p1_payoffs_editable}" id="pl1PayMapStrBox"
+                    width="100%" widthInChars="30" fontFamily="myFontFamily"
+                    heightInLines="15" lineBreak="explicit"
+                    text="{pl1PayMapStr}" fontSize="20"
+                    change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;"
+                    contentBackgroundColor="{p1cbg}"/>
+
 			</s:VGroup>
 			<s:VGroup width="50%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
-		
 			
 				<s:Label height="20" color="#2323E6" text="Player 2"
-						 verticalAlign="middle"/>
+                    fontSize="16" verticalAlign="middle"/>
 				<s:HGroup  width="100%" verticalAlign="middle">
-					<s:Label height="20" width="150" text="Number of strategies: " verticalAlign="middle"/>
-					<s:TextInput tabIndex="2" editable="{p2_numb_editable}" id="pl2Dimensions" width="60" widthInChars="22" text="{dimensions2}" change="createEmptyArrayString(pl1Dimensions.text,pl2Dimensions.text);dataChanged=true;" contentBackgroundColor="{p2_num_cbg}" />
-					<s:Label height="20" width="100%" text="(columns)" verticalAlign="middle"/>
+					<s:Label height="20" width="155"
+                        text="Number of strategies: "
+                        fontSize="14" verticalAlign="middle"/>
+					<s:TextInput tabIndex="2" editable="{p2_numb_editable}"
+                        id="pl2Dimensions" width="60" widthInChars="22"
+                        text="{pl2NumStr.toString()}"
+                        fontSize="16"
+                        enter="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);
+                               pl1StratInput.setFocus();"
+                        change="dataChanged=true;" contentBackgroundColor="{p2_num_cbg}" />
+					<s:Label height="20" width="100%"
+                        text="(columns)" fontSize="14" verticalAlign="middle"/>
 				
 				</s:HGroup>	
 				
 				<s:HGroup width="100%" verticalAlign="middle">
-					<s:Label height="20" width="150" text="Strategy names:" verticalAlign="middle"/>
-					<s:TextInput tabIndex="4" editable="{p2_strat_editable}" width="100%" id="pl2StratInput" widthInChars="22" text="{alpha2}" change="dataChanged=true;" contentBackgroundColor="{p2_strat_cbg}" />
+					<s:Label height="20" width="155"
+                        text="Strategy names:" fontSize="14" 
+                        verticalAlign="middle"/>
+					<s:TextInput tabIndex="4" editable="{p2_strat_editable}"
+                        width="100%" id="pl2StratInput"
+                        widthInChars="22" text="{alpha2}"
+                        fontSize="16" change="dataChanged=true;" 
+                        enter="pl1PayMapStrBox.setFocus();" 
+                        contentBackgroundColor="{p2_strat_cbg}" />
 				</s:HGroup>
 
-				<s:Label height="20" color="#2323E6" text="Payoffs"
-						 verticalAlign="middle"/>
-				<s:TextArea tabIndex="6" editable="{p2_payoffs_editable}" id="pl2PayMapStrBox" width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
-							text="{pl2PayMapStr}" change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;" contentBackgroundColor="{p2_text_cbg}" />
-				
-				<s:HGroup width="100%" horizontalAlign="center">
-					<s:Button tabIndex="9" enabled="{p2_payoffs_editable}" label="Clear" cornerRadius="0" click="pl2PayMapStrBox.text='0';pl2PayMapStr='0';alignStrategy();"/>
-				</s:HGroup>
+				<s:Label height="20" color="#2323E6"
+                text="Payoffs" fontSize="16" verticalAlign="middle"/>
+				<s:TextArea tabIndex="6" editable="{p2_payoffs_editable}" id="pl2PayMapStrBox"
+                    width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
+                    text="{pl2PayMapStr}"
+                    fontSize="20"
+                    change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;"
+                    contentBackgroundColor="{p2_text_cbg}" /> 
 			</s:VGroup>
 		</s:HGroup>
-
+			<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+				<s:HGroup width="100%" horizontalAlign="center">
+                <s:Button tabIndex="7" enabled="{p1_payoffs_editable}"
+                    label="Confirm payoffs" cornerRadius="0"
+                    click="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);"/>
+				</s:HGroup>
+			</s:VGroup>
 				
 	</s:VGroup>
 	
