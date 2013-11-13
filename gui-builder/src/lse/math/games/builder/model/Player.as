@@ -1,5 +1,6 @@
 package lse.math.games.builder.model 
 {	
+    // 13 Nov 2013 BvS  added  id  , NOT FOR CIRCULAR LIST, only 2 players
 	import util.Log;
 
 	/**
@@ -23,8 +24,6 @@ package lse.math.games.builder.model
 		//private var _prevPlayer:Player = null;
 		
 		private var log:Log = Log.instance;
-		
-		
 		
 		/** Creates the player and inserts it in the linked list of players */
 		public function Player(name:String, game:Game)
@@ -63,6 +62,27 @@ package lse.math.games.builder.model
 		/** Name of the player */
 		public function get name():String {	return _name; }
 		public function set name(value:String):void {	_name=value; }
+
+		/** id of the player as "0" or "1" or "2" */
+		public function get id():String {
+            // have only access to successors in player list, so
+            // superkludgy counting down from 2 (= total number of players)
+            // to infer current player number
+            if (nextPlayer == null)
+                return "2";
+            else { if (nextPlayer.nextPlayer == null)
+                return "1";
+            else 
+                return "0";
+            }
+//            var i:int = 2;  // replace 2 by total number of players
+//            var nextp:Player = nextPlayer;
+//			while (nextp != null) {
+//                nextp = nextp.nextPlayer;  
+//                i--;
+//            }
+//            return ""+i;
+		}
 		
 		/** Next player */
 		public function get nextPlayer():Player { return _nextPlayer; }
@@ -75,6 +95,7 @@ package lse.math.games.builder.model
 		//for every reference to the 'get nextPlayer()' function 
 		//(Ctrl+Shift+G in Windows FlashBuilder 4.5)
 		
+
 		public function toString():String {
 			return _name;
 		}
