@@ -413,9 +413,9 @@
 
 				var pm:Array=new Array(); 
 
-   				for(var i = 0; i < pl1NumStr; i++){
+   				for(var i:int = 0; i < pl1NumStr; i++){
 					pm[i] = [];    
-					for(var j = 0; j < pl2NumStr; j++){ 
+					for(var j:int = 0; j < pl2NumStr; j++){ 
 						pm[i][j] = "0";    
 					}    
 				}
@@ -431,8 +431,8 @@
 			 */	
 			private function convertToMatrixFixed(inputString:String):Array {
 
-				var pm = createEmptyMatrix();
-				var temp = convertToMatrix(inputString);
+				var pm:Array = createEmptyMatrix();
+				var temp:Array = convertToMatrix(inputString);
 						
 				for (var i:int=0;i<pl1NumStr;i++) {
 					for (var j:int=0;j<pl2NumStr;j++) {
@@ -565,7 +565,7 @@
 			 */	
 			private function createRandomMatrix():Array {
 
-				var pm = createEmptyMatrix()
+				var pm:Array = createEmptyMatrix()
 
 				for (var i:int=0;i<pl1NumStr;i++){
 					for (var j:int=0;j<pl2NumStr;j++){
@@ -674,7 +674,7 @@
 				for (i=0;i<pm.length;i++){
 					for (j=0;j<pm[i].length;j++){
 						
-						var test:String=null;
+						test=null;
 						if (use_dp) { 
 							test=String(roundTodecimal(Rational.parse(pm[i][j]).floatValue,dp));
 						} else {
@@ -704,9 +704,9 @@
 			/**
 			 * Align the matrix in columns and rows for player 1 and player 2 and update the strategy names
 			 *  
-			 *@author Martin  
+			 *@author Martin, updated by Rahul  
 			 */	
-			function alignStrategy():void 
+			public function alignStrategy():void 
 			{
 				payoffMatrix1 = convertToMatrixFixed(pl1PayMapStr);
 
