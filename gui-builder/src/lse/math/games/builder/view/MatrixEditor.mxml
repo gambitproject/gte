@@ -137,7 +137,7 @@
 			public function setDefaultStrategicForm():void {
 				pl1NumStr = 2;
 				pl2NumStr = 2;
-				pl1PayMapStr = "1 2 \n0 1";
+				pl1PayMapStr = "1 2 \n0 4";
 				pl2PayMapStr = "3 0 \n0 1";
 			}
 
@@ -914,7 +914,8 @@
 					<s:TextInput tabIndex="3" editable="{p1_strat_editable}" id="pl1StratInput"
                         width="100%" widthInChars="22"
                         text="{alpha1}" fontSize="16" change="dataChanged=true;"
-                        enter="pl2StratInput.setFocus();" 
+                        enter="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);
+                            pl2StratInput.setFocus();" 
                         contentBackgroundColor="{p1cbg}" />
 				</s:HGroup>
 
@@ -956,7 +957,8 @@
                         width="100%" id="pl2StratInput"
                         widthInChars="22" text="{alpha2}"
                         fontSize="16" change="dataChanged=true;" 
-                        enter="pl1PayMapStrBox.setFocus();" 
+                        enter="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);
+                            pl1PayMapStrBox.setFocus();" 
                         contentBackgroundColor="{p2_strat_cbg}" />
 				</s:HGroup>
 
@@ -973,8 +975,9 @@
 			<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
 				<s:HGroup width="100%" horizontalAlign="center">
                 <s:Button tabIndex="7" enabled="{p1_payoffs_editable}"
-                    label="Confirm payoffs" cornerRadius="0"
-                    click="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);"/>
+                    label="Confirm changes and align payoffs" cornerRadius="0"
+                    click="updateNumberOfStrategies(pl1Dimensions.text,pl2Dimensions.text);"
+                    />
 				</s:HGroup>
 			</s:VGroup>
 				
