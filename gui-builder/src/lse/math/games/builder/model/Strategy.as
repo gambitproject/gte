@@ -1,5 +1,7 @@
 package lse.math.games.builder.model 
 {		
+    // 14 Nov 2013 BvS   see end of file for strategy
+    // representation to be changed
 	import flash.utils.getTimer;
 	
 	import util.Log;
@@ -144,7 +146,7 @@ package lse.math.games.builder.model
 
 		
 		/** Returns a String with the strategy name, or with a string representation of the sequence, if appliable */
-		public function getNameOrSeq(addStar:Boolean = false, delim:String = "-"):String
+		public function getNameOrSeq(addStar:Boolean = false, delim:String = ","):String
 		{
 			if(_sequence!=null)
 			{
@@ -158,6 +160,7 @@ package lse.math.games.builder.model
 				}
 				return buf.join(delim) + (_isReduced && addStar ? "*" : "");
 			} else
+            // CHANGE HERE REPRESENTATION OF OUTPUT
 				return _name;
 		}
 				
