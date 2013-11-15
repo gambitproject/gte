@@ -923,7 +923,7 @@
                       fontSize="16" verticalAlign="middle"/>
 				<s:TextArea tabIndex="5" editable="{p1_payoffs_editable}" id="pl1PayMapStrBox"
                     width="100%" widthInChars="30" fontFamily="myFontFamily"
-                    heightInLines="15" lineBreak="explicit"
+                    heightInLines="10" lineBreak="explicit"
                     text="{pl1PayMapStr}" fontSize="20"
                     change="pl1PayMapStr = pl1PayMapStrBox.text;dataChanged=true;"
                     contentBackgroundColor="{p1cbg}"/>
@@ -965,7 +965,7 @@
 				<s:Label height="20" color="#2323E6"
                 text="Payoffs" fontSize="16" verticalAlign="middle"/>
 				<s:TextArea tabIndex="6" editable="{p2_payoffs_editable}" id="pl2PayMapStrBox"
-                    width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="15" lineBreak="explicit" 
+                    width="100%" widthInChars="30" fontFamily="myFontFamily" heightInLines="10" lineBreak="explicit" 
                     text="{pl2PayMapStr}"
                     fontSize="20"
                     change="pl2PayMapStr = pl2PayMapStrBox.text;dataChanged=true;"
