@@ -1,4 +1,4 @@
-# GTE - Game Theory Explorer #
+# GTE - Game Theory Explorer
 
 The Game Theory Explorer (GTE) is a graphical user interface that allows the
 interactive construction of small to medium size games in extensive and
@@ -68,12 +68,26 @@ to follow these instructions on how to build and deploy the war file gte.war.
 ## 1. Install Java SDK ##
 
 1. Download Java SDK (at least Java SE 6) at:
-[http://www.oracle.com/technetwork/java/javase/downloads/index.html]
-(http://www.oracle.com/technetwork/java/javase/downloads/index.html "Java Download")
+   [http://www.oracle.com/technetwork/java/javase/downloads/index.html]
+   (http://www.oracle.com/technetwork/java/javase/downloads/index.html "Java Download")
+   ===WINDOWS===
+   1.1 Download - http://www.oracle.com/technetwork/java/javase/downloads/
+   1.2 Add bin directory to path
+   1.3 Add JAVA_HOME environment variable (makes sure it points to the SDK, not JRE)
+   ===LINUX===
+   $ sudo apt-get install sun-java6-jdk
+   ===OS X===
+   OS X 10.6 and 10.7 with a Java SDK suitable for gte.  
+   Confirm you have the latest version by running "Software update..." from the Apple menu.
 
 2. Set the environment variable JAVA_HOME to the installed JAVA SDK
 
 ## 2. Install ANT ##
+
+OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
+
+**LINUX/WINDOWS:**
+
 1. Download ANT at: [http://ant.apache.org/](http://ant.apache.org/ "ANT")
 2. Extract the downloaded archive
 3. Set the environment variable ANT_HOME to the extracted ANT directory
@@ -81,8 +95,10 @@ to follow these instructions on how to build and deploy the war file gte.war.
    instructions at: [http://ant.apache.org/manual/install.html]
    (http://ant.apache.org/manual/install.html "Install ANT")
 
+
 ## 3. Install Jetty ##
-**LINUX/MAC:**
+
+**LINUX/OSX:**
 
 1. `JETTY_VERSION=7.6.1.v20120215`
 2. `wget http://download.eclipse.org/jetty/$JETTY_VERSION/dist/jetty-distribution-$JETTY_VERSION.tar.gz`
@@ -91,7 +107,6 @@ to follow these instructions on how to build and deploy the war file gte.war.
 5. Check Jetty with executing in jetty directory: `java -jar start.jar`
 6. Access JETTY at: 127.0.0.1:8080
 7. Terminate JETTY with CTRL-C
-
 
 **WINDOWS:**
 
@@ -113,6 +128,29 @@ to follow these instructions on how to build and deploy the war file gte.war.
 2. Extract archive
 3. Set the environment variable FLEX_HOME to the extracted FLEX directory
 4. Add the **bin** directory to your PATH environment variable.
+
+You may need to complete the following additional steps on Linux/OSX:
+
+4b. Install "gflashplayer"
+
+**Linux**
+4b.1 cd ${FLEX_HOME}/runtimes/player/10.1/lnx
+4b.2 tar -zxvf flashplayerdebugger.tar.gz
+4b.3 ln -s ./flashplayerdebugger ./gflashplayer
+4b.4 Add directory from [4b.1] to PATH
+
+**OS X**
+In ${FLEX_HOME}/runtimes/player/10.1/mac there is a DMG file,
+"Install Adobe Flash Player Debugger 10.1.dmg".
+Double-click in Finder to mount the disk image, which contains
+an installer, "Install Adobe Flash Player Debugger".  Double-click
+the installer to run.
+
+If you have Adobe Flash Player newer than 10.1 installed, the
+installer will complain and terminate.  In this instance, the
+Flash Player Debugger.app is also present in the folder.
+Double-click to unzip, and drag the application the the
+Applications folder (or wherever you want to put it).
 
 By now you should have 4 environment variables: `JAVA_HOME, ANT_HOME, JETTY_HOME and FLEX_HOME`
 pointing to the corresponding directories.
