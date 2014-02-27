@@ -9,9 +9,9 @@ of game theory software.
 
 It is written by
 
-* [Mark Egesdal]
-* [Martin Prause] (https://github.com/trobar)
 * [Alfonso](https://github.com/alfongj)
+* [Mark Egesdal]
+* [Martin Prause](https://github.com/trobar)
 * [Rahul Savani](https://github.com/rahulsavani)
 * [Bernhard von Stengel](https://github.com/stengel) 
 
@@ -169,11 +169,7 @@ to your PATH environment variable.
 2. Access GTE at: `127.0.0.1:8080/gte`
 3. Stop the JETTY server using the ANT-target **jetty-stop**
 
-If 
-
-    http://127.0.0.1:8080/gte/
-
-ever shows the browser message
+If http://127.0.0.1:8080/gte/ ever shows the browser message
 
     Unable to connect
     Firefox can't establish a connection to the server at
