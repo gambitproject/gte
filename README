@@ -142,8 +142,7 @@ Start the setup.exe and install the following packages:
 * **Devel:** make (3.82.90-1)
 * **Lib:** libgcc1 (4.5.3-3)
 
-Choosing these packages implies that setup.exe detects dependencies and autmatically will
-install the following packages on its own:
+Choosing these packages implies that setup.exe detects dependencies and autmatically will install the following packages on its own:
 
 * binutils (2.22.51-2)
 * gcc-core (3.4.4-999)
@@ -153,19 +152,15 @@ install the following packages on its own:
 * mingw-w32api (3.17-2)
 * w32api (3.17-2)
 
-After setup completes add the **bin** directory of your cygwin install dir (e.g. c:\cygwin\bin)
-to your PATH environment variable.
+After setup completes add the **bin** directory of your cygwin install dir (e.g. c:\cygwin\bin) to your PATH environment variable.
 
 **LINUX/MAC/WINDOWS:**
 
-1. From the root directory of the respository (which contains
-   build.properties), execute the `compileComplete` ANT-target with
+1. From the root directory of the respository (which contains build.properties), execute the `compileComplete` ANT-target with
 
 		ant compileComplete
 
-   The target compiles the servlets, FLEX GUI,
-   native Code, packs the compiled code into a War-file and deploys it to JETTY (**webapps**)
-   and starts the JETTY server. (TODO: Add info on other targets such as makeWarFile.)
+   The target compiles the servlets, FLEX GUI, native Code, packs the compiled code into a War-file and deploys it to JETTY (**webapps**) and starts the JETTY server. (TODO: Add info on other targets such as makeWarFile.)
 2. Access GTE at: `127.0.0.1:8080/gte`
 3. Stop the JETTY server using the ANT-target **jetty-stop**
 
@@ -175,8 +170,7 @@ If http://127.0.0.1:8080/gte/ ever shows the browser message
     Firefox can't establish a connection to the server at
     127.0.0.1:8080.
 
-then the jetty server is down, and you need to start it (in
-JETTY_HOME) with
+then the jetty server is down, and you need to start it (in JETTY_HOME) with
 
      java -jar start.jar
 
@@ -197,8 +191,6 @@ or uncomment this line in **start.ini** (JETTY 8.X and later).
 
 ## 6. Additional information ##
 
-Please find additional instructions on how to include your native algorithm into the
-SERVER version on GitHub.
+Please find additional instructions on how to include your native algorithm into the SERVER version on GitHub.
 
-The CLIENT version is only for developing the GUI. Please find details on developing
-the CLIENT verison with Eclipse in README-CLIENT.
+The CLIENT version is only for developing the GUI. Please find details on developing the CLIENT verison with Eclipse in README-CLIENT.
