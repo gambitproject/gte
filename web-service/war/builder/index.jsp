@@ -230,7 +230,7 @@
 </head>
 <body onload="javascript:prepareVars();">
 	<div id="titleContainer" style="text-align: left; width: 100%; margin: auto; background-color: #303030; color: #ffffff; padding: 0px 5px 0px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030;">
-		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
+		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="8size32.ico" />
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
 			<h3 style="display: inline; font-family: Helvetica;">Game Theory Explorer <span style="color: #ffd700">&#946;</span></h3><br/>
 			<em style="font-size: 13px; font-family: Helvetica; color: #a0a0a0;">Build, explore and solve extensive form games.</em>
@@ -286,7 +286,7 @@
  
 
     <div id="creditsContainer" style="display:none; font-size: 10px; font-family: Helvetica; text-align: left; margin: auto; background-color: #303030; color: #a0a0a0; padding: 3px 5px 3px 5px; border-left: 1px solid #303030; border-right: 1px solid #303030; width:400px;height:200px;">
-		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="minitree_32x32.png" />
+		<img style="display:inline; vertical-align: middle; border: #808080 solid 1px; margin: 5px 5px 5px 0px;" src="8size32.ico" />
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
 			<h3 style="display: inline; font-family: Helvetica;">Game Theory Explorer <span style="color: #ffd700">&#946;</span></h3><br/>
 			<em style="font-size: 13px; font-family: Helvetica; color: #a0a0a0;">Build, explore and solve extensive form games.</em>
