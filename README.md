@@ -2,7 +2,9 @@
 
 The Game Theory Explorer (GTE) is a graphical user interface that allows the
 interactive construction of small to medium size games in extensive and
-strategic form,  and to compute equilibria of these games.
+strategic form, and to compute equilibria of these games.
+
+Please see http://www.gametheoryexplorer.org/
 
 GTE is part of the [Gambit Project](http://www.gambit-project.org) - a library
 of game theory software.
@@ -35,7 +37,7 @@ These issues are addressed as follows:
 
 ![GTE Mainwindow](https://github.com/downloads/trobar/gte/gte_small.png)
 
-## Preface ##
+## Preface
 
 GTE can be installed in three different ways:
 
@@ -65,7 +67,7 @@ there in the file build.properties (see example in repository).
 If you want to contribute to the gte project, the first thing you need to do is
 to follow these instructions on how to build and deploy the war file gte.war.
 
-## 1. Install Java SDK ##
+## 1. Install Java SDK
 
 1. Download Java SDK (at least Java SE 6) at:
    [http://www.oracle.com/technetwork/java/javase/downloads/index.html]
@@ -82,7 +84,7 @@ to follow these instructions on how to build and deploy the war file gte.war.
 
 2. Set the environment variable JAVA_HOME to the installed JAVA SDK
 
-## 2. Install ANT ##
+2. Install ANT ##
 
 OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
 
@@ -96,7 +98,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
    (http://ant.apache.org/manual/install.html "Install ANT")
 
 
-## 3. Install Jetty ##
+## 3. Install Jetty
 
 **LINUX/OSX:**
 
@@ -121,7 +123,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
 
 **Applied to SERVER and CLIENT**
 
-## 4. Install Flex SDK (Adobe Flex SDK, NOT Open Source Flex SDK) ##
+## 4. Install Flex SDK (Adobe Flex SDK, NOT Open Source Flex SDK)
 
 1. Download Flex SDK (Version 4.1A) at: [http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/]
    (http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ "FLEX SDK")
@@ -155,7 +157,7 @@ Applications folder (or wherever you want to put it).
 By now you should have 4 environment variables: `JAVA_HOME, ANT_HOME, JETTY_HOME and FLEX_HOME`
 pointing to the corresponding directories.
 
-## 5. Run the Server version ##
+## 5. Run the Server version
 
 **LINUX:**
 
@@ -227,7 +229,7 @@ please follow the instructions here:
 add `-Dorg.apache.jasper.compiler.disablejsr199=true` to the **Jetty.xml** (JETTY 7.5.0 and prior)
 or uncomment this line in **start.ini** (JETTY 8.X and later).
 
-## 6. Additional information ##
+## 6. Additional information
 
 Please find additional instructions on how to include your native algorithm into the SERVER version on GitHub.
 
