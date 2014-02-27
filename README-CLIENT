@@ -9,7 +9,15 @@ Access the code from GitHub, change the GUI, submit the code back to GitHub
 If you want to compile, test and run the complete GTE you need to setup the
 SERVER version. Access the code from GitHub and run the **compileComplete** ANT-target.
 
-## 7. Setup and run the CLIENT version ##
+## 1. Install Eclipse IDE##
+
+Download Eclipse IDE (HELIOS or INDIGO) for Java EE Developpers 32-bit version at:
+[http://www.eclipse.org/downloads/](http://www.eclipse.org/downloads/ "Eclipse Download").
+Do not use the 64-bit version or the new JUNO release of eclipse because it does not work
+with the FlashBuilder plugin later.
+
+
+## 2. Setup and run the CLIENT version ##
 
 1. Make a copy of your Eclipse installation, because you will integrate FlashBuilder -
    FLEX support for Eclipse, which is buggy and may harm other projects on eclipse.
