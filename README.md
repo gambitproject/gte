@@ -99,7 +99,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
    (http://ant.apache.org/manual/install.html "Install ANT")
 
 
-## 3. Install Jetty
+## 2. Install Jetty
 
 **LINUX/OSX:**
 
@@ -124,7 +124,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
 
 **Applied to SERVER and CLIENT**
 
-## 4. Install Flex SDK 
+## 3. Install Flex SDK 
 
 1. Download Flex SDK (Version 4.1; Adobe Flex SDK, NOT Open Source Flex SDK) at: [http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/]
    (http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ "FLEX SDK")
@@ -158,7 +158,7 @@ Applications folder (or wherever you want to put it).
 By now you should have 4 environment variables: `JAVA_HOME, ANT_HOME, JETTY_HOME and FLEX_HOME`
 pointing to the corresponding directories.
 
-## 5. Run the Server version
+## 4. Build/Run the Server version
 
 **LINUX:**
 
@@ -169,7 +169,7 @@ Install gcc as a C-compiler (Ubuntu):
 * `sudo apt-get upgrade`
 * `sudo apt-get install build-essential`
 
-**MAC:**
+**OS X:**
 
 tbc (options include installing Xcode or using brew)
 
@@ -230,7 +230,7 @@ please follow the instructions here:
 add `-Dorg.apache.jasper.compiler.disablejsr199=true` to the **Jetty.xml** (JETTY 7.5.0 and prior)
 or uncomment this line in **start.ini** (JETTY 8.X and later).
 
-## 6. Additional information
+## 5. Additional information
 
 Please find additional instructions on how to include your native algorithm into the SERVER version on GitHub.
 
