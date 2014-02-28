@@ -99,7 +99,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
    (http://ant.apache.org/manual/install.html "Install ANT")
 
 
-## 3. Install Jetty
+## 2. Install Jetty
 
 **LINUX/OSX:**
 
@@ -124,7 +124,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
 
 **Applied to SERVER and CLIENT**
 
-## 4. Install Flex SDK 
+## 3. Install Flex SDK 
 
 1. Download Flex SDK (Version 4.1; Adobe Flex SDK, NOT Open Source Flex SDK) at: [http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/]
    (http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ "FLEX SDK")
@@ -158,7 +158,7 @@ Applications folder (or wherever you want to put it).
 By now you should have 4 environment variables: `JAVA_HOME, ANT_HOME, JETTY_HOME and FLEX_HOME`
 pointing to the corresponding directories.
 
-## 5. Run the Server version
+## 4. Build/Run the Server version
 
 **LINUX:**
 
