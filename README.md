@@ -13,8 +13,8 @@ of game theory software.
 
 It is written by
 
-* [Alfonso Gomez-Jordana](https://github.com/alfongj)
 * [Mark Egesdal](https://github.com/megesdal)
+* [Alfonso Gomez-Jordana](https://github.com/alfongj)
 * [Martin Prause](https://github.com/trobar)
 * [Rahul Savani](https://github.com/rahulsavani)
 * [Bernhard von Stengel](https://github.com/stengel) 
