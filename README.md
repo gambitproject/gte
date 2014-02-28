@@ -4,7 +4,9 @@ The Game Theory Explorer (GTE) is a graphical user interface that allows the
 interactive construction of small to medium size games in extensive and
 strategic form, and to compute equilibria of these games.
 
-Please see http://www.gametheoryexplorer.org/
+An up-to-date version of the web-application is available via the
+landing page http://www.gametheoryexplorer.org/ and directly at 
+http://gte.csc.liv.ac.uk/gte/builder/
 
 GTE is part of the [Gambit Project](http://www.gambit-project.org) - a library
 of game theory software.
@@ -68,7 +70,7 @@ there in the file build.properties (see example in repository).
 If you want to contribute to the gte project, the first thing you need to do is
 to follow these instructions on how to build and deploy the war file gte.war.
 
-## 1. Install Java SDK
+## 1. Install Java SDK and ANT 
 
 1. Download Java SDK (at least Java SE 6) at:
    [http://www.oracle.com/technetwork/java/javase/downloads/index.html]
