@@ -2,7 +2,7 @@
 <!--
 	Build file for Game Theory Explorer
 	@author Martin Prause
-	Adapted by Mark Egesdal and Rahul Savani 
+	Adapted by Mark Egesdal and Rahul Savani
 	to replace dependency on Google App Engine with Jetty
 --> 
 <project name="GameTheoryExplorer" basedir="." default="compileComplete"> 

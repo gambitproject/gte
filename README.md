@@ -123,9 +123,9 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
 
 **Applied to SERVER and CLIENT**
 
-## 4. Install Flex SDK (Adobe Flex SDK, NOT Open Source Flex SDK)
+## 4. Install Flex SDK 
 
-1. Download Flex SDK (Version 4.1A) at: [http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/]
+1. Download Flex SDK (Version 4.1; Adobe Flex SDK, NOT Open Source Flex SDK) at: [http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/]
    (http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ "FLEX SDK")
 2. Extract archive
 3. Set the environment variable FLEX_HOME to the extracted FLEX directory
@@ -170,7 +170,7 @@ Install gcc as a C-compiler (Ubuntu):
 
 **MAC:**
 
-tbc
+tbc (options include installing Xcode or using brew)
 
 **WINDOWS:**
 Download cygwin (setup.exe) from: [http://www.cygwin.com/](http://www.cygwin.com/ "Cygwin").
