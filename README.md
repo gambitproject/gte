@@ -11,7 +11,7 @@ of game theory software.
 
 It is written by
 
-* [Alfonso](https://github.com/alfongj)
+* [Alfonso Gomez-Jordana](https://github.com/alfongj)
 * [Mark Egesdal](https://github.com/megesdal)
 * [Martin Prause](https://github.com/trobar)
 * [Rahul Savani](https://github.com/rahulsavani)
@@ -35,7 +35,8 @@ These issues are addressed as follows:
 - the client communicates with that local server on your machine
 - all native algorithms also run locally
 
-![GTE Mainwindow](https://github.com/downloads/trobar/gte/gte_small.png)
+<!-- ![GTE Mainwindow](https://github.com/downloads/trobar/gte/gte_small.png)
+-->
 
 ## Preface
 
