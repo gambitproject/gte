@@ -75,12 +75,15 @@ to follow these instructions on how to build and deploy the war file gte.war.
 1. Download Java SDK (at least Java SE 6) at:
    [http://www.oracle.com/technetwork/java/javase/downloads/index.html]
    (http://www.oracle.com/technetwork/java/javase/downloads/index.html "Java Download")
+
    ===WINDOWS===
    1.1 Download - http://www.oracle.com/technetwork/java/javase/downloads/
    1.2 Add bin directory to path
    1.3 Add JAVA_HOME environment variable (makes sure it points to the SDK, not JRE)
+
    ===LINUX===
    $ sudo apt-get install sun-java6-jdk
+
    ===OS X===
    OS X 10.6 and 10.7 with a Java SDK suitable for gte.  
    Confirm you have the latest version by running "Software update..." from the Apple menu.
