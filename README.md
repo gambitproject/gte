@@ -65,12 +65,12 @@ This requires a number of installations:
 After all these installations, any update of the project only requires
 re-compiling the server and client.
 
-In the instructions that follow you are told to set environment variables like
-FLEX_HOME and JETTY_HOME. These should be set LOCALLY on your computer and stay
-there in the file build.properties (see example in repository).
-
 If you want to contribute to the gte project, the first thing you need to do is
 to follow these instructions on how to build and deploy the war file gte.war.
+
+In the instructions that follow you are told to set environment variables like
+FLEX_HOME and JETTY_HOME. These should be set LOCALLY on and specifically for
+your computer and stay in build.properties (see example in repository).
 
 ## 1. Install Java SDK and ANT 
 
@@ -78,23 +78,22 @@ to follow these instructions on how to build and deploy the war file gte.war.
    [http://www.oracle.com/technetwork/java/javase/downloads/index.html]
    (http://www.oracle.com/technetwork/java/javase/downloads/index.html "Java Download")
 
-   ===WINDOWS===
-   1.1 Download - http://www.oracle.com/technetwork/java/javase/downloads/
-   1.2 Add bin directory to path
-   1.3 Add JAVA_HOME environment variable (makes sure it points to the SDK, not JRE)
+   * **WINDOWS**
+	   1.1 Download - http://www.oracle.com/technetwork/java/javase/downloads/
+	   1.2 Add bin directory to path
+	   1.3 Add `JAVA_HOME` environment variable (makes sure it points to the SDK, not JRE)
 
-   ===LINUX===
-   $ sudo apt-get install sun-java6-jdk
+   * **LINUX**
+		`$ sudo apt-get install sun-java6-jdk`
 
-   ===OS X===
+   * **OS X**
    OS X 10.6 and 10.7 with a Java SDK suitable for gte.  
    Confirm you have the latest version by running "Software update..." from the Apple menu.
 
-2. Set the environment variable JAVA_HOME to the installed JAVA SDK
+2. Set the environment variable `JAVA_HOME` to the installed JAVA SDK
 
-2. Install ANT ##
+## 2. Install ANT
 
-OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
 
 **LINUX/WINDOWS:**
 
@@ -105,6 +104,7 @@ OS X 10.6 and 10.7 ships with ant (in /usr/bin/ant)
    instructions at: [http://ant.apache.org/manual/install.html]
    (http://ant.apache.org/manual/install.html "Install ANT")
 
+**OS X**: OS X 10.6 and 10.7 ships with ant (in `/usr/bin/ant`)
 
 ## 2. Install Jetty
 
@@ -143,14 +143,14 @@ You may need to complete the following additional steps on Linux/OSX:
 
 4b. Install "gflashplayer"
 
-**Linux**
-4b.1 cd ${FLEX_HOME}/runtimes/player/10.1/lnx
-4b.2 tar -zxvf flashplayerdebugger.tar.gz
-4b.3 ln -s ./flashplayerdebugger ./gflashplayer
+**LINUX**
+4b.1 `cd ${FLEX_HOME}/runtimes/player/10.1/lnx`
+4b.2 `tar -zxvf flashplayerdebugger.tar.gz`
+4b.3 `ln -s ./flashplayerdebugger ./gflashplayer`
 4b.4 Add directory from [4b.1] to PATH
 
 **OS X**
-In ${FLEX_HOME}/runtimes/player/10.1/mac there is a DMG file,
+In `${FLEX_HOME}/runtimes/player/10.1/mac` there is a DMG file,
 "Install Adobe Flash Player Debugger 10.1.dmg".
 Double-click in Finder to mount the disk image, which contains
 an installer, "Install Adobe Flash Player Debugger".  Double-click
@@ -218,17 +218,17 @@ If http://127.0.0.1:8080/gte/ ever shows the browser message
     Firefox can't establish a connection to the server at
     127.0.0.1:8080.
 
-then the jetty server is down, and you need to start it (in JETTY_HOME) with
+then the jetty server is down, and you need to start it (in `JETTY_HOME`) with
 
-     java -jar start.jar
+     `java -jar start.jar`
 
 Or if you want to start jetty so that it can easily be stopped then use
 
-	java -DSTOP.PORT=8079 -DSTOP.KEY=secret -jar start.jar &
+	`java -DSTOP.PORT=8079 -DSTOP.KEY=secret -jar start.jar &`
 
 And then to stop it
 
-	java -DSTOP.PORT=8079 -DSTOP.KEY=secret -jar start.jar --stop
+	`java -DSTOP.PORT=8079 -DSTOP.KEY=secret -jar start.jar --stop`
 
 If you get an error while starting JETTY that says you do not have a Java SDK installed,
 please follow the instructions here:
@@ -237,7 +237,7 @@ please follow the instructions here:
 add `-Dorg.apache.jasper.compiler.disablejsr199=true` to the **Jetty.xml** (JETTY 7.5.0 and prior)
 or uncomment this line in **start.ini** (JETTY 8.X and later).
 
-## 6. Including native algorithm into the SERVER version
+## 6. Including native algorithms in the SERVER version
 
 See servlet_howto.txt
 
@@ -252,15 +252,14 @@ Access the code from GitHub, change the GUI, submit the code back to GitHub
 If you want to compile, test and run the complete GTE you need to setup the
 SERVER version. Access the code from GitHub and run the **compileComplete** ANT-target.
 
-## 1. Install Eclipse IDE##
+## 1. Install Eclipse IDE
 
 Download Eclipse IDE (HELIOS or INDIGO) for Java EE Developpers 32-bit version at:
 [http://www.eclipse.org/downloads/](http://www.eclipse.org/downloads/ "Eclipse Download").
 Do not use the 64-bit version or the new JUNO release of eclipse because it does not work
 with the FlashBuilder plugin later.
 
-
-## 2. Setup and run the CLIENT version ##
+## 2. Setup and run the CLIENT version
 
 1. Make a copy of your Eclipse installation, because you will integrate FlashBuilder -
    FLEX support for Eclipse, which is buggy and may harm other projects on eclipse.
