@@ -149,36 +149,28 @@ You may need to complete the following additional steps on Linux/OSX:
 4b.3 `ln -s ./flashplayerdebugger ./gflashplayer`
 4b.4 Add directory from [4b.1] to PATH
 
-**OS X**
-In `${FLEX_HOME}/runtimes/player/10.1/mac` there is a DMG file,
-"Install Adobe Flash Player Debugger 10.1.dmg".
-Double-click in Finder to mount the disk image, which contains
-an installer, "Install Adobe Flash Player Debugger".  Double-click
-the installer to run.
+**OS X:** In `${FLEX_HOME}/runtimes/player/10.1/mac` there is a DMG file,
+"Install Adobe Flash Player Debugger 10.1.dmg".  Double-click in Finder to
+mount the disk image, which contains an installer, "Install Adobe Flash Player
+Debugger".  Double-click the installer to run.  If you have Adobe Flash Player
+newer than 10.1 installed, the installer will complain and terminate.  In this
+instance, the Flash Player Debugger.app is also present in the folder.
+Double-click to unzip, and drag the application the the Applications folder (or
+wherever you want to put it).
 
-If you have Adobe Flash Player newer than 10.1 installed, the
-installer will complain and terminate.  In this instance, the
-Flash Player Debugger.app is also present in the folder.
-Double-click to unzip, and drag the application the the
-Applications folder (or wherever you want to put it).
-
-By now you should have 4 environment variables: `JAVA_HOME, ANT_HOME, JETTY_HOME and FLEX_HOME`
-pointing to the corresponding directories.
+By now you should have 4 environment variables: `JAVA_HOME, ANT_HOME,
+JETTY_HOME and FLEX_HOME` pointing to the corresponding directories.
 
 ## 4. Build/Run the Server version
 
-**LINUX:**
-
-Install gcc as a C-compiler (Ubuntu):
+**LINUX:** Install gcc as a C-compiler (Ubuntu):
 
 * `sudo apt-get clean`
 * `sudo apt-get update`
 * `sudo apt-get upgrade`
 * `sudo apt-get install build-essential`
 
-**OS X:**
-
-tbc (options include installing Xcode or using brew)
+**OS X:** tbc (options include installing Xcode or using brew)
 
 **WINDOWS:**
 Download cygwin (setup.exe) from: [http://www.cygwin.com/](http://www.cygwin.com/ "Cygwin").
