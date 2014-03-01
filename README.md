@@ -28,7 +28,7 @@ in some native code, in particular C for the lrs program.  The output of this
 algorithm is then sent back to the client to be displayed as a solution.
 
 These issues are addressed as follows:
-- a local server is started called Jetty
+- Jetty is used to provide a local server
 - the client communicates with that local server on your machine
 - all native algorithms also run locally
 
@@ -43,14 +43,17 @@ GTE can be installed in three different ways:
    algorithms written in Java or native code.
 
 In this README we first provide detailed installation instructions for the
-SERVER version, and then provide some notes on developing just the CLIENT (with
-Eclipse).
+SERVER version ([here](#server)).  Then we provide some notes on developing
+just the CLIENT with Eclipse ([here](#client)). Finally we provide some
+instructions on using a "drawing-only" version, with no server components
+([here](#gtewsc)).
 
 If you want to contribute to the gte project, as a first step you should follow
 the SERVER installation instructions and create and deploy the war file gte.war
 on a local Jetty server.
 
 # SERVER installation instructions
+<a name="server"></a>
 
 This requires a number of installations:
 
@@ -228,6 +231,7 @@ or uncomment this line in **start.ini** (JETTY 8.X and later).
 See servlet_howto.txt
 
 # Developing just the CLIENT version
+<a name="client"></a>
 
 The CLIENT version is only for developing the GUI. 
 
@@ -272,7 +276,9 @@ Right-Click on the grey area and choose **Global settings** from the popup menu.
 Navigate to **Advanced** and scroll down. Click on **Trusted Location Settings**
 and add the directory where the Flash-File is executed to the list of trusted locations.
 
+
 # GTE without Server components
+<a name="gtewsc"></a>
 
 To run GTE without server components means just to use the drawing
 functionality. The drawing functionality is entirely coded in Flex and
