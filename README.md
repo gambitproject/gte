@@ -229,7 +229,7 @@ please follow the instructions here:
 add `-Dorg.apache.jasper.compiler.disablejsr199=true` to the **Jetty.xml** (JETTY 7.5.0 and prior)
 or uncomment this line in **start.ini** (JETTY 8.X and later).
 
-## 6. Including native algorithms in the SERVER version
+## 6. Including native algorithms in SERVER version
 
 See servlet_howto.txt
 
