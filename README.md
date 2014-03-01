@@ -52,8 +52,8 @@ If you want to contribute to the gte project, as a first step you should follow
 the SERVER installation instructions and create and deploy the war file gte.war
 on a local Jetty server.
 
-# SERVER installation instructions
 <a name="server"></a>
+# SERVER installation instructions
 
 This requires a number of installations:
 
@@ -230,8 +230,8 @@ or uncomment this line in **start.ini** (JETTY 8.X and later).
 
 See servlet_howto.txt
 
-# Developing just the CLIENT version
 <a name="client"></a>
+# Developing just the CLIENT version
 
 The CLIENT version is only for developing the GUI. 
 
@@ -267,7 +267,7 @@ with the FlashBuilder plugin later.
 7. Finish the project wizard
 8. Navigate in the project explorer to `gui-builder/src/les/math/games/builder/view`,
    right click on Main.mxml and choose **set as default application**.
-9. Delete the original *.mxml application file created by the project wizard
+9. Delete the original \*.mxml application file created by the project wizard
    (should be createt in gui-builder/src)
 10. Run "main.mxml"
 
@@ -277,8 +277,8 @@ Navigate to **Advanced** and scroll down. Click on **Trusted Location Settings**
 and add the directory where the Flash-File is executed to the list of trusted locations.
 
 
-# GTE without Server components
 <a name="gtewsc"></a>
+# GTE without Server components
 
 To run GTE without server components means just to use the drawing
 functionality. The drawing functionality is entirely coded in Flex and
