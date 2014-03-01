@@ -26,7 +26,6 @@ side, that file is read in, and an algorithm started, for example, to find one
 or all Nash-Equilibria of the game.  This algorithm maybe be a program written
 in some native code, in particular C for the lrs program.  The output of this
 algorithm is then sent back to the client to be displayed as a solution.
-
 These issues are addressed as follows:
 - Jetty is used to provide a local server
 - the client communicates with that local server on your machine
