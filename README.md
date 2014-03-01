@@ -36,10 +36,10 @@ These issues are addressed as follows:
 
 GTE can be installed in three different ways:
 
-1. Compiled version (PRODUCTIVE), ready to run on an installed Jetty Server
-2. Client Development version (CLIENT) for changing the GUI written in
+1. Compiled version (**PRODUCTIVE**), ready to run on an installed Jetty Server
+2. Client Development version (**CLIENT**) for changing the GUI written in
    ActionScript
-3. Server Development version (SERVER) for changing servlets or intergrating
+3. Server Development version (**SERVER**) for changing servlets or intergrating
    algorithms written in Java or native code.
 
 In this README we first provide detailed installation instructions for the
@@ -73,33 +73,32 @@ your computer and stay in build.properties (see example in repository).
    [http://www.oracle.com/technetwork/java/javase/downloads/index.html]
    (http://www.oracle.com/technetwork/java/javase/downloads/index.html "Java Download")
 
+   * **LINUX**
+		`$ sudo apt-get install sun-java6-jdk`
+
    * **WINDOWS**
 	   1.1 Download - http://www.oracle.com/technetwork/java/javase/downloads/
 	   1.2 Add bin directory to path
 	   1.3 Add `JAVA_HOME` environment variable (makes sure it points to the SDK, not JRE)
 
-   * **LINUX**
-		`$ sudo apt-get install sun-java6-jdk`
-
    * **OS X**
    OS X 10.6 and 10.7 with a Java SDK suitable for gte.  
    Confirm you have the latest version by running "Software update..." from the Apple menu.
 
-2. Set the environment variable `JAVA_HOME` to the installed JAVA SDK
+   Set the environment variable `JAVA_HOME` to the installed JAVA SDK
 
-## 2. Install ANT
+2. Install ANT
 
+   **LINUX/WINDOWS:**
 
-**LINUX/WINDOWS:**
+   1. Download ANT at: [http://ant.apache.org/](http://ant.apache.org/ "ANT")
+   2. Extract the downloaded archive
+   3. Set the environment variable ANT_HOME to the extracted ANT directory
+   4. Add the **bin** directory to your PATH environment variable. See install
+      instructions at: [http://ant.apache.org/manual/install.html]
+      (http://ant.apache.org/manual/install.html "Install ANT")
 
-1. Download ANT at: [http://ant.apache.org/](http://ant.apache.org/ "ANT")
-2. Extract the downloaded archive
-3. Set the environment variable ANT_HOME to the extracted ANT directory
-4. Add the **bin** directory to your PATH environment variable. See install
-   instructions at: [http://ant.apache.org/manual/install.html]
-   (http://ant.apache.org/manual/install.html "Install ANT")
-
-**OS X**: OS X 10.6 and 10.7 ships with ant (in `/usr/bin/ant`)
+   **OS X**: OS X 10.6 and 10.7 ships with ant (in `/usr/bin/ant`)
 
 ## 2. Install Jetty
 
@@ -108,7 +107,7 @@ your computer and stay in build.properties (see example in repository).
 1. `JETTY_VERSION=7.6.1.v20120215`
 2. `wget http://download.eclipse.org/jetty/$JETTY_VERSION/dist/jetty-distribution-$JETTY_VERSION.tar.gz`
 3. `tar xfz jetty-distribution-$JETTY_VERSION.tar.gz`
-4. Set the environment variable JETTY_HOME to the extracted JETTY directory
+4. Set the environment variable `JETTY_HOME` to the extracted JETTY directory
 5. Check Jetty with executing in jetty directory: `java -jar start.jar`
 6. Access JETTY at: 127.0.0.1:8080
 7. Terminate JETTY with CTRL-C
