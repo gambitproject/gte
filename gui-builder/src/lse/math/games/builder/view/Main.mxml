@@ -1293,6 +1293,9 @@
 			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" 
 					   click="controller.redo()" />				
             -->
+            <!-- // Replace UNDO and REDO buttons with spacer -->
+			<mx:Spacer width="46"/>	
+
 			<mx:Spacer width="13"/>	
 
 			
