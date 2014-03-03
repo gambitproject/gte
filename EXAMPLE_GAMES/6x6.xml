@@ -1,0 +1,31 @@
+<gte version="0.1">
+  <gameDescription/>
+  <display>
+    <color player="1">#FF0000</color>
+    <color player="2">#0000FF</color>
+    <font>Times</font>
+    <strokeWidth>1</strokeWidth>
+    <cellVertPadding>5</cellVertPadding>
+    <cellHorizPadding>5</cellHorizPadding>
+  </display>
+  <players>
+    <player playerId="1">1</player>
+    <player playerId="2">2</player>
+  </players>
+  <strategicForm size="{ 6 6 }">
+    <strategy player="1">{ "A" "B" "C" "D" "E" "F" }</strategy>
+    <strategy player="2">{ "g" "h" "i" "j" "k" "l" }</strategy>
+    <payoffs player="1">1 0 0 0 0 0
+6 9 0 0 0 0
+18 54 81 0 0 0
+54 162 486 729 0 0
+162 486 1458 4374 6561 0
+486 1458 4374 13122 39366 59049</payoffs>
+    <payoffs player="2">1 6 18 54 162 486
+0 9 54 162 486 1458
+0 0 81 486 1458 4374
+0 0 0 729 4374 13122
+0 0 0 0 6561 39366
+0 0 0 0 0 59049</payoffs>
+  </strategicForm>
+</gte>
