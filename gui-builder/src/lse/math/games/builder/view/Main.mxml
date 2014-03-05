@@ -340,7 +340,7 @@
 				matrixEditor.matrix = matrix
 				matrixEditor.controller = controller;
 				matrixEditor.setMode(grid.isZeroSum);				
-				matrixEditor.setEditable(false);
+				matrixEditor.setEditable(true);
 				tabNavigator.selectedIndex=1;
 				changeEditMode(1);
 				arrowMenu.enabled=false;
