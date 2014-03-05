@@ -36,8 +36,20 @@
 			import util.Log;
 			import util.PromptTextInputCanvas;
 			import util.PromptTwoButtons;
-						
-			
+
+
+			// ------------------------------------
+			// Layout parameters
+			// ------------------------------------
+
+			public var menuBarHeight:String = "30"; // orig: 30
+			public var buttonWidth1:String = "23";  // orig: 23
+			public var buttonHeight1:String = "24";  // orig: 24
+			public var buttonHeight2:String = "21";  // orig: 21
+			public var tabHeight:String = "22";  // orig: 22
+			public var arrowHeight:String = "16";  // orig: 16
+			public var arrowWidth:String = "70";  // orig: 70
+
 			// ------------------------------------
 			// START: Bindable propert
 			// ------------------------------------
@@ -340,7 +352,7 @@
 				matrixEditor.matrix = matrix
 				matrixEditor.controller = controller;
 				matrixEditor.setMode(grid.isZeroSum);				
-				matrixEditor.setEditable(true);
+				matrixEditor.setEditable(false);
 				tabNavigator.selectedIndex=1;
 				changeEditMode(1);
 				arrowMenu.enabled=false;
@@ -1268,29 +1280,30 @@
 			<mx:Move duration="2000" yBy="100" easingFunction="{Bounce.easeOut}"/>
 		</mx:Sequence>
 	</fx:Declarations>
-	
 
-	
+
+	<!-- START OF THE LAYOUT -->
+
 	<s:Group left="0" right="0" top="0" bottom="0" >
 		
 		<!-- TOP CONTROL BAR -->		
-		<s:HGroup left="{expanded ? 3 : 0}" height="30" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)" verticalAlign="middle">
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
+		<s:HGroup left="{expanded ? 3 : 0}" height="{menuBarHeight}" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)" verticalAlign="middle">
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />
 
-			<mx:TextInput  id="filename" width="100" height="24" enabled="false" added="fileManager = controller.fileManager;"
+			<mx:TextInput  id="filename" width="100" height="{buttonHeight1}" enabled="false" added="fileManager = controller.fileManager;"
 						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) fileManager.filename= filename.text; else filename.text = fileManager.filename" 
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
 			<mx:Spacer width="13"/>
 			
             <!--  // Disable UNDO and REDO buttons
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" 
 					   click="controller.undo()" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/arrow_redo.png')" toolTip="Redo [Ctrl+Shift+z]" 
 					   click="controller.redo()" />				
             -->
             <!-- // Replace UNDO and REDO buttons with spacer -->
@@ -1302,18 +1315,18 @@
 			<mx:Spacer width="60"/>
 			<s:HGroup id="arrowMenu" >
 			<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}" enabled="{editMode==0}">
-				<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Add and delete tree node" click="setExtensiveStep(0);" />
-				<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="70" height="16" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Assign players to tree nodes" click="setExtensiveStep(1);" />	
-				<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Merge node to infosets and disolve/cut infosets" click="setExtensiveStep(2);" />	
-				<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Assign move labels to tree edges" click="setExtensiveStep(3);" />
-				<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="70" height="16" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Assign player payoffs to leafs" click="setExtensiveStep(4);" />
+				<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Add and delete tree node" click="setExtensiveStep(0);" />
+				<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="{arrowWidth}" height="{arrowHeight}" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Assign players to tree nodes" click="setExtensiveStep(1);" />	
+				<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Merge node to infosets and disolve/cut infosets" click="setExtensiveStep(2);" />	
+				<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Assign move labels to tree edges" click="setExtensiveStep(3);" />
+				<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Assign player payoffs to leafs" click="setExtensiveStep(4);" />
 			</s:HGroup>
 			</s:HGroup>
 			<mx:Spacer width="13"/>
 
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(0)" />			
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(0)" />			
 			<mx:Spacer width="4"/>
-			<s:ComboBox id="algoComboBox" width="111" height="24" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
+			<s:ComboBox id="algoComboBox" width="111" height="{buttonHeight1}" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
 					<mx:ArrayCollection id="algos" source="{xfalgos}" />					
 				</s:dataProvider>
@@ -1329,93 +1342,93 @@
 			
 			<s:HGroup  visible="{editMode==0}" verticalAlign="middle" includeInLayout="{editMode==0}">
 				<s:HGroup  visible="{extensiveStep==-1}" verticalAlign="middle" includeInLayout="{extensiveStep==-1}">
-					<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/wand.png')" toolTip="Generate Random Payoffs" 
+					<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/wand.png')" toolTip="Generate Random Payoffs" 
 							   click="controller.doAction(actions.randomPayoffs)" />
-					<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
+					<mx:Button id="toggleZeroSumButton" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
 							   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
 				</s:HGroup>
 			</s:HGroup>
 			
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/zoom_in.png')" toolTip="Zoom In [Shift+l]" 
 					   click="controller.zoomIn()" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/zoom_out.png')" toolTip="Zoom Out [l]" 
 					   click="controller.zoomOut()" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zoom.png')" toolTip="Adjust Zoom [Ctrl+l]" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/zoom.png')" toolTip="Adjust Zoom [Ctrl+l]" 
 					   click="controller.zoomAdjust()" />				
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarSF.mouseScrollingEnabled ? 'ON' : 'OFF'} [Hold SpaceBar]" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/pan_tool.png')" toolTip="Pan Tool {scrollbarSF.mouseScrollingEnabled ? 'ON' : 'OFF'} [Hold SpaceBar]" 
 					   toggle="true" selected="{mouseScrollingEnabled}" change="if(mouseScrollingEnabled) disableMouseScrolling(); else enableMouseScrolling()" />
 			
-			<mx:Button id="toggleDecimalLayoutButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/rational.png')" toolTip="Decimal Layout {decimalLayout ? 'ON' : 'OFF'}" 
+			<mx:Button id="toggleDecimalLayoutButton" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/rational.png')" toolTip="Decimal Layout {decimalLayout ? 'ON' : 'OFF'}" 
 					   toggle="true" selected="{decimalLayout}" change="decimalLayout = event.target.selected;toggleDecimalLayout();" />
-			<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" 
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/cog_edit.png')" toolTip="Edit Settings" 
 					   click="showSettings()"/>		
 
 		</s:HGroup>
 	
 		<!-- TABS -->
-		<s:BorderContainer top="30" bottom="18" left="0" right="{leaves.visible ? 185 : 0}" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
-			<mx:TabNavigator id="tabNavigator" tabHeight="22" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" 
+		<s:BorderContainer top="{menuBarHeight}" bottom="18" left="0" right="{leaves.visible ? 185 : 0}" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+			<mx:TabNavigator id="tabNavigator" tabHeight="{tabHeight}" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" 
 							 change="tabChange(event)" creationPolicy="all">
 				<s:NavigatorContent label="Extensive Form" >
 					
-					<s:HGroup  gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="middle" clipAndEnableScrolling="true" enabled="{editMode==0}" >
+					<s:HGroup  gap="-1" left="340" right="0" top="-{buttonHeight2}" depth="3" verticalAlign="middle" clipAndEnableScrolling="true" enabled="{editMode==0}" >
 						<s:HGroup  enabled="{eStep0}" verticalAlign="middle" gap="-1" >
 							<!-- Tree Step-->
-							<mx:Button id="ngTreeAdd" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/add.png')"  
+							<mx:Button id="ngTreeAdd" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/add.png')"  
 									   toggle="true" selected="true" click="setExtensiveStep(0);ngTreeAdd.selected=true;ngTreeDelete.selected=false;"  toolTip="ADD a child node by clicking on a black square" />
-							<mx:Button id="ngTreeDelete" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/delete.png')"  
+							<mx:Button id="ngTreeDelete" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/delete.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(0);ngTreeDelete.selected=true;ngTreeAdd.selected=false;"  toolTip="DELETE a node by clicking on a black squaree" />
 						</s:HGroup>
 						<mx:Spacer width="20"/>
 						
 						<s:HGroup  enabled="{eStep1}" verticalAlign="middle" gap="-1" >
-							<mx:Button id="ngChance" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"  
+							<mx:Button id="ngChance" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(1);ngChance.selected=true;ngPlayer1.selected=false;ngPlayer2.selected=false;Player1InputVisible=false;Player2InputVisible=false;"
 									   toolTip="Assign CHANCE by clicking on a node"/>
-							<mx:Button id="ngPlayer1" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/user_1.png')"  
+							<mx:Button id="ngPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/user_1.png')"  
 									   toggle="true" selected="true" click="setExtensiveStep(1);ngPlayer1.selected=true;ngChance.selected=false;ngPlayer2.selected=false;Player1InputVisible=true;Player2InputVisible=false;" 
 									   toolTip="Assign PLAYER 1 by clicking on a node"/>
-							<mx:Button id="ngPlayer2" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/user_2.png')"  
+							<mx:Button id="ngPlayer2" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/user_2.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(1);ngPlayer2.selected=true;ngPlayer1.selected=false;ngChance.selected=false;Player1InputVisible=false;Player2InputVisible=true;" 
 									   toolTip="Assign PLAYER 2 by clicking on a node" />
 						</s:HGroup>
 						<mx:Spacer width="5"/>
 						<s:HGroup  enabled="{eStep2}" verticalAlign="middle" gap="-1" >
-							<mx:Button id="ngInfosetsJoin" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/link.png')"  
+							<mx:Button id="ngInfosetsJoin" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/link.png')"  
 									   toggle="true" selected="true" click="setExtensiveStep(2);ngInfosetsJoin.selected=true;ngInfosetsCut.selected=false;ngInfosetsDisjoin.selected=false;"
 									   toolTip="Select two or more nodes with the same number of children and the same player to merge them to an infoset"/>
-							<mx:Button id="ngInfosetsDisjoin" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/link_break.png')"  
+							<mx:Button id="ngInfosetsDisjoin" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/link_break.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(2);ngInfosetsDisjoin.selected=true;ngInfosetsCut.selected=false;ngInfosetsJoin.selected=false;" 
 									   toolTip="Select an infoset to disolve it and split it up in seperate infosets"/>
-							<mx:Button id="ngInfosetsCut" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/cut_red.png')"  
+							<mx:Button id="ngInfosetsCut" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/cut_red.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(2);ngInfosetsCut.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsJoin.selected=false;" 
 									   toolTip="Select an infoset to cut a node into a seperate infoset"/>
 						</s:HGroup>
 						<mx:Spacer width="5"/>
 						<s:HGroup  enabled="{eStep3}" verticalAlign="middle" gap="-1" >
-							<mx:Button id="ngMovesPlayer1" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/font_1.png')"  
+							<mx:Button id="ngMovesPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/font_1.png')"  
 									   click="setExtensiveStep(3);ngMovesPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer),0,0,2,settings.getValue('DEFAULT_PLAYER_1_COLOR') as Number);"
 									   toolTip="Assign MOVES to PLAYER 1."/>
-							<mx:Button id="ngMovesPlayer2" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/font_2.png')"  
+							<mx:Button id="ngMovesPlayer2" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/font_2.png')"  
 									   click="setExtensiveStep(3);ngMovesPlayer=2;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer.nextPlayer),0,0,2,settings.getValue('DEFAULT_PLAYER_2_COLOR') as Number);"
 									   toolTip="Assign MOVES to PLAYER 2."/>
-							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="autoLabelMovesAction();" 
+							<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="autoLabelMovesAction();" 
 									   toolTip="Assign MOVES automatically to all players"/>
 						</s:HGroup>
 						<mx:Spacer width="5"/>
 						
 						<s:HGroup  enabled="{eStep4}" verticalAlign="middle" gap="-1" >
-							<mx:Button id="ngPayoffsPlayer1" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/brick_1.png')"  
+							<mx:Button id="ngPayoffsPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/brick_1.png')"  
 									   click="setExtensiveStep(4);ngPayoffsPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer),0,0,2,settings.getValue('DEFAULT_PLAYER_1_COLOR') as Number);"
 									   toolTip="Assign PAYOFFS to PLAYER 1." />
-							<mx:Button id="ngPayoffsPlayer2" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/brick_2.png')"  
+							<mx:Button id="ngPayoffsPlayer2" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/brick_2.png')"  
 									   click="setExtensiveStep(4);ngPayoffsPlayer=2;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer.nextPlayer),0,0,2,settings.getValue('DEFAULT_PLAYER_2_COLOR') as Number);" 
 									   toolTip="Assign PAYOFFS to PLAYER 2."/>
-							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/wand.png')"   
+							<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/wand.png')"   
 									   click="setExtensiveStep(4);controller.doAction(actions.randomPayoffs)" toolTip="Assign RANDOM PAYOFFS to all players." />
-							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/text_list_numbers_vert.png')"   
+							<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/text_list_numbers_vert.png')"   
 									   click="setExtensiveStep(4);controller.doAction(actions.randomPayoffs);setAutoPayoffs(true);" toolTip="Assign ORDERED PAYOFFS to all players." />
-							<mx:Button id="ngToggleZeroSum" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')"  
+							<mx:Button id="ngToggleZeroSum" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')"  
 									   toggle="true" selected="{controller.isZeroSum}" change="setExtensiveStep(4);controller.isZeroSum = event.target.selected;toggleZeroSum();"  
 									   overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"
 									   toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}"/>
@@ -1468,18 +1481,18 @@
 								  visible="{editMode!=1}" click="changeEditMode(1);"/>
 					</s:VGroup>							
 					
-					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
-						<mx:Spacer width="23" />
+					<s:HGroup gap="-1" left="340" right="0" top="-{buttonHeight2}" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
+						<mx:Spacer width="{buttonWidth1}" />
 						
-						<mx:Button id="generalMatrix" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/nzerosum.png')" toolTip="General matrix"
+						<mx:Button id="generalMatrix" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/nzerosum.png')" toolTip="General matrix"
 								   toggle="true" click="matrixEditor.changeEvtRadioButton('2G');transpoMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;" visible="{editMode==1}"/>
-						<mx:Button id="ngToggleZeroSumStrategic" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')"  
+						<mx:Button id="ngToggleZeroSumStrategic" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')"  
 								   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();transpoMatrix.selected=false;generalMatrix.selected=false;"  
 								   toolTip="Zero Sum" visible="{editMode==1}"/>
-						<mx:Button id="transpoMatrix" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/transpo.png')" toolTip="Symmetric matrix"
+						<mx:Button id="transpoMatrix" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/transpo.png')" toolTip="Symmetric matrix"
 								   toggle="true" click="matrixEditor.changeEvtRadioButton('SG');generalMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;" visible="{editMode==1}"/>
-						<mx:Spacer width="23" />
-						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/wand.png')"   
+						<mx:Spacer width="{buttonWidth1}" />
+						<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/wand.png')"   
 								   click="matrixEditor.generateRandomPayoffs();" toolTip="Generate random payoffs." visible="{editMode==1}" />
 					</s:HGroup>
 				</s:NavigatorContent>		
@@ -1497,8 +1510,8 @@
 					
 							
 					
-					<s:HGroup gap="-1" left="340" right="0" top="-21" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
-						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="21" buttonWidth="23" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isStrategicReduced = (event.target.selectedIndex == 0);">
+					<s:HGroup gap="-1" left="340" right="0" top="-{buttonHeight2}" depth="3" verticalAlign="bottom" clipAndEnableScrolling="true">
+						<mx:ToggleButtonBar id="nfReducedBar" buttonHeight="{buttonHeight2}" buttonWidth="{buttonWidth1}" buttonStyleName="myButton" firstButtonStyleName="myButton" lastButtonStyleName="myButton" selectedIndex="0" valueCommit="controller.isStrategicReduced = (event.target.selectedIndex == 0);">
 							<mx:dataProvider>					
 								<mx:ArrayCollection>
 									<mx:source>
@@ -1508,7 +1521,7 @@
 								</mx:ArrayCollection>
 							</mx:dataProvider>
 						</mx:ToggleButtonBar>
-						<mx:Spacer width="23" />
+						<mx:Spacer width="{buttonWidth1}" />
 							
 					</s:HGroup>
 				</s:NavigatorContent>		
@@ -1531,7 +1544,7 @@
 		</mx:DataGrid>
 		
 		<!-- BOTTOM LOG LINE -->
-		<s:BorderContainer id="logLineContainer" left="1" right="1" bottom="1" height="16" borderColor="0xbb0000">
+		<s:BorderContainer id="logLineContainer" left="1" right="1" bottom="1" height="{arrowHeight}" borderColor="0xbb0000">
 		
 				<s:Label id="logLine" height="100%" width="100%"  backgroundColor="0xd6d6d6"
 						 color="#000000" creationComplete="initLogLineListener();"
