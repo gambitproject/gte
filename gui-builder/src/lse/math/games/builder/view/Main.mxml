@@ -1329,7 +1329,7 @@
 			
 			<s:HGroup  visible="{editMode==0}" verticalAlign="middle" includeInLayout="{editMode==0}">
 				<s:HGroup  visible="{extensiveStep==-1}" verticalAlign="middle" includeInLayout="{extensiveStep==-1}">
-					<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')" toolTip="Generate Random Payoffs" 
+					<mx:Button styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/wand.png')" toolTip="Generate Random Payoffs" 
 							   click="controller.doAction(actions.randomPayoffs)" />
 					<mx:Button id="toggleZeroSumButton" styleName="myButton" width="23" height="24" icon="@Embed(source='../../../../../../assets/icons/zerosum.png')" toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}" 
 							   toggle="true" selected="{controller.isZeroSum}" change="controller.isZeroSum = event.target.selected;toggleZeroSum();"  overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"/>
@@ -1369,15 +1369,15 @@
 						<mx:Spacer width="20"/>
 						
 						<s:HGroup  enabled="{eStep1}" verticalAlign="middle" gap="-1" >
+							<mx:Button id="ngChance" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"  
+									   toggle="true" selected="false" click="setExtensiveStep(1);ngChance.selected=true;ngPlayer1.selected=false;ngPlayer2.selected=false;Player1InputVisible=false;Player2InputVisible=false;"
+									   toolTip="Assign CHANCE by clicking on a node"/>
 							<mx:Button id="ngPlayer1" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/user_1.png')"  
 									   toggle="true" selected="true" click="setExtensiveStep(1);ngPlayer1.selected=true;ngChance.selected=false;ngPlayer2.selected=false;Player1InputVisible=true;Player2InputVisible=false;" 
 									   toolTip="Assign PLAYER 1 by clicking on a node"/>
 							<mx:Button id="ngPlayer2" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/user_2.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(1);ngPlayer2.selected=true;ngPlayer1.selected=false;ngChance.selected=false;Player1InputVisible=false;Player2InputVisible=true;" 
 									   toolTip="Assign PLAYER 2 by clicking on a node" />
-							<mx:Button id="ngChance" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/wand.png')"  
-									   toggle="true" selected="false" click="setExtensiveStep(1);ngChance.selected=true;ngPlayer1.selected=false;ngPlayer2.selected=false;Player1InputVisible=false;Player2InputVisible=false;"
-									   toolTip="Assign CHANCE by clicking on a node"/>
 						</s:HGroup>
 						<mx:Spacer width="5"/>
 						<s:HGroup  enabled="{eStep2}" verticalAlign="middle" gap="-1" >
@@ -1411,7 +1411,7 @@
 							<mx:Button id="ngPayoffsPlayer2" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/brick_2.png')"  
 									   click="setExtensiveStep(4);ngPayoffsPlayer=2;PromptTextInputCanvas.show(onReturnFromPromptPayoffs, controller.grid.getPlayerPayoffs(controller.grid.firstPlayer.nextPlayer),0,0,2,settings.getValue('DEFAULT_PLAYER_2_COLOR') as Number);" 
 									   toolTip="Assign PAYOFFS to PLAYER 2."/>
-							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   
+							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/wand.png')"   
 									   click="setExtensiveStep(4);controller.doAction(actions.randomPayoffs)" toolTip="Assign RANDOM PAYOFFS to all players." />
 							<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/text_list_numbers_vert.png')"   
 									   click="setExtensiveStep(4);controller.doAction(actions.randomPayoffs);setAutoPayoffs(true);" toolTip="Assign ORDERED PAYOFFS to all players." />
@@ -1479,7 +1479,7 @@
 						<mx:Button id="transpoMatrix" styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/transpo.png')" toolTip="Symmetric matrix"
 								   toggle="true" click="matrixEditor.changeEvtRadioButton('SG');generalMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;" visible="{editMode==1}"/>
 						<mx:Spacer width="23" />
-						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"   
+						<mx:Button styleName="myButton" width="23" height="21" icon="@Embed(source='../../../../../../assets/icons/wand.png')"   
 								   click="matrixEditor.generateRandomPayoffs();" toolTip="Generate random payoffs." visible="{editMode==1}" />
 					</s:HGroup>
 				</s:NavigatorContent>		
