@@ -50,6 +50,18 @@
 			public var arrowHeight:String = "16";  // orig: 16
 			public var arrowWidth:String = "70";  // orig: 70
 
+			public var treeStepSpacer:String = "52"; 
+			public var treeStepSpacerButtons:String = "2"; 
+			public var playersStepSpacer:String = "10";  // spacer for arrows
+			public var playersStepSpacerButtons:String = "23";  // buttons below
+			public var infosetsStepSpacer:String = "17";  
+			public var infosetsStepSpacerButtons:String = "18"; 
+			public var movesStepSpacer:String = "15";
+			public var movesStepSpacerButtons:String = "18"; 
+			public var payoffsStepSpacer:String = "39"; 
+			public var payoffsStepSpacerButtons:String = "18"; 
+			public var postPayoffsStepSpacer:String = "60"; 
+
 			// ------------------------------------
 			// START: Bindable propert
 			// ------------------------------------
@@ -1307,19 +1319,27 @@
 					   click="controller.redo()" />				
             -->
             <!-- // Replace UNDO and REDO buttons with spacer -->
-			<mx:Spacer width="46"/>	
 
-			<mx:Spacer width="13"/>	
+			<mx:Spacer width="{treeStepSpacer}"/>	
 
-			
 			<mx:Spacer width="60"/>
 			<s:HGroup id="arrowMenu" >
 			<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}" enabled="{editMode==0}">
+
 				<mx:Button id="ngTreeStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngTreeIcon}" overIcon="{ngTreeHoverIcon}" toolTip="Add and delete tree node" click="setExtensiveStep(0);" />
+				<mx:Spacer width="{playersStepSpacer}"/>	
+
 				<mx:Button id="ngPlayersStep" styleName="myButtonSkinless" alpha="0.3" width="{arrowWidth}" height="{arrowHeight}" icon="{ngPlayersIcon}" overIcon="{ngPlayersHoverIcon}" toolTip="Assign players to tree nodes" click="setExtensiveStep(1);" />	
+				<mx:Spacer width="{infosetsStepSpacer}"/>	
+
 				<mx:Button id="ngInfosetsStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngInfosetsIcon}" overIcon="{ngInfosetsHoverIcon}" toolTip="Merge node to infosets and disolve/cut infosets" click="setExtensiveStep(2);" />	
+				<mx:Spacer width="{movesStepSpacer}"/>	
+
 				<mx:Button id="ngMovesStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngMovesIcon}" overIcon="{ngMovesHoverIcon}" toolTip="Assign move labels to tree edges" click="setExtensiveStep(3);" />
+				<mx:Spacer width="{payoffsStepSpacer}"/>	
+
 				<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Assign player payoffs to leafs" click="setExtensiveStep(4);" />
+				<mx:Spacer width="{postPayoffsStepSpacer}"/>	
 			</s:HGroup>
 			</s:HGroup>
 			<mx:Spacer width="13"/>
@@ -1372,6 +1392,9 @@
 				<s:NavigatorContent label="Extensive Form" >
 					
 					<s:HGroup  gap="-1" left="340" right="0" top="-{buttonHeight2}" depth="3" verticalAlign="middle" clipAndEnableScrolling="true" enabled="{editMode==0}" >
+						
+						<mx:Spacer width="{treeStepSpacerButtons}"/>	
+
 						<s:HGroup  enabled="{eStep0}" verticalAlign="middle" gap="-1" >
 							<!-- Tree Step-->
 							<mx:Button id="ngTreeAdd" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/add.png')"  
@@ -1379,7 +1402,8 @@
 							<mx:Button id="ngTreeDelete" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/delete.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(0);ngTreeDelete.selected=true;ngTreeAdd.selected=false;"  toolTip="DELETE a node by clicking on a black squaree" />
 						</s:HGroup>
-						<mx:Spacer width="20"/>
+
+						<mx:Spacer width="{playersStepSpacerButtons}"/>	
 						
 						<s:HGroup  enabled="{eStep1}" verticalAlign="middle" gap="-1" >
 							<mx:Button id="ngChance" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"  
@@ -1392,7 +1416,9 @@
 									   toggle="true" selected="false" click="setExtensiveStep(1);ngPlayer2.selected=true;ngPlayer1.selected=false;ngChance.selected=false;Player1InputVisible=false;Player2InputVisible=true;" 
 									   toolTip="Assign PLAYER 2 by clicking on a node" />
 						</s:HGroup>
-						<mx:Spacer width="5"/>
+
+						<mx:Spacer width="{infosetsStepSpacerButtons}"/>	
+
 						<s:HGroup  enabled="{eStep2}" verticalAlign="middle" gap="-1" >
 							<mx:Button id="ngInfosetsJoin" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/link.png')"  
 									   toggle="true" selected="true" click="setExtensiveStep(2);ngInfosetsJoin.selected=true;ngInfosetsCut.selected=false;ngInfosetsDisjoin.selected=false;"
@@ -1404,7 +1430,9 @@
 									   toggle="true" selected="false" click="setExtensiveStep(2);ngInfosetsCut.selected=true;ngInfosetsDisjoin.selected=false;ngInfosetsJoin.selected=false;" 
 									   toolTip="Select an infoset to cut a node into a seperate infoset"/>
 						</s:HGroup>
-						<mx:Spacer width="5"/>
+
+						<mx:Spacer width="{movesStepSpacerButtons}"/>	
+
 						<s:HGroup  enabled="{eStep3}" verticalAlign="middle" gap="-1" >
 							<mx:Button id="ngMovesPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/font_1.png')"  
 									   click="setExtensiveStep(3);ngMovesPlayer=1;;PromptTextInputCanvas.show(onReturnFromPromptMoves, controller.grid.getPlayerMoves(controller.grid.firstPlayer),0,0,2,settings.getValue('DEFAULT_PLAYER_1_COLOR') as Number);"
@@ -1415,7 +1443,8 @@
 							<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/lightbulb.png')"   click="autoLabelMovesAction();" 
 									   toolTip="Assign MOVES automatically to all players"/>
 						</s:HGroup>
-						<mx:Spacer width="5"/>
+
+						<mx:Spacer width="{payoffsStepSpacerButtons}"/>	
 						
 						<s:HGroup  enabled="{eStep4}" verticalAlign="middle" gap="-1" >
 							<mx:Button id="ngPayoffsPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/brick_1.png')"  
@@ -1433,6 +1462,8 @@
 									   overIcon="@Embed(source='../../../../../../assets/icons/nzerosum.png')"
 									   toolTip="Zero Sum {controller.isZeroSum ? 'ON' : 'OFF'}"/>
 						</s:HGroup>
+
+						<mx:Spacer width="{postPayoffsStepSpacer}"/>	
 						
 					</s:HGroup>	
 					
