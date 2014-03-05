@@ -50,10 +50,11 @@
 			public var arrowHeight:String = "16";  // orig: 16
 			public var arrowWidth:String = "70";  // orig: 70
 
+			// spacer for arrows first and then buttons below them
 			public var treeStepSpacer:String = "52"; 
 			public var treeStepSpacerButtons:String = "2"; 
-			public var playersStepSpacer:String = "10";  // spacer for arrows
-			public var playersStepSpacerButtons:String = "23";  // buttons below
+			public var playersStepSpacer:String = "10";  
+			public var playersStepSpacerButtons:String = "23"; 
 			public var infosetsStepSpacer:String = "17";  
 			public var infosetsStepSpacerButtons:String = "18"; 
 			public var movesStepSpacer:String = "15";
@@ -1299,6 +1300,9 @@
 	<s:Group left="0" right="0" top="0" bottom="0" >
 		
 		<!-- TOP CONTROL BAR -->		
+
+		<!-- // File operations -->
+
 		<s:HGroup left="{expanded ? 3 : 0}" height="{menuBarHeight}" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)" verticalAlign="middle">
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
