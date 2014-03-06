@@ -1,2 +1,13 @@
 build
 build.properties
+native-algo/lrslib-042c/2nash
+native-algo/lrslib-042c/buffer
+native-algo/lrslib-042c/coclique3
+native-algo/lrslib-042c/lrs
+native-algo/lrslib-042c/lrs1
+native-algo/lrslib-042c/nash
+native-algo/lrslib-042c/prepare_nash
+native-algo/lrslib-042c/redund
+native-algo/lrslib-042c/redund1
+native-algo/lrslib-042c/setupnash
+native-algo/lrslib-042c/setupnash2
