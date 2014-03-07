@@ -234,7 +234,7 @@
 		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px;">
 			<h3 style="display: inline; font-family: Helvetica;">Game Theory Explorer <span style="color: #ffd700">&#946; </span></h3>
 		</div>
-		<div style="vertical-align: middle; display: inline-block; margin: 5px 5px 5px 0px; float: right;">
+		<div style="vertical-align: middle; display: inline-block; margin: 5px 15px 5px 0px; float: right;">
 		<em id="creditPopup" style="font-size: 13px; font-family: Helvetica; color: #a0a0a0; text-decoration:underline;cursor:pointer;">Credits and Feedback</em>
 		</div>
 	</div>
