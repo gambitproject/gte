@@ -51,7 +51,9 @@
 			public var arrowWidth:String = "70";  // orig: 70
 
 			// spacer for arrows first and then buttons below them
-			public var treeStepSpacer:String = "52"; 
+			public var preUndoButtonsSpacer:String = "13"; 
+			public var undoButtonsReplaceSpacer:String = "46"; 
+			public var treeStepSpacer:String = "66"; 
 			public var treeStepSpacerButtons:String = "2"; 
 			public var playersStepSpacer:String = "10";  
 			public var playersStepSpacerButtons:String = "23"; 
@@ -61,7 +63,8 @@
 			public var movesStepSpacerButtons:String = "18"; 
 			public var payoffsStepSpacer:String = "39"; 
 			public var payoffsStepSpacerButtons:String = "18"; 
-			public var postPayoffsStepSpacer:String = "60"; 
+			public var postPayoffsStepSpacer:String = "73"; 
+			public var cogButtonSpacer:String = "4"; 
 
 			// ------------------------------------
 			// START: Bindable propert
@@ -1314,7 +1317,8 @@
 						  click="filename.enabled=true;" focusOut="filename.enabled=false; if(filename.text.length>0) fileManager.filename= filename.text; else filename.text = fileManager.filename" 
 						  text="{fileManager.filename}" keyUp="if(event.keyCode == Keyboard.ENTER) controller.canvas.setFocus(); event.stopPropagation()" keyDown="event.stopPropagation()" 
 						  borderVisible="false" color="#EEEEEE" contentBackgroundColor="#B6BABD" disabledColor="#000000"/>
-			<mx:Spacer width="13"/>
+
+			<mx:Spacer width="{preUndoButtonsSpacer}"/>
 			
             <!--  // Disable UNDO and REDO buttons
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/arrow_undo.png')" toolTip="Undo [Ctrl+z]" 
@@ -1324,9 +1328,10 @@
             -->
             <!-- // Replace UNDO and REDO buttons with spacer -->
 
+			<mx:Spacer width="{undoButtonsReplaceSpacer}"/>	
+
 			<mx:Spacer width="{treeStepSpacer}"/>	
 
-			<mx:Spacer width="60"/>
 			<s:HGroup id="arrowMenu" >
 			<s:HGroup gap="-2" visible="{extensiveStep>=0}"  includeInLayout="{extensiveStep>=0}" enabled="{editMode==0}">
 
@@ -1343,13 +1348,13 @@
 				<mx:Spacer width="{payoffsStepSpacer}"/>	
 
 				<mx:Button id="ngPayoffsStep" styleName="myButtonSkinless" width="{arrowWidth}" height="{arrowHeight}" icon="{ngPayoffsIcon}" overIcon="{ngPayoffsHoverIcon}" toolTip="Assign player payoffs to leafs" click="setExtensiveStep(4);" />
-				<mx:Spacer width="{postPayoffsStepSpacer}"/>	
 			</s:HGroup>
 			</s:HGroup>
-			<mx:Spacer width="13"/>
+
+			<mx:Spacer width="{postPayoffsStepSpacer}"/>	
 
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(0)" />			
-			<mx:Spacer width="4"/>
+			<mx:Spacer width="{cogButtonSpacer}"/>
 			<s:ComboBox id="algoComboBox" width="111" height="{buttonHeight1}" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
 					<mx:ArrayCollection id="algos" source="{xfalgos}" />					
@@ -1362,7 +1367,8 @@
 					</fx:Component>					
 				</s:itemRenderer> 
 			</s:ComboBox>
-			<mx:Spacer width="13"/>
+
+			<mx:Spacer width="{postPayoffsStepSpacer}"/>	
 			
 			<s:HGroup  visible="{editMode==0}" verticalAlign="middle" includeInLayout="{editMode==0}">
 				<s:HGroup  visible="{extensiveStep==-1}" verticalAlign="middle" includeInLayout="{extensiveStep==-1}">
