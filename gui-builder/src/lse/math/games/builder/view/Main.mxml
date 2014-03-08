@@ -66,6 +66,8 @@
 			public var postPayoffsStepSpacer:String = "73"; 
 			public var cogButtonSpacer:String = "4"; 
 
+			public var bottomMargin:String = "18"; 
+
 			// ------------------------------------
 			// START: Bindable propert
 			// ------------------------------------
@@ -1396,7 +1398,7 @@
 		</s:HGroup>
 	
 		<!-- TABS -->
-		<s:BorderContainer top="{menuBarHeight}" bottom="18" left="0" right="{leaves.visible ? 185 : 0}" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
+		<s:BorderContainer top="{menuBarHeight}" bottom="{bottomMargin}" left="0" right="{leaves.visible ? 185 : 0}" backgroundColor="0xe0e0e0" backgroundAlpha="1" borderColor="0x808080" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)">
 			<mx:TabNavigator id="tabNavigator" tabHeight="{tabHeight}" top="3" bottom="-1" left="-1" right="-1" depth="2"  tabOffset="5" paddingTop="0" backgroundColor="0xffffff" tabStyleName="mxTabLabels" 
 							 change="tabChange(event)" creationPolicy="all">
 				<s:NavigatorContent label="Extensive Form" >
@@ -1419,10 +1421,11 @@
 							<mx:Button id="ngChance" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/tumbling_dice.png')"  
 									   toggle="true" selected="false" click="setExtensiveStep(1);ngChance.selected=true;ngPlayer1.selected=false;ngPlayer2.selected=false;Player1InputVisible=false;Player2InputVisible=false;"
 									   toolTip="Assign CHANCE by clicking on a node"/>
-							<mx:Button id="ngPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/user_1.png')"  
+							<mx:Button id="ngPlayer1" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/user_1.png')" 
 									   toggle="true" selected="true" click="setExtensiveStep(1);ngPlayer1.selected=true;ngChance.selected=false;ngPlayer2.selected=false;Player1InputVisible=true;Player2InputVisible=false;" 
 									   toolTip="Assign PLAYER 1 by clicking on a node"/>
-							<mx:Button id="ngPlayer2" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/user_2.png')"  
+							<mx:Button id="ngPlayer2" styleName="myButton" width="{buttonWidth1}" height="{buttonHeight2}" icon="@Embed(source='../../../../../../assets/icons/user_2.png')" 
+ 
 									   toggle="true" selected="false" click="setExtensiveStep(1);ngPlayer2.selected=true;ngPlayer1.selected=false;ngChance.selected=false;Player1InputVisible=false;Player2InputVisible=true;" 
 									   toolTip="Assign PLAYER 2 by clicking on a node" />
 						</s:HGroup>
@@ -1573,7 +1576,7 @@
 		</s:BorderContainer>
 		
 		<!-- SEQUENCE TABLE -->
-		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="18" top="30" right="0" width="180" borderColor="0x808080"
+		<mx:DataGrid id="leaves" dataProvider="{controller.outcomeData}" bottom="{bottomMargin}" top="30" right="0" width="180" borderColor="0x808080"
 					 editable="{editMode==0}" visible="false" draggableColumns="false" sortableColumns="false" 
 					 change="controller.selectedOutcome = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);" 
 					 focusOut="controller.selectedOutcome = -1" focusIn="controller.selectedOutcome = (leaves.selectedItem != null ? leaves.selectedItem.uid : -1);">
