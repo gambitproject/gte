@@ -49,6 +49,7 @@
 			public var tabHeight:String = "22";  // orig: 22
 			public var arrowHeight:String = "16";  // orig: 16
 			public var arrowWidth:String = "70";  // orig: 70
+			public var algoComboBoxWidth:String = "150";  // orig: 111
 
 			// spacer for arrows first and then buttons below them
 			public var preUndoButtonsSpacer:String = "13"; 
@@ -1357,7 +1358,7 @@
 
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/cog_go.png')" toolTip="Run [Ctrl+r]" click="runAlgorithm(0)" />			
 			<mx:Spacer width="{cogButtonSpacer}"/>
-			<s:ComboBox id="algoComboBox" width="111" height="{buttonHeight1}" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
+			<s:ComboBox id="algoComboBox" width="{algoComboBoxWidth}" height="{buttonHeight1}" toolTip="Select Algorithm" fontFamily="Helvetica" preinitialize="initVars();" selectedIndex="0">
 				<s:dataProvider>
 					<mx:ArrayCollection id="algos" source="{xfalgos}" />					
 				</s:dataProvider>
