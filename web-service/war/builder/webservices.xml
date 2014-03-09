@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Servlets>
-  <Servlet Name="LrsCServlet">
+  <Servlet Name="Lrs: All Eq">
     <Active>1</Active>
     <Tooltip>LrsCServlet</Tooltip>
     <Url>/gte/lrsc/servlet</Url>
@@ -23,19 +23,9 @@
   </Servlet> 
   -->
   
-  <Servlet Name="Lrs Find All Eq">
+  <Servlet Name="Lemke: One Eq">
     <Active>1</Active>
-    <Tooltip>Lrs Find All Equilibria</Tooltip>
-    <Url>/gte/matrix/</Url>
-    <Type>nf</Type>
-    <Directory></Directory>
-    <MaxSeconds>600</MaxSeconds>
-  </Servlet>
-
-
-  <Servlet Name="Lemke NF Eq">
-    <Active>1</Active>
-    <Tooltip>Lemke Find One Equilibrium</Tooltip>
+    <Tooltip>Lemke Find One Equilibrium (Strategic Form)</Tooltip>
     <Url>/gte/matrix/</Url>
     <Type>nf</Type>
     <Directory></Directory>
@@ -43,7 +33,7 @@
   </Servlet>
 
   
-    <Servlet Name="Lemke SF Eq">
+    <Servlet Name="Lemke: One Eq">
     <Active>1</Active>
     <Tooltip>Lemke Find One Equilibrium (Sequence Form)</Tooltip>
     <Url>/gte/tree/</Url>
