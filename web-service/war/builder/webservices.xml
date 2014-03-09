@@ -10,6 +10,16 @@
     <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
+  <Servlet Name="Lrs Test">
+    <Active>1</Active>
+    <Tooltip>Lrs Test</Tooltip>
+    <Url>/gte/lrsc/testservlet</Url>
+    <Type>nf</Type>
+    <Directory>native-algo/lrslib-042c/</Directory>
+    <Estimate>1</Estimate>
+    <MaxSeconds>600</MaxSeconds>
+  </Servlet>
+
 <!--
   <Servlet Name="NativeServlet">
     <Active>1</Active>
