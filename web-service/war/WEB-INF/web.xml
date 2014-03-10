@@ -33,7 +33,7 @@
 	</servlet-mapping>
 	
 	<servlet-mapping>
-		<servlet-name>LrsC</servlet-name>
+		<servlet-name>LrsTest</servlet-name>
 		<url-pattern>/lrsc/testservlet</url-pattern>
 	</servlet-mapping>
 
