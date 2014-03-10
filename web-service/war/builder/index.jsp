@@ -6,7 +6,9 @@
 	<meta name="language" content="en" />
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
-	
+
+	<link rel="icon" type="image/png" href="8size32.ico">
+
 	<script src="swfobject.js" type="text/javascript"></script>
 	<script type="text/javascript" src="js/jquery-1.8.2.js"></script>
 	<script type="text/javascript" src="js/jquery.bpopup-0.7.0.min.js"></script>
