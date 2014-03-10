@@ -2,6 +2,8 @@ package lse.math.games.web;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Mark Egesdal
+ * adapted by Rahul Savani
  */
 @SuppressWarnings("serial")
 public abstract class AbstractRESTServlet extends HttpServlet 
@@ -20,6 +23,9 @@ public abstract class AbstractRESTServlet extends HttpServlet
 	private static final String ERROR = "error";
 	private static final String WARNING = "warning";
 	
+	String lineSeparator = System.getProperty("line.separator");
+	protected Path outputPath = Paths.get(System.getProperty("user.dir")).resolve("game-output");
+
 	protected Long parseRandomSeed(String s)
 	{
 		Long seed = null;		

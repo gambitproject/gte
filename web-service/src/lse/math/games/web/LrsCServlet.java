@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
@@ -31,6 +33,7 @@ import lse.math.games.io.ColumnTextWriter;
 
 /**
  * @author Martin Prause
+ * adapted by Rahul Savani
  */
 @SuppressWarnings("serial")
 public class LrsCServlet extends AbstractRESTServlet 
@@ -46,7 +49,8 @@ public class LrsCServlet extends AbstractRESTServlet
 	private String program3="";
 	//program4=Clique process
 	private String program4="";
-	
+
+
 	public void init(ServletConfig config) 
 	throws ServletException
 	{
@@ -63,7 +67,7 @@ public class LrsCServlet extends AbstractRESTServlet
 			program3="lrs";
 			program4="coclique3";
 		}
-		
+		outputPath = Paths.get(System.getProperty("user.dir")).resolve("game-output");
 	}
 
 	/**
@@ -138,7 +142,7 @@ public class LrsCServlet extends AbstractRESTServlet
 						try {
 							//Create the tempfiles
 							for (int i=0;i<3;i++){
-								f[i]=File.createTempFile("game","lrs");
+								f[i]=File.createTempFile("game","lrs",outputPath.toFile());
 								log.info(f[i].getCanonicalPath());
 							}
 							//Write the game to a file
@@ -191,19 +195,36 @@ public class LrsCServlet extends AbstractRESTServlet
 					try {
 						this.writeResponseHeader(request, response);
 						if (game != null) {
-							response.getWriter().println("Strategic form: ");
-							response.getWriter().println(game.printFormatHTML());
-							//response.getWriter().println("From C Algo:");
-							//response.getWriter().println(consoleOutput);
-							response.getWriter().println("");
-							response.getWriter().println("EE = Extreme Equilibrium, EP = Expected Payoffs");
-							response.getWriter().println("");
-							response.getWriter().println("Rational:");
+							StringBuilder outStrBuilder=new StringBuilder();
+							outStrBuilder.append("Strategic form: ");
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(game.printFormatHTML());
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append("EE = Extreme Equilibrium, EP = Expected Payoffs");
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append("Rational:");
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(lineSeparator);
 							StringBuilder clique=new StringBuilder();
-							response.getWriter().println(formatOutput(processOutput(consoleOutput,true,clique)));
-							response.getWriter().println("Decimal:");
-							response.getWriter().println(formatOutput(processOutput(consoleOutput,false,clique)));
-							response.getWriter().println(processClique(pathToAlgo,clique));
+							outStrBuilder.append(formatOutput(processOutput(consoleOutput,true,clique)));
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append("Decimal:");
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(lineSeparator);
+							outStrBuilder.append(formatOutput(processOutput(consoleOutput,false,clique)));
+							outStrBuilder.append(processClique(pathToAlgo,clique));
+
+							File outFile=File.createTempFile("stratform-output-",".txt",outputPath.toFile());
+							//Write the game to a file
+							FileWriter fstream= new FileWriter(outFile);
+							BufferedWriter out = new BufferedWriter(fstream);
+							out.write(outStrBuilder.toString());
+							out.close();
+
+							response.getWriter().println(outStrBuilder.toString());
 						}
 					} catch (Exception ex) {
 						response.getWriter().println(ex.getMessage());
@@ -213,7 +234,7 @@ public class LrsCServlet extends AbstractRESTServlet
 					try {
 						//Create the tempfiles
 						for (int i=0;i<3;i++){
-							f[i]=File.createTempFile("game","lrs");
+							f[i]=File.createTempFile("game","lrs",outputPath.toFile());
 							log.info(f[i].getCanonicalPath());
 						}
 						//Write the game to a file
@@ -404,7 +425,7 @@ public class LrsCServlet extends AbstractRESTServlet
 		try {
 			//Create the tempfiles
 			for (int i=0;i<2;i++){
-				f[i]=File.createTempFile("clique","lrs");
+				f[i]=File.createTempFile("clique","lrs",outputPath.toFile());
 				log.info(f[i].getCanonicalPath());
 			}
 			//Write cliqueInput to File
@@ -448,7 +469,7 @@ public class LrsCServlet extends AbstractRESTServlet
 			for (int i=0;i<2;i++){
 				if (f[i]!=null) {
 					f[i].delete();
-				}
+		    		}
 			}
 			
 		}

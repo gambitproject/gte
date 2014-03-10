@@ -2,7 +2,7 @@
 <Servlets>
   <Servlet Name="Lrs: All Eq">
     <Active>1</Active>
-    <Tooltip>LrsCServlet</Tooltip>
+    <Tooltip>Lrs: All Eq</Tooltip>
     <Url>/gte/lrsc/servlet</Url>
     <Type>nf</Type>
     <Directory>native-algo/lrslib-042c/</Directory>
