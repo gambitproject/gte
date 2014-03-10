@@ -14,10 +14,6 @@
 		<servlet-class>lse.math.games.web.TreeServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>LrsTest</servlet-name>
-		<servlet-class>lse.math.games.web.LrsTestServlet</servlet-class>
-	</servlet>	
-	<servlet>
 		<servlet-name>LrsC</servlet-name>
 		<servlet-class>lse.math.games.web.LrsCServlet</servlet-class>
 	</servlet>	
@@ -32,11 +28,6 @@
 		<url-pattern>/native/servlet</url-pattern>
 	</servlet-mapping>
 	
-	<servlet-mapping>
-		<servlet-name>LrsTest</servlet-name>
-		<url-pattern>/lrsc/testservlet</url-pattern>
-	</servlet-mapping>
-
 	<servlet-mapping>
 		<servlet-name>LrsC</servlet-name>
 		<url-pattern>/lrsc/servlet</url-pattern>
