@@ -22,6 +22,7 @@
 	<property name="lib.test.proj.dir" value="lib-algo/test"/>
 	<property name="web.proj.dir" value="web-service"/>	
 
+	<property name="lib.proj.output" value="game-output"/>
 	<property name="lib.proj.native" value="native-algo"/>
 	<property name="lib.proj.native.algo" value="native-algo/lrslib-042c"/>	
 	<property name="lib.proj.native.my" value="native-algo/myNative"/>	
@@ -327,6 +328,8 @@
 		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.native}"/>
 		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.native.algo}"/>
 		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.native.my}"/>
+
+		<mkdir dir="${JETTY_DIST_DIR}/${lib.proj.output}"/>
 		
 		<antcall target="-copyUnixFiles" />
   		<antcall target="-copyWindowsFiles" />
@@ -343,6 +346,8 @@
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native}"/>
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native.algo}"/>
 		<mkdir dir="${JETTY_HOME}/${lib.proj.native.my}"/>
+
+		<mkdir dir="${JETTY_HOME}/${lib.proj.output}"/>
 		
 		<antcall target="-copyUnixFiles" />
   		<antcall target="-copyWindowsFiles" />

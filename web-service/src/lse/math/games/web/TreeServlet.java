@@ -1,5 +1,10 @@
 package lse.math.games.web;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
@@ -234,12 +239,21 @@ public class TreeServlet extends AbstractRESTServlet
 		}
 
 		this.writeResponseHeader(request, response);
+
+		File outFile=File.createTempFile("seqform-output-",".txt",outputPath.toFile());
+		//Write the game to a file
+		FileWriter fstream= new FileWriter(outFile);
+		BufferedWriter out = new BufferedWriter(fstream);
+
 		if (seqForm != null) {
 			response.getWriter().println("SequenceForm");
 			response.getWriter().println(seqForm.toString());
+			out.write(seqForm.toString());
 		}
 		if (solutionStr != null) {			
 			response.getWriter().println(solutionStr);
+			out.write(solutionStr);
 		}
+		out.close();
 	}
 }
