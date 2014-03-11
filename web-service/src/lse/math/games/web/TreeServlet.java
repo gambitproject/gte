@@ -240,7 +240,7 @@ public class TreeServlet extends AbstractRESTServlet
 
 		this.writeResponseHeader(request, response);
 
-		File outFile=File.createTempFile("seqform-output-",".txt",outputPath.toFile());
+		File outFile=File.createTempFile("seqform-lemke-",".txt",outputPath.toFile());
 		//Write the game to a file
 		FileWriter fstream= new FileWriter(outFile);
 		BufferedWriter out = new BufferedWriter(fstream);

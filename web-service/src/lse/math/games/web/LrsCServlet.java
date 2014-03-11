@@ -217,7 +217,7 @@ public class LrsCServlet extends AbstractRESTServlet
 							outStrBuilder.append(formatOutput(processOutput(consoleOutput,false,clique)));
 							outStrBuilder.append(processClique(pathToAlgo,clique));
 
-							File outFile=File.createTempFile("stratform-output-",".txt",outputPath.toFile());
+							File outFile=File.createTempFile("stratform-lrs-all-",".txt",outputPath.toFile());
 							//Write the game to a file
 							FileWriter fstream= new FileWriter(outFile);
 							BufferedWriter out = new BufferedWriter(fstream);
