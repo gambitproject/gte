@@ -1,0 +1,45 @@
+#!/bin/sh
+#Test identity matrices using the first method for converting to an equivalent path
+
+for N in $(eval echo 2 4 6 8)
+do
+    echo "Testing "$N"x"$N
+    ../../../inlh -m < $N"x"$N > output
+    
+    for k in $(eval echo {1..$((2*N))})
+    do
+        echo -n "Testing label $k: "
+        ./lh-label -d $N -l $k > gpath
+        grep "newlabel .*" gpath | sed 's/newlabel \([0-9]*\)/\1/' > tmp
+        mv tmp gpath
+        cat sample gpath > tmp
+        mv tmp gpath
+        sed "s/m=.*/m=$N/" gpath > tmp
+        mv tmp gpath
+        sed "s/n=.*/n=$N/" gpath > tmp
+        mv tmp gpath
+        ../../../path/path -m < gpath > tmp
+        mv tmp gpath
+
+        grep -n "Number of pivots:" output | head -n 1 > line
+        L=`cat line | sed "s/\([0-9\]*\):.*/\1/"`
+        head -n $L output > cpath
+        R=$(($L-`wc -l output | sed 's/[ ]*\([0-9]*\) output/\1/'`))
+        tail -n $R output > tmp
+        mv tmp output
+
+        grep -x 'leaving:.*' cpath > tmp
+        mv tmp cpath
+        sed 's/leaving: \([a-z0-9]*\).*/\1/' cpath > tmp
+        mv tmp cpath
+
+        S=`diff cpath gpath`
+        if [ -z $S ] 
+            then
+            echo "Passed"
+        else
+            echo "Failed"
+        fi
+    done
+done
+rm cpath gpath line output

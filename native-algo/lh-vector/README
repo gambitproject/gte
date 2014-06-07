@@ -1,0 +1,32 @@
+These are C-routines for an implementation of
+Lemke's algorithm to solve the LCP  
+w = q + Mz >= 0, z >=0,  z^T w=0.
+
+See file sample-input for input.
+
+COMPILE by simply typing
+
+    make
+
+to create the executable file   inlemke
+
+Test with 
+
+    ./inlemke  <  sample-input
+
+d is the covering vector needed to initialize
+
+with   q + dz_0 >= 0,
+
+so it must have a positive entry whenever q has
+a negative one.
+
+Restrictions: input are fractions with
+int  limitations on size (31 bit).
+Big integers should be preferred here.
+The gmp library (GNU multiprecision) is much preferable 
+for larger LCPs.  The  glemke.c  version has this,
+but  gmp  must be installed, and the code adapted.
+
+Bernhard von Stengel 
+26 March 2012

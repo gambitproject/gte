@@ -1,0 +1,22 @@
+#!/bin/sh
+#Test identity matrices using the first method for converting to an equivalent path
+
+for N in $(eval echo 2 4 6 8)
+do
+    echo "Testing "$N"x"$N
+    ../../../inlh $2 < $N"x"$N > output
+    s1=`cat output | grep "Equilibria discovered"`
+    C1=`echo $s1 | sed 's/.* \([0-9]*\)/\1/'`
+    s2=`cat output | grep "Leads to: "`
+    C2=`echo $s2 | grep -o "\->0" | wc -l | sed s/\ //g`
+    E1=1
+    E2=$(($N*2))
+    T1=`[ "$C1" -eq "$E1" ]`
+    T2=`[ "$C2" -eq "$E2" ]`
+    if [ T1 -a T2 ] 
+        then
+        echo "Passed"
+    else
+        echo "Failed"
+    fi
+done

@@ -1,0 +1,241 @@
+restart;
+with (linalg);
+
+maxeq:= proc (d)
+    g := x -> [ seq(x^i, i=1..d)]; 
+    L:=[seq(g(k), k=-d+1..d)]; 
+    mu := add (L[i]/(2*d), i=1..2*d); 
+    K := [seq( L[i]-mu, i=1..2*d)]; 
+    C:= matrix([seq (K[i], i=1..d)]); 
+    Cinv := inverse(C); 
+    Dmat:= matrix([seq (K[i], i=d+1..2*d)]); 
+    one := [seq(1, i=1..d)]; 
+    r := evalm( one - evalm (Dmat &* evalm (Cinv &* one))); 
+    S := matrix (d,d,0); 
+    for i to d do S[i,i] := 1/r[i] od; 
+    Btrans:= evalm(-S &* Dmat &* Cinv); 
+    B:=transpose(Btrans); 
+    perm := i -> i - 1 + 2*(i mod 2); 
+    A :=  matrix (d,d,0); 
+    for i to d do for j to d do A[perm(i),perm(j+d)-d] := Btrans[i,j] od od; 
+    comm := 1 ;
+    for i to d do  for j to d do  comm:= lcm(comm, denom(A[i,j])) od od;
+    writedata( A,  evalm(comm * A), integer);
+    print("Wrote payoff matrix A to file A");
+    writedata( B, evalm(comm * B), integer); 
+    print("Wrote payoff matrix B to file B");
+end proc;
+
+square:= proc (d)
+    g := x -> [ seq(x^i, i=1..d)]; 
+    L:=[seq(g(k), k=-d+1..d)]; 
+    mu := add (L[i]/(2*d), i=1..2*d); 
+    K := [seq( L[i]-mu, i=1..2*d)]; 
+    C:= matrix([seq (K[i], i=1..d)]); 
+    Cinv := inverse(C); 
+    Dmat:= matrix([seq (K[i], i=d+1..2*d)]); 
+    one := [seq(1, i=1..d)]; 
+    r := evalm( one - evalm (Dmat &* evalm (Cinv &* one))); 
+    S := matrix (d,d,0); 
+    for i to d do S[i,i] := 1/r[i] od; 
+    Btrans:= evalm(-S &* Dmat &* Cinv); 
+    B:=transpose(Btrans); 
+    perm := i -> if i=1 then i else if i=d then d else if i<d then i + 1 - 2*(i mod 2) else i - 1 + 2*(i mod 2) end if end if  end if; 
+    A :=  matrix (d,d,0); 
+    for i to d do for j to d do A[perm(i),perm(j+d)-d] := Btrans[i,j] od od; 
+    comm := 1 ;
+    for i to d do  for j to d do  comm:= lcm(comm, denom(A[i,j])) od od;
+    writedata( A,  evalm(comm * A), integer);
+    print("Wrote payoff matrix A to file A");
+    writedata( B, evalm(comm * B), integer); 
+    print("Wrote payoff matrix B to file B");
+end proc;
+
+chall := proc (d)
+    g := x -> [ seq(x^i, i=1..d)]; 
+    threed := 3*d/2;
+    L:=[seq(g(k), k=-threed+1..threed)]; 
+    mu := add (L[i]/(3*d), i=1..3*d); 
+    K := [seq( L[i]-mu, i=1..3*d)]; 
+    C:= matrix([seq (K[i], i=1..d)]); 
+    Cinv := inverse(C); 
+    Dmat:= matrix([seq (K[i], i=d+1..3*d)]); 
+    one := [seq(1, i=1..d)]; 
+    twoone := [seq(1, i=1..2*d)]; 
+    r := evalm( twoone - evalm (Dmat &* evalm (Cinv &* one))); 
+    S := matrix (2*d,2*d,0); 
+    for i to 2*d do S[i,i] := 1/r[i] od; 
+    Btrans:= evalm(-S &* Dmat &* Cinv); 
+    B:=transpose(Btrans); 
+    perm := i -> if i=1 then i else if i=d then d else if i<d then i + 1 - 2*(i mod 2) else i - 1 + 2*(i mod 2) end if end if  end if; 
+    
+    gg := x -> [ seq(x^i, i=1..2*d)];
+    LL:=[seq(gg(k), k=-threed+1..threed)];
+    mumu := add ( LL[i]/(3*d), i=1..3*d);
+    KK := [seq( LL[i]-mumu, i=1..3*d)];
+    Kperm := [seq ( KK[perm(i)],  i=1..3*d)];
+    
+    CC:= matrix([seq (Kperm[i], i=d+1..3*d)]);
+    CCinv := inverse(CC); 
+    DD := matrix([seq (Kperm[i], i=1..d)]);
+    
+    rr := evalm( one - evalm (DD &* evalm (CCinv &* twoone))); 
+    SS := matrix (d,d,0); 
+    for i to d do SS[i,i] := 1/rr[i] od; 
+    A := evalm(-SS &* DD &* CCinv);
+    
+    comm := 1 ;
+    for i to d do  for j to 2*d do  comm:= lcm(comm, denom(A[i,j])) od od; 
+    writedata( A,  evalm(comm * A), integer);
+    
+    comm := 1 ;
+    for i to d do  for j to 2*d do  comm:= lcm(comm, denom(B[i,j])) od od; 
+
+	Aint := evalm(comm * A);
+	Bint := evalm(comm * B);
+	# 
+
+	min := 0;
+    for i to d do
+		for j to 2*d do 
+			if Aint[i,j]< min then min:= Aint[i,j] fi;
+			if Bint[i,j]< min then min:= Bint[i,j] fi; 
+		od;
+    od;
+   	# find smallest entry - could do seperately for A and B 
+   
+	if min<0 then 
+    for i to d do
+		for j to 2*d do 
+			Aint[i,j]:= Aint[i,j] - min + 1;  
+			Bint[i,j]:= Bint[i,j] - min + 1;  
+		od;
+    od;
+	fi;
+	# now positive
+	
+	#max := 0;
+    #for i to d do
+	#	for j to 2*d do 
+	#		if Aint[i,j]> max then max:= Aint[i,j] fi;
+	#		if Bint[i,j]> max then max:= Bint[i,j] fi; 
+	#	od;
+    #od;
+
+	#M:= matrix(3*d,3*d,max+1);
+	M:= matrix(3*d,3*d,0);
+	
+    for i to d do
+		for j to 2*d do 
+			M[i,j+d]:= Aint[i,j];  
+		od;
+    od;
+    
+	for i to 2*d do
+		for j to d do 
+			M[i+d,j]:= Bint[j,i];  
+		od;
+    od;
+    		
+    writedata( A, evalm(Aint), integer);
+    print("Wrote payoff matrix A to file A");
+	writedata( B, evalm(Bint), integer); 
+    print("Wrote payoff matrix B to file B");
+    writedata( M, M, integer); 
+    print("Wrote min to file M");
+end proc;
+
+
+chall_cost := proc (d)
+    g := x -> [ seq(x^i, i=1..d)]; 
+    threed := 3*d/2;
+    L:=[seq(g(k), k=-threed+1..threed)]; 
+    mu := add (L[i]/(3*d), i=1..3*d); 
+    K := [seq( L[i]-mu, i=1..3*d)]; 
+    C:= matrix([seq (K[i], i=1..d)]); 
+    Cinv := inverse(C); 
+    Dmat:= matrix([seq (K[i], i=d+1..3*d)]); 
+    one := [seq(1, i=1..d)]; 
+    twoone := [seq(1, i=1..2*d)]; 
+    r := evalm( twoone - evalm (Dmat &* evalm (Cinv &* one))); 
+    S := matrix (2*d,2*d,0); 
+    for i to 2*d do S[i,i] := 1/r[i] od; 
+    Btrans:= evalm(-S &* Dmat &* Cinv); 
+    B:=transpose(Btrans); 
+    perm := i -> if i=1 then i else if i=d then d else if i<d then i + 1 - 2*(i mod 2) else i - 1 + 2*(i mod 2) end if end if  end if; 
+    
+    gg := x -> [ seq(x^i, i=1..2*d)];
+    LL:=[seq(gg(k), k=-threed+1..threed)];
+    mumu := add ( LL[i]/(3*d), i=1..3*d);
+    KK := [seq( LL[i]-mumu, i=1..3*d)];
+    Kperm := [seq ( KK[perm(i)],  i=1..3*d)];
+    
+    CC:= matrix([seq (Kperm[i], i=d+1..3*d)]);
+    CCinv := inverse(CC); 
+    DD := matrix([seq (Kperm[i], i=1..d)]);
+    
+    rr := evalm( one - evalm (DD &* evalm (CCinv &* twoone))); 
+    SS := matrix (d,d,0); 
+    for i to d do SS[i,i] := 1/rr[i] od; 
+    A := evalm(-SS &* DD &* CCinv);
+    
+    comm := 1 ;
+    for i to d do  for j to 2*d do  comm:= lcm(comm, denom(A[i,j])) od od; 
+    
+    comm := 1 ;
+    for i to d do  for j to 2*d do  comm:= lcm(comm, denom(B[i,j])) od od; 
+
+	Aint := evalm(-comm * A);
+	Bint := evalm(-comm * B);
+	# now costs
+
+	min := 0;
+    for i to d do
+		for j to 2*d do 
+			if Aint[i,j]< min then min:= Aint[i,j] fi;
+			if Bint[i,j]< min then min:= Bint[i,j] fi; 
+		od;
+    od;
+   	# find smallest entry - could do seperately for A and B 
+   
+	if min<0 then 
+    for i to d do
+		for j to 2*d do 
+			Aint[i,j]:= Aint[i,j] - min + 1;  
+			Bint[i,j]:= Bint[i,j] - min + 1;  
+		od;
+    od;
+	fi;
+	# costs now positive
+	
+	max := 0;
+    for i to d do
+		for j to 2*d do 
+			if Aint[i,j]> max then max:= Aint[i,j] fi;
+			if Bint[i,j]> max then max:= Bint[i,j] fi; 
+		od;
+    od;
+
+	M:= matrix(3*d,3*d,max+1);
+	
+    for i to d do
+		for j to 2*d do 
+			M[i,j+d]:= Aint[i,j];  
+		od;
+    od;
+    
+	for i to 2*d do
+		for j to d do 
+			M[i+d,j]:= Bint[j,i];  
+		od;
+    od;
+    		
+    writedata( A, evalm(comm * A), integer);
+    print("Wrote payoff matrix A to file A");
+	writedata( B, evalm(comm * B), integer); 
+    print("Wrote payoff matrix B to file B");
+    writedata( M, M, integer); 
+    print("Wrote min to file M");
+end proc;
+
+

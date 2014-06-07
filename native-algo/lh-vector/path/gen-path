@@ -1,0 +1,11 @@
+#!/bin/sh
+
+./path < path-input > path-output
+cat ../sample-input path-output > lh-input
+rm path-output
+../inlh -i $1 < lh-input > lh-output
+
+./path < path-input12 > path-output
+cat ../sample-input path-output > lh-input12
+rm path-output
+../inlh -i $1 < lh-input12 > lh-output12

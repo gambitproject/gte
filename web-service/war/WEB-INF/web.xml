@@ -21,11 +21,20 @@
 		<servlet-name>Native</servlet-name>
 		<servlet-class>lse.math.games.web.NativeServlet</servlet-class>
 	</servlet>		
+	<servlet>
+		<servlet-name>LH</servlet-name>
+		<servlet-class>lse.math.games.web.LHServlet</servlet-class>
+	</servlet>
 
 	
 	<servlet-mapping>
 		<servlet-name>Native</servlet-name>
 		<url-pattern>/native/servlet</url-pattern>
+	</servlet-mapping>
+    
+	<servlet-mapping>
+		<servlet-name>LH</servlet-name>
+		<url-pattern>/lh/servlet</url-pattern>
 	</servlet-mapping>
 	
 	<servlet-mapping>

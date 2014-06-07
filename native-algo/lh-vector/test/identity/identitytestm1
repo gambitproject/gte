@@ -1,0 +1,31 @@
+#!/bin/sh
+#Test identity matrices using the first method for converting to an equivalent path
+N=$1
+./genidentity $N > input
+../../inlh < input > output
+for k in $(eval echo {1..$((2*N))})
+do
+    echo -n "Testing label $k: "
+    ./genidenpath $N $k > tmp
+    ../../path/path < tmp > gpath
+    
+    grep -n "Number of pivots:" output | head -n 1 > line
+    L=`cat line | sed "s/\([0-9\]*\):.*/\1/"`
+    head -n $L output > cpath
+    R=$(($L-`wc -l output | sed 's/[ ]*\([0-9]*\) output/\1/'`))
+    tail -n $R output > tmp
+    mv tmp output
+    
+    grep -x 'leaving:.*' cpath > tmp
+    mv tmp cpath
+    sed 's/leaving: \([a-z0-9]*\).*/\1/' cpath > tmp
+    mv tmp cpath
+    S=`diff cpath gpath`
+    if [ -z $S ] 
+        then
+        echo "Passed"
+    else
+        echo "Failed"
+    fi
+done
+rm input cpath gpath

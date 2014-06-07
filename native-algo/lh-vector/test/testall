@@ -1,0 +1,37 @@
+#!/bin/sh
+
+echo "\nTesting identity matrix $1 with method 1\n"
+cd ./identity
+./identitytestm1 $1
+
+echo "\nTesting identity matrix $1 with method 2\n"
+./identitytestm2 $1
+cd ../
+
+echo "\nTesting Rational and decimal input with method 1\n"
+cd ./rat_dec
+./rat_dectestm1 $1
+
+echo "\nTesting Rational and decimal input with method 2\n"
+./rat_dectestm2 $1
+cd ../
+
+echo "\nTesting (d,d) dual cyclic polytopes for unique equilibrium\n"
+cd ./dualcyclic/dxd
+./dualcyclictest
+
+echo "\nTesting (d,d) dual cyclic polytopes with method 1\n"
+cd ./dualcyclic/dxd
+./dualcyclictestm1
+
+echo "\nTesting (d,d) dual cyclic polytopes with method 2\n"
+./dualcyclictestm1
+cd ../../
+
+echo "\nTesting (d,2d) dual cyclic polytopes with method 1\n"
+cd ./dualcyclic/dx2d
+./pathlengthtestm1
+
+echo "\nTesting (d,2d) dual cyclic polytopes with method 2\n"
+./pathlengthtestm2
+cd ../../
