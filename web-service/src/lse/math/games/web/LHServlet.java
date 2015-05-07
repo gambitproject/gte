@@ -308,6 +308,10 @@ public class LHServlet extends AbstractRESTServlet
             {
                 if (i >= rowNames.length + colNames.length + 2)
                     break;
+                
+                if (i == rowNames.length + 2)
+                    output.append(" - ");
+                
                 String label = (i - 2 < rowNames.length) ? rowNames[i - 2] : colNames[i - rowNames.length - 2];
                 output.append(entries[i].replace((i - 1) + "->", label + "->") + " ");
             }
