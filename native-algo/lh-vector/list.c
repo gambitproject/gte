@@ -130,7 +130,7 @@ void printlist(node* list, char prefix)
 	int i = 0;
 	while(cur != NULL)
 	{
-		sprintf(smp, "%cEq[%d]: ", prefix, i++);
+		sprintf(smp, "Eq%c[%d]: ", prefix, i++);
         colpr(smp);
 		colprEquilibrium(cur->eq);
 		int k;

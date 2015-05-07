@@ -1480,11 +1480,11 @@ void computeEquilibria(Flagsrunlemke flags)
         sprintf(smp, "\n%d-ve index:", negi);
         colpr(smp);
         colnl();
-        printlist(neg, 'N');
+        printlist(neg, '-');
         sprintf(smp, "\n%d+ve index:", posi);
         colpr(smp);
         colnl();
-        printlist(pos, 'P');
+        printlist(pos, '+');
         colout();
     }
 }
