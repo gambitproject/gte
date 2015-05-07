@@ -38,7 +38,7 @@ Conceptual
 Display
 * fig page settings (auto determine)
 * BigMatrixPainter (using monospaced font and larger text block for really large matrices)
-     Alos, see if I can find a quick way to drop all the labels... or is it the gc that is slowing things up
+     Also, see if I can find a quick way to drop all the labels... or is it the gc that is slowing things up
 * Auto-Label should correct casing (UPPER first pl, lower second pl) for already assigned nodes
 * mouse over effects (perhaps that means making iset depth groups their own child components? same with matrix squares?)
 * fix drawing so labels don't run into eachother... hard to get right all the time
