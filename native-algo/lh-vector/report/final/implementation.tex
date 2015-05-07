@@ -1,0 +1,101 @@
+\section{Implementation}
+\subsection{Restarting from an Equilibrium}
+Once the first set of positively indexed equilibria has been
+computed, the next step involves searching for other equilibria
+from the already computed ones. This involves restarting from one of
+the computed equilibrium, by choosing a covering vector and
+pivoting in $z_0$. When an equilibrium has been computed,
+the tableau column which represents the covering vector has
+been changed and a new covering vector would need to be
+computed which would be able to match the information in the
+tableau.
+
+The method used to compute the new covering vector is the
+first method which is explained by Berhnard in his documentation 
+of Lemke's algorithm \cite{doculemke}.
+This involves the computation of
+$A_B^{-1}$ for the set of basic variables in $B$, where $A$ is
+the tableau which represents the current equilibrium. The column
+$i$ in $A_B^{-1}$ is given by the column of $w_i$ if $w_i$ is 
+non-basic, or by the column $x$ such that:
+$x = 
+\begin{pmatrix}
+    0 & 0 & \cdots & det & \cdots & 0 & 0 &
+\end{pmatrix}^\mathsf{T}$
+where $det$ is the determinant of the tableau, and $x[l]$ is 
+equal to $det$ if $l$ is the row of $w_i$, or 0 otherwise.
+
+The covering vector $d$ which represents a missing label $k$ is
+given by 
+\[d = 
+\begin{pmatrix}
+    1 & 1 & \cdots & 0 & \cdots & 1 & 1 &
+\end{pmatrix}^\mathsf{T}\]
+such that $d[i] = 0$ if $i = k$ otherwise $d[i] = 0$. Once the
+values of $d$ and $A_B^{-1}$ have been computed, the new
+covering vector $d'$ is calculated as $A_B^{-1}d$. The new
+covering vector $d'$ can then be substituted in the tableau for
+the column for $z_0$.
+
+\subsection{Bi-partite Graph}
+The bi-partite graph containing the equilibria of a game is 
+represented in the program by two linked list, one containing
+all the negatively indexed equilibria, and the second has as
+its elements all the positively indexed equilibria. Each node in
+a linked list stores three values; the equilibrium represented
+at that node, the list of equilibria the current equilibria is
+connected with a given missing label, and the next element in
+the list. By storing each partition of the graph as a list,
+we can easily get the $i$-th equilibrium in a list containing
+$n$ elements, where $0 \leq i < n$, by using the value for
+next in each node until the $i$-th node has been found.
+
+Each equilibrium found is stored as the tableau which represents
+the equilibrium. By doing so the equilibrium for the given
+node can be copied into the variables used for computation of the
+new equilibrium.
+
+The list of equilibria which can be gotten from the current equilibria
+using a set of missing labels is stored as an integer array \verb|link|
+where the $k$-th element of the array $l$, is the location of the
+equilibrium the current equilibrium is linked to in the opposite
+list by the missing label $k-1$.
+
+The bi-partite graph is computed using an algorithm similar to the 
+Breadth First Search (BFS) to compute all equilibria reachable from
+the artificial equilibrium which is listed in Algorithm \ref{compall}.
+\input{computeall}
+
+Starting from the artificial equilibrium which is stored in \verb|neg[0]|,
+it first computes the first positively indexed equilibrium by using the
+missing label 1, stores the resulting equilibrium in \verb|pos[0]| and
+and links both nodes by setting the first element of both links to 0
+(i.e. \verb|neg->link[0] = 0| and \verb|pos->link[0] = 0|). It then makes
+a call to compute all the equilibrium from the first node of the negatively
+indexed equilibria (i.e. the artificial equilibrium). Once all the first set
+of positively linked equilibria have been calculated, it sets \verb|negi| to
+1 and \verb|posi| to 0. The value of \verb|negi| is used to store the location
+of the next negatively indexed equilibrium to restart from, the same goes for
+\verb|posi| but for positively indexed equilibrium, \verb|isneg| is also set to
+FALSE (0), to represent that we are going to be restarting from a positively indexed
+equilibrium.
+
+The algorithm then loops through the following steps until the condition
+that \verb|negi| equals the number of negatively indexed equilibria, and
+\verb|posi| equals the number of positively indexed equilibria, indicating
+that there are no longer any equilibria which can be found.found.
+
+If \verb|isneg| is FALSE, it loops through values of \verb|posi| until \verb|posi|
+is equal to the length of \verb|pos|. For each value of \verb|posi| it computes
+all the negatively indexed equilibria which are reachable from the \verb|posi|-th 
+positively indexed equilibrium, storing any new equilibrium found to \verb|neg|
+and linking the current equilibrium with the equilibrium found using the label it
+was found with. After each step, \verb|posi| is incremented by 1.found.
+
+If \verb|isneg| is TRUE, the process is the same as the above paragraph, but
+with \verb|negi| instead of \verb|posi|, \verb|neg| instead of \verb|pos| and
+\verb|pos| instead of \verb|neg|.
+
+Upon completion of the loop, the values of \verb|negi| and \verb|posi| would
+store the number of negatively indexed and positively indexed equilibria found
+respectively.

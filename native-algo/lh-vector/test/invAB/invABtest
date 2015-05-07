@@ -1,0 +1,35 @@
+#!/bin/sh
+#Tests the computation of the inverse of A_B
+echo "\n" > sample-output
+M=`grep 'm=.*' sample-input | sed 's/m= \([0-9]*\)/\1/'`
+N=`grep 'n=.*' sample-input | sed 's/n= \([0-9]*\)/\1/'`
+C=`expr $M + $N`
+../../inlh -a $1 < sample-input > sample-output
+for k in $(eval echo {1..$C})
+do
+    echo -n "Testing label $k: "
+    S=`grep -n 'Printing invAB:' sample-output | sed 's/\([0-9]*\).*/\1/' | head -1`
+    echo "n= `expr $C + 2`" > tmp
+    echo "k= $k" > tmp2
+    cat tmp tmp2 > tmp3
+    echo "invAB=" > tmp2
+    cat tmp3 tmp2 > tmp
+	L=$(($S+$C+2))
+	head -$L sample-output | tail -$((C+2)) > tmp2
+    cat tmp tmp2 > tmp3
+    R=$((`wc -l sample-output | sed 's/[ ]*\([0-9]*\) sample-output/\1/'`-$L))
+	tail -$R sample-output > tmp
+	mv tmp sample-output
+    ./invABdtest < tmp3 > tmp
+    G=`grep "z0= .*" tmp | sed 's/z0= \([0-9^ ]*\)/\1/'`
+    E=`grep "z0= .*" sample-output | sed 's/z0= \([0-9^ ]*\)/\1/' | head -1`
+
+    if [ "$E" = "$G" ] 
+        then
+        echo "Passed"
+    else
+        echo "Failed"
+		exit
+    fi
+done
+rm tmp*

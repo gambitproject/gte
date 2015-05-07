@@ -1,0 +1,17 @@
+alloc.o: alloc.c alloc.h
+col.o: col.c col.h
+mp.o: mp.c mp.h
+inlemke.o: inlemke.c alloc.h col.h rat.h mp.h lemke.h list.h \
+  equilibrium.h
+rat.o: rat.c rat.h mp.h
+equilibrium.o: equilibrium.c rat.h mp.h equilibrium.h alloc.h col.h
+list.o: list.c equilibrium.h alloc.h col.h rat.h mp.h list.h
+lemke.o: lemke.c alloc.h col.h lemke.h list.h equilibrium.h rat.h mp.h
+gmpwrap.o: gmpwrap.c gmp.h gmpwrap.h
+grat.o: grat.c rat.h gmp.h gmpwrap.h mp.h
+gequilibrium.o: gequilibrium.c rat.h gmp.h gmpwrap.h mp.h equilibrium.h \
+  alloc.h col.h
+glemke.o: glemke.c alloc.h col.h lemke.h list.h equilibrium.h rat.h gmp.h \
+  gmpwrap.h mp.h
+inlemkehowson.o: inlemkehowson.c alloc.h col.h rat.h mp.h lemke.h list.h \
+  equilibrium.h

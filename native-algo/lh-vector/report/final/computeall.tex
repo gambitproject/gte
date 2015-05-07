@@ -1,0 +1,80 @@
+\begin{algorithm}
+    \caption{Compute Equilibria From Node}\label{compnode}
+    \begin{algorithmic}[1]
+        \Procedure{Compute Equilibria From Node}{$i, isneg$}\Comment{\small{Computes all equilibria from the current node $i$}}
+            \If{$isneg$}
+                \State $cur \gets neg$ \Comment{Set current list as the negatively indexed list}
+                \State $res \gets pos$ \Comment{Set result list as the positively indexed list}
+            \Else
+                \State $cur \gets pos$ \Comment{Set current list as the positively indexed list}
+                \State $res \gets neg$ \Comment{Set result list as the negatively indexed list}
+            \EndIf
+            \\
+            \State $cur \gets getNodeAt(cur, i)$ \Comment{Gets the $i$th node in the list}
+            \State $maxK \gets nrows + ncols$ \Comment{The maximum possible value for the missing label}
+            \\
+            \For{$k2 \gets 1, maxK$}
+                \If{$cur.link[k2-1] \not= -1$} \Comment{If the equilibrium it is linked with using label $k2$ is known}
+                    \State \textbf{continue}
+                \EndIf
+                \\
+                \State $copyEquilibrium(cur.eq)$ \Comment{Copy and setup the current equilibrium for computation}
+                \State $setupEquilibrium()$
+                \State $runLemke()$ \Comment{Run Lemke's algorithm to find the next equilibrium}
+                \\
+                \State $eq \gets createEquilibrium()$ \Comment{Create equilibrium using the current information in the tableau}
+                \State $j \gets addEquilibrium(res, eq)$ \Comment{Add the equilibrium to $res$ and return its location. If
+                $eq$ already exists in $res$, it returns its location but doesn't add it to $res$}
+                \\
+                \State $cur.link[k2-1] \gets j$ \Comment{Link the two equilibria together using label $k2$}
+                \State $p \gets getNodeat(res, j)$
+                \State $p.link[k2-1] \gets i$
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{Compute all Equilibrium Reachable from the Artificial Equilibrium}\label{compall}
+    \begin{algorithmic}[1]
+        \Procedure{Compute All Equilibria}{} \Comment{\small{}}
+            \State $maxK \gets nrows + ncols$
+            \State $neg = newnode(maxK)$ \Comment{Create the two lists with the total number of strategies}
+            \State $pos = newnode(maxK)$
+            \State $isqdok()$ \Comment{Check if the LCP is valid and generate the tableau}
+            \State $filltableau()$
+            \\
+            \State $eq \gets createEquilibrium()$ \Comment{Create the Artificial Equilibrium from the current tableau}
+            \State $neg.eq \gets eq$ \Comment{Set $neg[0]$ to the Artificial Equilibrium}
+            \State $runLemke()$ \Comment{Run Lemke's algorithm to find the first positively indexed Equilibrium}
+            \State $eq \gets createEquilibrium()$
+            \\
+            \State $pos.eq \gets eq$
+            \State $neg.link[0] \gets 0$ \Comment{Link the two equilibria using label 1}
+            \State $pos.link[0] \gets 0$
+            \\
+            \State $negi \gets 1$ \Comment{Stores its location in the list of negatively indexed Equilibria}
+            \State $posi \gets 1$ \Comment{Stores its location in the list of positively indexed Equilibria}
+            \State $isneg \gets \textbf{FALSE}$ \Comment{Stores if it is currently restarting from a negatively indexed Equilibrium}
+            \\
+            \While{\textbf{TRUE}}
+                \If{$isneg$}
+                    \While{$negi < listlength(neg)$}
+                        \State $computeEquilibriaFromNode(negi, isneg)$
+                        \State $negi$++
+                    \EndWhile
+                \Else
+                    \While{$posi < listlength(pos)$}
+                        \State $computeEquilibriaFromNode(posi, isneg)$
+                        \State $posi$++
+                    \EndWhile
+                \EndIf
+                \State $isneg = !isneg$
+                \\
+                \If{$(negi == listlength(neg))$ \& $(posi == listlength(pos))$}
+                    \State \textbf{break}
+                \EndIf
+            \EndWhile
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}

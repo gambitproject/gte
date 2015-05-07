@@ -1,0 +1,27 @@
+#!/bin/sh
+echo "\n" > sample-output
+for M in $(eval echo 2 4 6)
+do
+    N=$((2*$M))
+    F=$M"x"$N
+    echo "Testing $F"
+    #Compute and get the path lengths for the pivots from the artificial equilibrium
+    ../../../inlh -m < $F | grep "Number of pivots: " | grep "Number of pivots: " -n | head -n "$(($M+$N))" > tmp
+    for k in $(eval echo {1..$(($N+$M))})
+    do
+        echo -n "Testing label $k: "
+        C=`egrep "$k: Number of pivots:" tmp | sed 's/.* Number of pivots:[ ]* \([0-9]*\)/\1/' | head -n 1`
+        G=`sed -n ''"$k,$k p"'' "$F"path | sed "s/.*length=\([0-9]*\)/\1/"`
+        B=$(($G+3))
+        D=$(($G+4))
+        T1=`[ $C -eq $B ]`
+        T2=`[ $C -eq $D ]`
+        if [ $T1 -o $T2 ]
+            then
+            echo "Passed"
+        else
+            echo "Failed"
+        fi
+    done
+done
+rm -f tmp

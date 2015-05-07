@@ -23,6 +23,26 @@
   </Servlet> 
   -->
   
+  <Servlet Name="LH: All reachable Eq">
+    <Active>1</Active>
+    <Tooltip>Lemke-Howson using covering vectors</Tooltip>
+    <Url>/gte/lh/</Url>
+    <Type>nf</Type>
+    <Directory>native-algo/lh-vector/</Directory>
+    <Estimate>0</Estimate>
+    <MaxSeconds>600</MaxSeconds>
+  </Servlet> 
+  
+  <Servlet Name="LH: Bi-partite Graph">
+    <Active>1</Active>
+    <Tooltip>Lemke-Howson using covering vectors</Tooltip>
+    <Url>/gte/lh/</Url>
+    <Type>nf</Type>
+    <Directory>native-algo/lh-vector/</Directory>
+    <Estimate>1</Estimate>
+    <MaxSeconds>600</MaxSeconds>
+  </Servlet> 
+  
   <Servlet Name="Lemke: One Eq">
     <Active>1</Active>
     <Tooltip>Lemke Find One Equilibrium (Strategic Form)</Tooltip>
@@ -32,8 +52,7 @@
     <MaxSeconds>600</MaxSeconds>
   </Servlet>
 
-  
-    <Servlet Name="Lemke: One Eq">
+  <Servlet Name="Lemke: One Eq">
     <Active>1</Active>
     <Tooltip>Lemke Find One Equilibrium (Sequence Form)</Tooltip>
     <Url>/gte/tree/</Url>

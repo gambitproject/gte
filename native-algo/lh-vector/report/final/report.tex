@@ -1,0 +1,45 @@
+% 26 May 2012
+\documentclass[a4paper,12pt]{article}  %% important: a4paper first
+% \pdfoutput=1
+\usepackage{mathptmx}
+\usepackage{epsf}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bbold}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{asymptote}
+\usepackage{pict2e}
+\usepackage{xcolor}
+
+\oddsidemargin=.46cm    % A4
+\textwidth=15cm
+\textheight=23.3cm
+\topmargin=-1.3cm
+\clubpenalty=10000
+\widowpenalty=10000
+\predisplaypenalty=1350
+\newdimen\einr
+\einr2em
+
+\setlength\fboxrule{0pt}
+
+% \parindent0pt
+\parskip1ex
+
+\title{Final Evaluation Report}
+
+\author{Tobenna Peter, Igwe\\ \small{\url{http://www.github.com/ptigwe/lh-vector}}}
+
+\date{\today}
+
+\begin{document}
+    \maketitle
+    \input{intro}
+    \input{implementation}
+    \input{testing}
+    \bibliography{ref}
+    \bibliographystyle{plain}
+\end{document}

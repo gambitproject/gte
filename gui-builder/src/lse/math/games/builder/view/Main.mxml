@@ -1311,7 +1311,7 @@
 
 		<s:HGroup left="{expanded ? 3 : 0}" height="{menuBarHeight}" top="0" paddingTop="3" gap="-1" right="0" clipAndEnableScrolling="true" keyDown="sc_keyDownHandler(event)" keyUp="sc_keyUpHandler(event)" verticalAlign="middle">
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white.png')" toolTip="Clear [Ctrl+c]" click="PromptTwoButtons.show(clearDependingOnPromptResult, 'Are you really sure you want to clear the game?');" />
-			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="controller.open()" />	
+			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/folder_page.png')" toolTip="Open [Ctrl+o]" click="matrixEditor.changeEvtRadioButton('2G');transpoMatrix.selected=false;ngToggleZeroSumStrategic.selected=false;controller.open()" />	
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_save.png')" toolTip="Save [Ctrl+s]" click="controller.save()" />	
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white_picture.png')" toolTip="Export As PNG File" click="controller.image()" />			
 			<mx:Button styleName="myButton" width="{buttonWidth1}" height="{buttonHeight1}" icon="@Embed(source='../../../../../../assets/icons/page_white_vector.png')" toolTip="Export As FIG File" click="controller.fig()" />

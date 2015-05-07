@@ -1,0 +1,17 @@
+#!/bin/sh
+echo "\n" > sample-output
+M=`grep 'm=.*' sample-input | sed 's/m= \([0-9]*\)/\1/'`
+N=`grep 'n=.*' sample-input | sed 's/n= \([0-9]*\)/\1/'`
+C=`expr $M + $N`
+for k in $(eval echo {1..$C})
+do
+	echo -n "Testing label $k: "
+	sed "s/k=.*/k=$k/" sample-input > tmp
+	mv tmp sample-input
+	./inlh $1 < sample-input > tmp
+	cat sample-output tmp > tmp2
+	mv tmp2 sample-output
+	S=`egrep 'Number of pivots:' tmp`
+	echo " "$S
+done
+rm -f tmp
