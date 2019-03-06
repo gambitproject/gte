@@ -178,7 +178,7 @@ Start the setup.exe and install the following packages:
 * **Devel:** make (3.82.90-1)
 * **Lib:** libgcc1 (4.5.3-3)
 
-Choosing these packages implies that setup.exe detects dependencies and autmatically will install the following packages on its own:
+Choosing these packages implies that setup.exe detects dependencies and automatically will install the following packages on its own:
 
 * binutils (2.22.51-2)
 * gcc-core (3.4.4-999)
